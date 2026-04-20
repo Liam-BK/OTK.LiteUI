@@ -66,7 +66,7 @@ public class Material
                 if (flipY) flags |= 1 << 1;
                 if (flipX) flags |= 1 << 2;
 
-                TextureManager.TryLoadTexture(pathAttr, name, EmptyPixelType.Transparent, grayscale);
+                TextureManager.TryLoadTexture(pathAttr, name, out var result, EmptyPixelType.Transparent, grayscale);
             }
         }
         return material;

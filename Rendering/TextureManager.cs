@@ -2,6 +2,7 @@ using OpenTK.Graphics.OpenGL4;
 
 public enum TextureResolution
 {
+    INVALID = -1,
     R16,
     R32,
     R64,
@@ -77,17 +78,19 @@ namespace OTK.LiteUI.Managers
             _nextLayer[res] = 0;
         }
 
-        public static bool TryLoadTexture(string path, string name, EmptyPixelType type = EmptyPixelType.Transparent, bool greyScale = false)
+        public static bool TryLoadTexture(string path, string name, out TextureResolution finalResolution, EmptyPixelType type = EmptyPixelType.Transparent, bool greyScale = false)
         {
             try
             {
                 var data = ImageLoader.LoadImage(path, ImageLoader.Flip.Vertical, greyScale);
-                data.ConvertToResolution(InferResolution(data), type);
+                finalResolution = InferResolution(data);
+                data.ConvertToResolution(finalResolution, type);
                 UploadTexture(data, name);
                 return true;
             }
             catch
             {
+                finalResolution = TextureResolution.INVALID;
                 return false;
             }
         }
@@ -103,7 +106,7 @@ namespace OTK.LiteUI.Managers
                     continue;
 
                 string name = Path.GetFileNameWithoutExtension(file);
-                TryLoadTexture(file, name, type, greyScale);
+                TryLoadTexture(file, name, out var result, type, greyScale);
             }
 
             return true;

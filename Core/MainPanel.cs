@@ -21,13 +21,13 @@ public class MainPanel : GameWindow
     InstanceRenderer? renderer = null;
     Matrix4 projection;
     public static UIQuad quad;
+    private static TextureResolution grassResolution = TextureResolution.R512;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
         VSync = VSyncMode.On;
         Dimensions = new Vector2(Size.X, Size.Y);
         projection = Matrix4.CreateOrthographic(Dimensions.X, Dimensions.Y, 0.1f, 10.0f);
-        quad = new UIQuad() { position = new Vector2(), size = new Vector2(50, 25), UVOffset = new Vector2(), UVRange = new Vector2(1, 1), colour = new Vector4(0, 1, 0, 0.5f), textureLayer = -1 };
     }
 
     protected override void OnLoad()
@@ -36,12 +36,23 @@ public class MainPanel : GameWindow
         GL.ClearColor(0.2f, 0.2f, 0.2f, 1);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         GL.Enable(EnableCap.CullFace);
+        TextureManager.CreateResolution(TextureResolution.R256, 128);
+        TextureManager.CreateResolution(TextureResolution.R512, 128);
+        TextureManager.CreateResolution(TextureResolution.R1024, 128);
+        int layer = -1;
+        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/grass.png", "Grass", out grassResolution)) Console.WriteLine("Failed To Load Texture");
+        else
+        {
+            TextureManager.TryGetTexture("Grass", grassResolution, out layer);
+        }
         Vector2 offset = new Vector2(333.0f, 250);
         Vector4 quadOffset = new Vector4(offset.X, offset.Y, offset.X, offset.Y);
         float width = 100;
         float height = 100;
         float halfHeight = 42.0f;
         float halfWidth = 333.0f;
+
+        quad = new UIQuad() { position = new Vector2(25, 12.5f), size = new Vector2(50, 25), UVOffset = new Vector2(), UVRange = new Vector2(1, 1), colour = new Vector4(0, 1, 0, 0.5f), textureLayer = layer };
         Vector4 testBounds = new Vector4(Dimensions.X * 0.5f - width, Dimensions.Y * 0.5f - height, Dimensions.X * 0.5f + width, Dimensions.Y * 0.5f + height) + quadOffset;
         Vector4 horizontalTestBounds = new Vector4(Dimensions.X * 0.5f - halfWidth, Dimensions.Y * 0.5f - halfHeight, Dimensions.X * 0.5f + halfWidth, Dimensions.Y * 0.5f + halfHeight) + quadOffset;
         Vector4 verticalTestBounds = new Vector4(Dimensions.X * 0.5f - 10, Dimensions.Y * 0.5f - 100, Dimensions.X * 0.5f + 10, Dimensions.Y * 0.5f + 100) + quadOffset;
@@ -129,6 +140,7 @@ public class MainPanel : GameWindow
 
     private void DrawUI()
     {
+        TextureManager.Bind(grassResolution, 0);
         renderer?.DrawInstances();
     }
 
