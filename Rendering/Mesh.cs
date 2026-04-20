@@ -68,7 +68,7 @@ public class Mesh : IDisposable
 
     public static Mesh Load(string path, int sceneMeshIndex = 0)
     {
-        var stream = ResourceIO.GetStream(path);
+        var stream = ResourceIO.GetLoadingStream(path);
 
         if (stream is null) throw new FileNotFoundException($"File: {path} could not be found.");
 

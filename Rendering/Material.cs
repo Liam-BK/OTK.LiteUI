@@ -14,7 +14,7 @@ public class Material
     private Dictionary<string, Vector4> _vec4Uniforms = new Dictionary<string, Vector4>();
     private Dictionary<string, Matrix4> _matrix4Uniforms = new Dictionary<string, Matrix4>();
 
-    private Dictionary<string, int> _textures = new Dictionary<string, int>();
+    private Dictionary<TextureResolution, int> _textureArrays = new();
 
     public bool DepthTest = true;
     public bool Blending = false;
@@ -66,8 +66,7 @@ public class Material
                 if (flipY) flags |= 1 << 1;
                 if (flipX) flags |= 1 << 2;
 
-                TextureManager.LoadTexture(pathAttr, name, grayscale);
-                material.SetTexture(name, unit);
+                TextureManager.TryLoadTexture(pathAttr, name, EmptyPixelType.Transparent, grayscale);
             }
         }
         return material;
@@ -147,14 +146,15 @@ public class Material
         return _matrix4Uniforms.ContainsKey(name);
     }
 
-    public void SetTexture(string name, int value)
+    public void SetTextureArray(TextureResolution res, int unit)
     {
+        if (_textureArrays.Count >= MaxUnits && !_textureArrays.ContainsKey(res))
+            throw new InvalidOperationException("Too many texture arrays bound.");
 
-        if (_textures.Count >= MaxUnits && !_textures.ContainsKey(name)) throw new InvalidOperationException("Materials can only support up to 16 textures");
-        _textures[name] = value;
+        _textureArrays[res] = unit;
     }
 
-    public void UpdateUniforms()
+    public void UpdateUniforms(bool transpose = false)
     {
         if (Shader == 0) return;
         GL.UseProgram(Shader);
@@ -169,28 +169,10 @@ public class Material
         foreach (var pair in _vec4Uniforms)
             GL.Uniform4(GL.GetUniformLocation(Shader, pair.Key), pair.Value);
 
-        bool transpose = false;
         foreach (var pair in _matrix4Uniforms)
         {
             var mat = pair.Value;
             GL.UniformMatrix4(GL.GetUniformLocation(Shader, pair.Key), transpose, ref mat);
-        }
-
-        int count = _textures.Count;
-        int[] units = new int[count];
-
-        int i = 0;
-        foreach (var pair in _textures)
-        {
-            units[i++] = pair.Value;
-        }
-        if (_textures.Count > 0)
-        {
-            int location = GL.GetUniformLocation(Shader, "uTextures");
-            if (location != -1)
-            {
-                GL.Uniform1(location, units.Length, units);
-            }
         }
     }
 
@@ -210,12 +192,19 @@ public class Material
 
         UpdateUniforms();
 
-        foreach (var pair in _textures)
+        foreach (var pair in _textureArrays)
         {
-            string name = pair.Key;
+            TextureResolution res = pair.Key;
             int unit = pair.Value;
-            TextureManager.Bind(name, unit);
-            GL.Uniform1(GL.GetUniformLocation(Shader, name), unit);
+
+            TextureManager.Bind(res, unit);
+
+            // You need a uniform per array (example naming)
+            string uniformName = $"uTexture_{res}";
+            int loc = GL.GetUniformLocation(Shader, uniformName);
+
+            if (loc != -1)
+                GL.Uniform1(loc, unit);
         }
     }
 }

@@ -3,6 +3,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using OTK.LiteUI.Managers;
 
 public class MainPanel : GameWindow
 {
@@ -15,10 +16,18 @@ public class MainPanel : GameWindow
     private static float tick = 0.5f;
     public static Vector2 Dimensions = new Vector2(1280, 720);
     public static bool hitWall = false, grounded = false, atEdge = false;
+    Mesh? mesh = null;
+    Material? material = null;
+    InstanceRenderer? renderer = null;
+    Matrix4 projection;
+    public static UIQuad quad;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
         VSync = VSyncMode.On;
+        Dimensions = new Vector2(Size.X, Size.Y);
+        projection = Matrix4.CreateOrthographic(Dimensions.X, Dimensions.Y, 0.1f, 10.0f);
+        quad = new UIQuad() { position = new Vector2(), size = new Vector2(50, 25), UVOffset = new Vector2(), UVRange = new Vector2(1, 1), colour = new Vector4(0, 1, 0, 0.5f), textureLayer = -1 };
     }
 
     protected override void OnLoad()
@@ -31,12 +40,15 @@ public class MainPanel : GameWindow
         Vector4 quadOffset = new Vector4(offset.X, offset.Y, offset.X, offset.Y);
         float width = 100;
         float height = 100;
-        Dimensions = new Vector2(Size.X, Size.Y);
         float halfHeight = 42.0f;
         float halfWidth = 333.0f;
         Vector4 testBounds = new Vector4(Dimensions.X * 0.5f - width, Dimensions.Y * 0.5f - height, Dimensions.X * 0.5f + width, Dimensions.Y * 0.5f + height) + quadOffset;
         Vector4 horizontalTestBounds = new Vector4(Dimensions.X * 0.5f - halfWidth, Dimensions.Y * 0.5f - halfHeight, Dimensions.X * 0.5f + halfWidth, Dimensions.Y * 0.5f + halfHeight) + quadOffset;
         Vector4 verticalTestBounds = new Vector4(Dimensions.X * 0.5f - 10, Dimensions.Y * 0.5f - 100, Dimensions.X * 0.5f + 10, Dimensions.Y * 0.5f + 100) + quadOffset;
+        mesh = Mesh.Load("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Meshes/Quad.obj");
+        material = Material.Load("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Materials/UIMaterial.mat");
+        InstanceAttribType[] attribTypes = [InstanceAttribType.Position2D, InstanceAttribType.Vec2, InstanceAttribType.TexCoords, InstanceAttribType.Vec2, InstanceAttribType.Color4, InstanceAttribType.Single];
+        renderer = new InstanceRenderer(mesh, material, attribTypes);
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -100,6 +112,9 @@ public class MainPanel : GameWindow
         if (KeyboardState.IsKeyDown(Keys.Down)) dir.Y -= speed;
         dir *= delta;
         FPSCount++;
+        material?.SetMatrix4("vpMatrix", projection);
+        material?.UpdateUniforms();
+        renderer?.AddInstance(quad);
     }
 
     public override void Close()
@@ -114,7 +129,7 @@ public class MainPanel : GameWindow
 
     private void DrawUI()
     {
-
+        renderer?.DrawInstances();
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)

@@ -1,5 +1,12 @@
 using StbImageSharp;
 
+public enum EmptyPixelType
+{
+    Black,
+    White,
+    Transparent
+}
+
 namespace OTK.LiteUI.Managers
 {
     public class ImageData
@@ -73,6 +80,101 @@ namespace OTK.LiteUI.Managers
                 Pixels[i + 2] = grey;
                 // Leave alpha unchanged (i + 3)
             }
+        }
+
+        public void ConvertToResolution(TextureResolution resolution, EmptyPixelType emptyType)
+        {
+            int target = TextureManager.FindResolution(resolution);
+
+            if (Width == target && Height == target)
+                return;
+
+            // Step 1: if larger → downscale
+            if (Width > target || Height > target)
+            {
+                Downscale(target, target);
+            }
+
+            // Step 2: if smaller → pad
+            if (Width < target || Height < target)
+            {
+                PadTo(target, target, emptyType);
+            }
+        }
+
+        private void PadTo(int targetWidth, int targetHeight, EmptyPixelType emptyType)
+        {
+            byte[] newPixels = new byte[targetWidth * targetHeight * Channels];
+
+            var fill = GetFillPixel(emptyType);
+
+            // fill entire buffer
+            for (int i = 0; i < newPixels.Length; i += Channels)
+            {
+                for (int c = 0; c < Channels; c++)
+                    newPixels[i + c] = fill[c];
+            }
+
+            int offsetX = (targetWidth - Width) / 2;
+            int offsetY = (targetHeight - Height) / 2;
+
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    int srcIndex = (y * Width + x) * Channels;
+                    int dstIndex = ((y + offsetY) * targetWidth + (x + offsetX)) * Channels;
+
+                    for (int c = 0; c < Channels; c++)
+                    {
+                        newPixels[dstIndex + c] = Pixels[srcIndex + c];
+                    }
+                }
+            }
+
+            Pixels = newPixels;
+            Width = targetWidth;
+            Height = targetHeight;
+        }
+
+        private void Downscale(int targetWidth, int targetHeight)
+        {
+            byte[] newPixels = new byte[targetWidth * targetHeight * Channels];
+
+            float scaleX = (float)Width / targetWidth;
+            float scaleY = (float)Height / targetHeight;
+
+            for (int y = 0; y < targetHeight; y++)
+            {
+                for (int x = 0; x < targetWidth; x++)
+                {
+                    int srcX = (int)(x * scaleX);
+                    int srcY = (int)(y * scaleY);
+
+                    int srcIndex = (srcY * Width + srcX) * Channels;
+                    int dstIndex = (y * targetWidth + x) * Channels;
+
+                    for (int c = 0; c < Channels; c++)
+                    {
+                        newPixels[dstIndex + c] = Pixels[srcIndex + c];
+                    }
+                }
+            }
+
+            Pixels = newPixels;
+            Width = targetWidth;
+            Height = targetHeight;
+        }
+
+        private byte[] GetFillPixel(EmptyPixelType type)
+        {
+            return type switch
+            {
+                EmptyPixelType.Black => [0, 0, 0, 255],
+                EmptyPixelType.White => [255, 255, 255, 255],
+                EmptyPixelType.Transparent => [0, 0, 0, 0],
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
     }
 

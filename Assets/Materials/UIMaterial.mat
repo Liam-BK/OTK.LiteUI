@@ -1,0 +1,12 @@
+<Material>
+    <Shaders>
+        <Vertex Path="Assets/Shaders/VertexShaders/UIVShader.vert"/>
+        <Fragment Path="Assets/Shaders/FragmentShaders/UIFShader.frag"/>
+    </Shaders>
+
+    <RenderState>
+        <Blending Value="true"/>
+        <CullFace Value="true"/>
+        <DepthTest Value="false"/>
+    </RenderState>
+</Material>
