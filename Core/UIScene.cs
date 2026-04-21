@@ -1,4 +1,3 @@
-using System.Drawing;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -12,9 +11,10 @@ public static class UIScene
     private static InstanceRenderer? renderer;
     private static Material? material;
     public static Matrix4 projection;
-
+    public static TextureResolution resolution = TextureResolution.R256;
     private const float referenceDPI = 96.0f;
     public static List<IUIElement> components = new List<IUIElement>();
+    public static List<IUIElement> pendingRemovals = new List<IUIElement>();
 
     /// <summary>
     /// A Vector2 that can be multiplied with a position to multiply it by the inverse DPI scale.
@@ -96,7 +96,7 @@ public static class UIScene
         DPI
     }
 
-    public static void AttachTo(GameWindow newWindow)
+    public static void Initialize(GameWindow newWindow, TextureResolution resolution)
     {
         if (_initialized) return;
         window = newWindow;
@@ -118,14 +118,19 @@ public static class UIScene
 
     public static void Register(IUIElement component)
     {
-        if (!_initialized) return;
+        if (!_initialized) throw new InvalidOperationException("UIScene has not been initialized. Make sure to call 'Initialize' before doing any operations.");
         components.Add(component);
+    }
+
+    public static void Deregister(IUIElement component)
+    {
+        if (!_initialized) throw new InvalidOperationException("UIScene has not been initialized. Make sure to call 'Initialize' before doing any operations.");
+        pendingRemovals.Add(component);
     }
 
     public static void OnClickDown(MouseState mouse)
     {
         if (!_initialized) return;
-        Console.WriteLine("Clicked");
         for (int i = components.Count - 1; i >= 0; i--)
         {
             var c = components[i];
@@ -210,6 +215,11 @@ public static class UIScene
                 if (component is IRenderable renderable) renderable.SubmitData(renderer);
             }
         }
+        foreach (var component in pendingRemovals)
+        {
+            if (!components.Remove(component)) throw new InvalidOperationException("Attempted to deregister a UI element that was not registered.");
+        }
+        if (pendingRemovals.Count > 0) pendingRemovals.Clear();
     }
 
     public static Vector2 ConvertMouseScreenCoords(Vector2 position)

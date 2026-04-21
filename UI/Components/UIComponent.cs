@@ -19,6 +19,8 @@ public abstract class UIComponent : IUIElement
 
     public float Width => _bounds.Z - _bounds.X;
 
+    public Vector4 Colour = Vector4.One;
+
     public virtual bool OnClickDown(MouseState mouse)
     {
         return true;
@@ -61,8 +63,7 @@ public abstract class UIComponent : IUIElement
 
     public bool WithinBounds(MouseState mouse)
     {
-        var position = UIScene.ConvertMouseScreenCoords(mouse.Position);
-        return WithinBounds(position);
+        return WithinBounds(UIScene.ConvertMouseScreenCoords(mouse.Position));
     }
 
     public bool WithinBounds(Vector2 position)
