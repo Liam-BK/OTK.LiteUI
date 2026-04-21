@@ -67,7 +67,7 @@ public class MainPanel : GameWindow
         material = Material.Load("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Materials/UIMaterial.mat");
         InstanceAttribType[] attribTypes = [InstanceAttribType.Position2D, InstanceAttribType.Vec2, InstanceAttribType.TexCoords, InstanceAttribType.Vec2, InstanceAttribType.Color4, InstanceAttribType.Single];
         renderer = new InstanceRenderer(mesh, material, attribTypes);
-        UIScene.Initialize(projection);
+        UIScene.AttachTo(this);
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -79,43 +79,36 @@ public class MainPanel : GameWindow
     protected override void OnKeyDown(KeyboardKeyEventArgs e)
     {
         base.OnKeyDown(e);
-        UIScene.OnKeyDown(e);
     }
 
     protected override void OnKeyUp(KeyboardKeyEventArgs e)
     {
         base.OnKeyUp(e);
-        UIScene.OnKeyUp(e);
     }
 
     protected override void OnMouseDown(MouseButtonEventArgs e)
     {
         base.OnMouseDown(e);
-        UIScene.OnClickDown(MouseState);
     }
 
     protected override void OnMouseMove(MouseMoveEventArgs e)
     {
         base.OnMouseMove(e);
-        UIScene.OnMouseMove(MouseState);
     }
 
     protected override void OnMouseUp(MouseButtonEventArgs e)
     {
         base.OnMouseUp(e);
-        UIScene.OnClickUp(MouseState);
     }
 
     protected override void OnMouseWheel(MouseWheelEventArgs e)
     {
         base.OnMouseWheel(e);
-        UIScene.OnMouseWheel(MouseState);
     }
 
     protected override void OnTextInput(TextInputEventArgs e)
     {
         base.OnTextInput(e);
-        UIScene.OnTextInput(e);
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)

@@ -34,7 +34,6 @@ public interface IUIElement
     public Vector2 Center
     {
         get;
-        set;
     }
 
     /// <summary>
@@ -66,6 +65,18 @@ public interface IUIElement
     public bool OnClickUp(MouseState mouse);
 
     /// <summary>
+    /// Called when the mouse wheel is scrolled.
+    /// </summary>
+    /// <param name="mouse">The current mouse state.</param>
+    public bool OnMouseWheel(MouseState mouse);
+
+    /// <summary>
+    /// Called when the mouse moves.
+    /// </summary>
+    /// <param name="mouse">The current mouse state.</param>
+    public bool OnMouseMove(MouseState mouse);
+
+    /// <summary>
     /// Called when a key is pressed.
     /// </summary>
     /// <param name="e">The key event arguments.</param>
@@ -84,38 +95,6 @@ public interface IUIElement
     public void OnTextInput(TextInputEventArgs e);
 
     /// <summary>
-    /// Called when the mouse wheel is scrolled.
-    /// </summary>
-    /// <param name="mouse">The current mouse state.</param>
-    public bool OnMouseWheel(MouseState mouse);
-
-    /// <summary>
-    /// Called when the mouse moves.
-    /// </summary>
-    /// <param name="mouse">The current mouse state.</param>
-    public bool OnMouseMove(MouseState mouse);
-
-    /// <summary>
-    /// Updates the element with a given delta time.
-    /// </summary>
-    /// <param name="deltaTime">Elapsed time since last update in seconds.</param>
-    public void OnUpdate(float deltaTime);
-
-    /// <summary>
-    /// Updates the element with delta time and mouse state.
-    /// </summary>
-    /// <param name="deltaTime">Elapsed time since last update in seconds.</param>
-    /// <param name="mouse">The current mouse state.</param>
-    public void OnUpdate(float deltaTime, MouseState mouse);
-
-    /// <summary>
-    /// Updates the element with delta time and keyboard state.
-    /// </summary>
-    /// <param name="deltaTime">Elapsed time since last update in seconds.</param>
-    /// <param name="keyboard">The current keyboard state.</param>
-    public void OnUpdate(float deltaTime, KeyboardState keyboard);
-
-    /// <summary>
     /// Updates the element with delta time, mouse state, and keyboard state.
     /// </summary>
     /// <param name="deltaTime">Elapsed time since last update in seconds.</param>
@@ -128,15 +107,7 @@ public interface IUIElement
     /// </summary>
     /// <param name="position">The position to check.</param>
     /// <returns><c>true</c> if the position is inside the element; otherwise, <c>false</c>.</returns>
+    public bool WithinBounds(MouseState mouse);
+
     public bool WithinBounds(Vector2 position);
-
-    /// <summary>
-    /// Deletes GPU resources associated with this element (e.g., textures, buffers).
-    /// </summary>
-    public void DeleteFromVRam();
-
-    /// <summary>
-    /// Renders the element on screen.
-    /// </summary>
-    public void Draw();
 }
