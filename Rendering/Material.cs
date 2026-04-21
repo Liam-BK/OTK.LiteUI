@@ -66,7 +66,7 @@ public class Material
                 if (flipY) flags |= 1 << 1;
                 if (flipX) flags |= 1 << 2;
 
-                TextureManager.TryLoadTexture(pathAttr, name, out var result, EmptyPixelType.Transparent, grayscale);
+                TextureManager.TryLoadTexture(pathAttr, name, out var result, null, EmptyPixelType.Transparent, grayscale);
             }
         }
         return material;
@@ -200,7 +200,7 @@ public class Material
             TextureManager.Bind(res, unit);
 
             // You need a uniform per array (example naming)
-            string uniformName = $"uTexture_{res}";
+            string uniformName = $"uTexture";
             int loc = GL.GetUniformLocation(Shader, uniformName);
 
             if (loc != -1)

@@ -20,8 +20,9 @@ public class MainPanel : GameWindow
     Material? material = null;
     InstanceRenderer? renderer = null;
     Matrix4 projection;
-    public static UIQuad quad;
-    private static TextureResolution grassResolution = TextureResolution.R512;
+    public static UIQuad quad1, quad2;
+    private static TextureResolution grassResolution = TextureResolution.R256;
+    private static TextureResolution buttonResolution = TextureResolution.R256;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
@@ -39,11 +40,19 @@ public class MainPanel : GameWindow
         TextureManager.CreateResolution(TextureResolution.R256, 128);
         TextureManager.CreateResolution(TextureResolution.R512, 128);
         TextureManager.CreateResolution(TextureResolution.R1024, 128);
-        int layer = -1;
-        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/grass.png", "Grass", out grassResolution)) Console.WriteLine("Failed To Load Texture");
+        int grassLayer = -1;
+        int buttonLayer = -1;
+        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/grass.png", "Grass", out grassResolution, TextureResolution.R256, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Grass Texture");
         else
         {
-            TextureManager.TryGetTexture("Grass", grassResolution, out layer);
+            TextureManager.TryGetTexture("Grass", grassResolution, out grassLayer);
+            Console.WriteLine($"grass resolution {TextureManager.FindResolution(grassResolution)}");
+        }
+        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/DefaultButton.png", "Button", out buttonResolution)) Console.WriteLine("Failed To Load Button Texture");
+        else
+        {
+            TextureManager.TryGetTexture("Button", buttonResolution, out buttonLayer);
+            Console.WriteLine($"button resolution {TextureManager.FindResolution(buttonResolution)}");
         }
         Vector2 offset = new Vector2(333.0f, 250);
         Vector4 quadOffset = new Vector4(offset.X, offset.Y, offset.X, offset.Y);
@@ -52,7 +61,8 @@ public class MainPanel : GameWindow
         float halfHeight = 42.0f;
         float halfWidth = 333.0f;
 
-        quad = new UIQuad() { position = new Vector2(25, 12.5f), size = new Vector2(50, 25), UVOffset = new Vector2(), UVRange = new Vector2(1, 1), colour = new Vector4(0, 1, 0, 0.5f), textureLayer = layer };
+        quad1 = new UIQuad() { position = new Vector2(0, 0), size = new Vector2(100, 100), UVOffset = new Vector2(), UVRange = new Vector2(1, 1), colour = new Vector4(0, 1, 0, 0.5f), textureLayer = grassLayer };
+        quad2 = new UIQuad() { position = new Vector2(100, 0), size = new Vector2(100, 100), UVOffset = new Vector2(), UVRange = new Vector2(1, 1), colour = new Vector4(0, 1, 0, 0.5f), textureLayer = buttonLayer };
         Vector4 testBounds = new Vector4(Dimensions.X * 0.5f - width, Dimensions.Y * 0.5f - height, Dimensions.X * 0.5f + width, Dimensions.Y * 0.5f + height) + quadOffset;
         Vector4 horizontalTestBounds = new Vector4(Dimensions.X * 0.5f - halfWidth, Dimensions.Y * 0.5f - halfHeight, Dimensions.X * 0.5f + halfWidth, Dimensions.Y * 0.5f + halfHeight) + quadOffset;
         Vector4 verticalTestBounds = new Vector4(Dimensions.X * 0.5f - 10, Dimensions.Y * 0.5f - 100, Dimensions.X * 0.5f + 10, Dimensions.Y * 0.5f + 100) + quadOffset;
@@ -125,7 +135,8 @@ public class MainPanel : GameWindow
         FPSCount++;
         material?.SetMatrix4("vpMatrix", projection);
         material?.UpdateUniforms();
-        renderer?.AddInstance(quad);
+        renderer?.AddInstance(quad1);
+        renderer?.AddInstance(quad2);
     }
 
     public override void Close()
@@ -140,7 +151,6 @@ public class MainPanel : GameWindow
 
     private void DrawUI()
     {
-        TextureManager.Bind(grassResolution, 0);
         renderer?.DrawInstances();
     }
 

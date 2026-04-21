@@ -78,12 +78,13 @@ namespace OTK.LiteUI.Managers
             _nextLayer[res] = 0;
         }
 
-        public static bool TryLoadTexture(string path, string name, out TextureResolution finalResolution, EmptyPixelType type = EmptyPixelType.Transparent, bool greyScale = false)
+        public static bool TryLoadTexture(string path, string name, out TextureResolution finalResolution, TextureResolution? forceResolution = null, EmptyPixelType type = EmptyPixelType.Transparent, bool greyScale = false)
         {
             try
             {
                 var data = ImageLoader.LoadImage(path, ImageLoader.Flip.Vertical, greyScale);
-                finalResolution = InferResolution(data);
+                if (forceResolution is null) finalResolution = InferResolution(data);
+                else finalResolution = (TextureResolution)forceResolution;
                 data.ConvertToResolution(finalResolution, type);
                 UploadTexture(data, name);
                 return true;
@@ -95,7 +96,7 @@ namespace OTK.LiteUI.Managers
             }
         }
 
-        public static bool LoadAllTextures(string directory, EmptyPixelType type, bool greyScale = false)
+        public static bool LoadAllTextures(string directory, EmptyPixelType type, TextureResolution? forceResolution = null, bool greyScale = false)
         {
             if (!Directory.Exists(directory))
                 return false;
@@ -106,7 +107,7 @@ namespace OTK.LiteUI.Managers
                     continue;
 
                 string name = Path.GetFileNameWithoutExtension(file);
-                TryLoadTexture(file, name, out var result, type, greyScale);
+                TryLoadTexture(file, name, out var result, forceResolution, type, greyScale);
             }
 
             return true;

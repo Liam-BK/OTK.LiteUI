@@ -6,8 +6,8 @@ flat in int layerIndex;
 
 out vec4 FragColor;
 
-uniform sampler2DArray terrainTexture;
+uniform sampler2DArray uTexture;
 
 void main(){
-    FragColor = layerIndex == -1 ? fColour : texture(terrainTexture, vec3(fUV, layerIndex));
+    FragColor = layerIndex == -1 ? fColour : texture(uTexture, vec3(fUV, layerIndex));
 }
