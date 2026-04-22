@@ -19,7 +19,7 @@ public class InstanceRenderer
     public bool IsVisible = true;
     public Mesh? Mesh = null;
     public Material? Material = null;
-
+    public int InstanceCount => _instanceData.Count / attribLayout.Length;
     private List<float> _instanceData = new List<float>();
     private int _instanceVBO;
     private int _instanceCount = 0;

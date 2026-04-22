@@ -1,7 +1,6 @@
 using System.Xml.Linq;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
-using OTK.LiteUI.Managers;
 
 public class Material
 {

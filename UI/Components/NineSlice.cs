@@ -1,5 +1,4 @@
 using OpenTK.Mathematics;
-using OTK.LiteUI.Managers;
 
 public class NineSlice : UIComponent, IRenderable
 {
