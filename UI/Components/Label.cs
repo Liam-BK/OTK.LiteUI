@@ -90,6 +90,7 @@ public class Label : UIComponent, IRenderable
             if (!fontData.GlyphUVs.TryGetValue(c, out var UVs)) continue;
             if (!fontData.GlyphBounds.TryGetValue(c, out var charBounds)) continue;
             if (!fontData.Offsets.TryGetValue(c, out var offset)) continue;
+            Console.WriteLine($"{c} UVs: {UVs}");
             float kern = 0.0f;
             if (i < Text.Length - 1)
             {
@@ -105,10 +106,9 @@ public class Label : UIComponent, IRenderable
             float glyphWidth = c == ' ' ? 0.5f : (UVs.Z - UVs.X) / (UVs.W - UVs.Y) * glyphHeight;
 
             var glyph = new UIQuad();
-            glyph.position = new Vector2(XCursor + glyphWidth * 0.5f * Size, YCursor + glyphHeight * 0.5f * Size);
+            glyph.position = new Vector2((XCursor + glyphWidth * 0.5f * Size) - (kern * Size), YCursor + glyphHeight * 0.5f * Size);
             glyph.size = new Vector2(glyphWidth * Size, glyphHeight * Size);
-            Console.WriteLine($"Glyph size: {glyph.size}");
-            glyph.UVOffset = new Vector2(UVs.X, 1 - UVs.Y);
+            glyph.UVOffset = new Vector2(UVs.X, 1 - UVs.W);
             glyph.UVRange = new Vector2(UVs.Z - UVs.X, UVs.W - UVs.Y);
             glyph.colour = Colour;
             TextureManager.TryGetTexture(FontKey, UIScene.resolution, out var layer);

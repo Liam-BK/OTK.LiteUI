@@ -27,9 +27,10 @@ public class MainPanel : GameWindow
         GL.ClearColor(0.2f, 0.2f, 0.2f, 1);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         GL.Enable(EnableCap.CullFace);
-        TextureManager.CreateResolution(TextureResolution.R256, 128);
-        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/grass.png", "Grass", out resolution, TextureResolution.R256, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Grass Texture");
-        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/DefaultButton.png", "Button", out resolution, TextureResolution.R256, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Button Texture");
+        UIScene.Initialize(this, TextureResolution.R512);
+        TextureManager.CreateResolution(UIScene.resolution, 128);
+        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/grass.png", "Grass", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Grass Texture");
+        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/DefaultButton.png", "Button", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Button Texture");
         Vector2 offset = new Vector2(333.0f, 250);
         Vector4 quadOffset = new Vector4(offset.X, offset.Y, offset.X, offset.Y);
         float width = 100;
@@ -40,11 +41,10 @@ public class MainPanel : GameWindow
         Vector4 testBounds = new Vector4(Dimensions.X * 0.5f - width, Dimensions.Y * 0.5f - height, Dimensions.X * 0.5f + width, Dimensions.Y * 0.5f + height) + quadOffset;
         Vector4 horizontalTestBounds = new Vector4(Dimensions.X * 0.5f - halfWidth, Dimensions.Y * 0.5f - halfHeight, Dimensions.X * 0.5f + halfWidth, Dimensions.Y * 0.5f + halfHeight) + quadOffset;
         Vector4 verticalTestBounds = new Vector4(Dimensions.X * 0.5f - 10, Dimensions.Y * 0.5f - 100, Dimensions.X * 0.5f + 10, Dimensions.Y * 0.5f + 100) + quadOffset;
-        UIScene.Initialize(this, TextureResolution.R256);
-        FontManager.LoadFont("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Fonts/DejaVuSans.ttf", 32, 512, 512);
+        FontManager.LoadFont("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Fonts/Roboto.ttf", 32, 512, 512);
         var nineSlice = new NineSlice(new Vector4(-200, -200, 200, 200), 50, 0.125f, new Vector4(0, 1, 0, 1));
-        nineSlice.Texture = "DejaVuSans";
-        var label = new Label(new Vector2(), 50, "Hello");
+        nineSlice.Texture = "Roboto";
+        var label = new Label(new Vector2(), 10, "AVA\nHello, World");
     }
 
     protected override void OnResize(ResizeEventArgs e)
