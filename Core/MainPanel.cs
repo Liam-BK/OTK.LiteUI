@@ -41,10 +41,11 @@ public class MainPanel : GameWindow
         Vector4 testBounds = new Vector4(Dimensions.X * 0.5f - width, Dimensions.Y * 0.5f - height, Dimensions.X * 0.5f + width, Dimensions.Y * 0.5f + height) + quadOffset;
         Vector4 horizontalTestBounds = new Vector4(Dimensions.X * 0.5f - halfWidth, Dimensions.Y * 0.5f - halfHeight, Dimensions.X * 0.5f + halfWidth, Dimensions.Y * 0.5f + halfHeight) + quadOffset;
         Vector4 verticalTestBounds = new Vector4(Dimensions.X * 0.5f - 10, Dimensions.Y * 0.5f - 100, Dimensions.X * 0.5f + 10, Dimensions.Y * 0.5f + 100) + quadOffset;
-        FontManager.LoadFont("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Fonts/Roboto.ttf", 32, 512, 512);
-        var nineSlice = new NineSlice(new Vector4(-200, -200, 200, 200), 50, 0.125f, new Vector4(0, 1, 0, 1));
-        nineSlice.Texture = "Roboto";
-        var label = new Label(new Vector2(), 10, "AVA\nHello, World");
+        FontManager.LoadFont("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Fonts/Roboto.ttf", 64, 512, 512);
+        // var nineSlice = new NineSlice(new Vector4(-200, -200, 200, 200), 50, 0.125f, new Vector4(0, 1, 0, 1));
+        // nineSlice.Texture = "Roboto";
+        var label = new Label(new Vector2(), 25, "AVA\nHello, World\nThis is a third line");
+        label.Alignment = TextAlignment.Right;
     }
 
     protected override void OnResize(ResizeEventArgs e)

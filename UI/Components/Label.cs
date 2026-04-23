@@ -33,7 +33,7 @@ public class Label : UIComponent, IRenderable
     public TextAlignment Alignment = TextAlignment.Left;
     public int InstanceCount => _glyphs.Count;
     private List<UIQuad> _glyphs = new List<UIQuad>();
-    private float _lineSpacing = 0.0f;
+    private const float _lineSpacing = 12.0f;
     public string FontKey
     {
         private get;
@@ -62,9 +62,6 @@ public class Label : UIComponent, IRenderable
         Colour = colour ?? Vector4.One;
         Text = text;
         FontKey = FontManager.DefaultFontKey;
-        Console.WriteLine(FontKey);
-        TextureManager.TryGetTexture(FontKey, UIScene.resolution, out var layer);
-        Console.WriteLine($"layer: {layer}");
         UIScene.Register(this);
     }
 
@@ -90,7 +87,6 @@ public class Label : UIComponent, IRenderable
             if (!fontData.GlyphUVs.TryGetValue(c, out var UVs)) continue;
             if (!fontData.GlyphBounds.TryGetValue(c, out var charBounds)) continue;
             if (!fontData.Offsets.TryGetValue(c, out var offset)) continue;
-            Console.WriteLine($"{c} UVs: {UVs}");
             float kern = 0.0f;
             if (i < Text.Length - 1)
             {
@@ -99,6 +95,7 @@ public class Label : UIComponent, IRenderable
                 {
                     kern = 0.0f;
                 }
+                if (kern > 0) Console.WriteLine($"{c} : {Text[i + 1]} kern: {kern}");
             }
             offset /= fontData.ScaleFactor;
 
@@ -106,7 +103,7 @@ public class Label : UIComponent, IRenderable
             float glyphWidth = c == ' ' ? 0.5f : (UVs.Z - UVs.X) / (UVs.W - UVs.Y) * glyphHeight;
 
             var glyph = new UIQuad();
-            glyph.position = new Vector2((XCursor + glyphWidth * 0.5f * Size) - (kern * Size), YCursor + glyphHeight * 0.5f * Size);
+            glyph.position = new Vector2(XCursor + glyphWidth * 0.5f * Size, YCursor + glyphHeight * 0.5f * Size);
             glyph.size = new Vector2(glyphWidth * Size, glyphHeight * Size);
             glyph.UVOffset = new Vector2(UVs.X, 1 - UVs.W);
             glyph.UVRange = new Vector2(UVs.Z - UVs.X, UVs.W - UVs.Y);
@@ -114,7 +111,48 @@ public class Label : UIComponent, IRenderable
             TextureManager.TryGetTexture(FontKey, UIScene.resolution, out var layer);
             glyph.textureLayer = layer;
             _glyphs.Add(glyph);
-            XCursor += glyphWidth * Size;
+            XCursor += glyphWidth * Size + kern * Size;
+            XCursor += offset.X * Size;
+        }
+        ShiftAlignment();
+    }
+
+    private void ShiftAlignment()
+    {
+        var lines = _text.Split('\n');
+        var offset = 0;
+        for (int i = 0; i < lines.Length; i++)
+        {
+            var line = lines[i];
+            ShiftLineAlignment(offset, offset + line.Length - 1);
+            offset += line.Length;
+        }
+    }
+
+    private void ShiftLineAlignment(int startIndex, int endIndex)
+    {
+        float multiplier;
+        switch (Alignment)
+        {
+            case TextAlignment.Center:
+                multiplier = 0.5f;
+                break;
+            case TextAlignment.Right:
+                multiplier = 1;
+                break;
+            default:
+                return;
+        }
+        var left = _glyphs[startIndex].position.X - _glyphs[startIndex].size.X * 0.5f;
+        var right = _glyphs[endIndex].position.X + _glyphs[endIndex].size.X * 0.5f;
+        var shiftAmount = (right - left) * multiplier;
+        for (int i = startIndex; i <= endIndex; i++)
+        {
+            var glyph = _glyphs[i];
+            var x = glyph.position.X;
+            var y = glyph.position.Y;
+            glyph.position = new Vector2(x - shiftAmount, y);
+            _glyphs[i] = glyph;
         }
     }
 
