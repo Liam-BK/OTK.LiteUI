@@ -23,8 +23,14 @@ public class NineSlice : UIComponent, IRenderable
     private float _uvInset;
     public float UVInset
     {
-        get => _uvInset;
-        set => _uvInset = Math.Clamp(value, 0, 0.5f);
+        get
+        {
+            return _uvInset;
+        }
+        set
+        {
+            _uvInset = Math.Clamp(value, 0, 0.5f);
+        }
     }
     private UIQuad topLeft = new UIQuad();
     private UIQuad topCenter = new UIQuad();
@@ -38,12 +44,12 @@ public class NineSlice : UIComponent, IRenderable
 
     public NineSlice(Vector4 bounds, float inset = 10, float uvInset = 0.25f, Vector4? colour = null)
     {
+        UIScene.Register(this);
         Bounds = bounds;
         Inset = inset;
         UVInset = uvInset;
         Colour = colour ?? Vector4.One;
         UpdateQuadrants();
-        UIScene.Register(this);
     }
 
     private void UpdateQuadrants()
@@ -116,7 +122,7 @@ public class NineSlice : UIComponent, IRenderable
         bottomRight.textureLayer = textureLayer;
     }
 
-    public void SubmitData(InstanceRenderer renderer)
+    public virtual void SubmitData(InstanceRenderer renderer)
     {
         if (!IsVisible) return;
         UpdateQuadrants();

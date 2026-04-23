@@ -14,6 +14,8 @@ public class MainPanel : GameWindow
     private static float tick = 0.5f;
     public static Vector2 Dimensions = new Vector2(1280, 720);
     public static TextureResolution resolution = TextureResolution.R256;
+    public static Label? label = null;
+    public static Button? button = null;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
@@ -42,10 +44,10 @@ public class MainPanel : GameWindow
         Vector4 horizontalTestBounds = new Vector4(Dimensions.X * 0.5f - halfWidth, Dimensions.Y * 0.5f - halfHeight, Dimensions.X * 0.5f + halfWidth, Dimensions.Y * 0.5f + halfHeight) + quadOffset;
         Vector4 verticalTestBounds = new Vector4(Dimensions.X * 0.5f - 10, Dimensions.Y * 0.5f - 100, Dimensions.X * 0.5f + 10, Dimensions.Y * 0.5f + 100) + quadOffset;
         FontManager.LoadFont("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Fonts/Roboto.ttf", 64, 512, 512);
-        // var nineSlice = new NineSlice(new Vector4(-200, -200, 200, 200), 50, 0.125f, new Vector4(0, 1, 0, 1));
-        // nineSlice.Texture = "Roboto";
-        var label = new Label(new Vector2(), 25, "AVA\nHello, World\nThis is a third line");
-        label.Alignment = TextAlignment.Right;
+        button = new Button(new Vector4(10, 10, 110, 45), "Button");
+        button.Texture = "Button";
+        button.TextColour = new Vector4(1, 0, 0, 1);
+        label = new Label(new Vector2(10, Dimensions.Y * UIScene.InvDPIScaleY - 35.0f), 25.0f, "stuff");
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -66,6 +68,11 @@ public class MainPanel : GameWindow
         {
             FPSTickTime -= tick;
             FPSCount = 0;
+        }
+
+        if (label is not null && button is not null)
+        {
+            label.Text = $"mouse: {UIScene.ConvertMouseScreenCoords(MouseState.Position)}, within bounds: {button.WithinBounds(MouseState)}";
         }
 
         FPSCount++;

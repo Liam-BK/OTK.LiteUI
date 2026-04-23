@@ -19,7 +19,13 @@ public abstract class UIComponent : IUIElement
 
     public float Width => _bounds.Z - _bounds.X;
 
-    public Vector4 Colour = Vector4.One;
+    protected Vector4 _colour = Vector4.One;
+
+    public virtual Vector4 Colour
+    {
+        get;
+        set;
+    }
 
     public virtual bool OnClickDown(MouseState mouse)
     {

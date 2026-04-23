@@ -1,3 +1,4 @@
+using System.Reflection;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -77,7 +78,7 @@ public static class UIScene
         set
         {
             _displayUnits = value;
-            projection = window is not null ? Matrix4.CreateOrthographic(window.Size.X * InvDPIScaleX, window.Size.Y * InvDPIScaleY, 0.01f, 1.0f) : Matrix4.Identity;
+            UpdateProjection();
         }
     }
 
@@ -99,12 +100,12 @@ public static class UIScene
     public static void Initialize(GameWindow newWindow, TextureResolution resolution)
     {
         if (_initialized) return;
+        _initialized = true;
         window = newWindow;
         var mesh = Mesh.Load("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Meshes/Quad.obj");
         material = Material.Load("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Materials/UIMaterial.mat");
         InstanceAttribType[] attribTypes = [InstanceAttribType.Position2D, InstanceAttribType.Vec2, InstanceAttribType.TexCoords, InstanceAttribType.Vec2, InstanceAttribType.Color4, InstanceAttribType.Single];
         renderer = new InstanceRenderer(mesh, material, attribTypes);
-        projection = Matrix4.CreateOrthographic(window.Size.X, window.Size.Y, 0.1f, 10.0f);
         window.KeyDown += OnKeyDown;
         window.KeyUp += OnKeyUp;
         window.MouseDown += _ => OnClickDown(window.MouseState);
@@ -113,7 +114,13 @@ public static class UIScene
         window.MouseWheel += _ => OnMouseWheel(window.MouseState);
         window.TextInput += OnTextInput;
         window.UpdateFrame += args => OnUpdate((float)args.Time, window.MouseState, window.KeyboardState);
-        _initialized = true;
+        UpdateProjection();
+    }
+
+    private static void UpdateProjection()
+    {
+        if (!_initialized || window is null) throw new InvalidOperationException("UIScene has not been initialized. Make sure to call 'Initialize' before doing any operations.");
+        projection = Matrix4.CreateOrthographicOffCenter(0, window.Size.X * InvDPIScaleX, 0, window.Size.Y * InvDPIScaleY, 0.01f, 1.0f);
     }
 
     public static void Register(IUIElement component)
@@ -212,7 +219,16 @@ public static class UIScene
         {
             foreach (var component in components)
             {
-                if (component is IRenderable renderable) renderable.SubmitData(renderer);
+                if (component is IRenderable renderable)
+                {
+                    var offset = new Vector2();
+                    if (window is not null)
+                    {
+                        offset.X = window.Size.X * -0.5f;
+                        offset.Y = window.Size.Y * -0.5f;
+                    }
+                    renderable.SubmitData(renderer);
+                }
             }
         }
         foreach (var component in pendingRemovals)
