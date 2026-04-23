@@ -219,16 +219,7 @@ public static class UIScene
         {
             foreach (var component in components)
             {
-                if (component is IRenderable renderable)
-                {
-                    var offset = new Vector2();
-                    if (window is not null)
-                    {
-                        offset.X = window.Size.X * -0.5f;
-                        offset.Y = window.Size.Y * -0.5f;
-                    }
-                    renderable.SubmitData(renderer);
-                }
+                if (component is IRenderable renderable) renderable.SubmitData(renderer);
             }
         }
         foreach (var component in pendingRemovals)
