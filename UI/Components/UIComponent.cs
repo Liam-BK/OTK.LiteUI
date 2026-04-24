@@ -29,22 +29,22 @@ public abstract class UIComponent : IUIElement
 
     public virtual bool OnClickDown(MouseState mouse)
     {
-        return true;
+        return false;
     }
 
     public virtual bool OnClickUp(MouseState mouse)
     {
-        return true;
+        return false;
     }
 
     public virtual bool OnMouseMove(MouseState mouse)
     {
-        return true;
+        return false;
     }
 
     public virtual bool OnMouseWheel(MouseState mouse)
     {
-        return true;
+        return false;
     }
 
     public virtual void OnTextInput(TextInputEventArgs e)

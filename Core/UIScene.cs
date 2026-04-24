@@ -152,7 +152,7 @@ public static class UIScene
         for (int i = components.Count - 1; i >= 0; i--)
         {
             var c = components[i];
-            if (!c.WithinBounds(mouse)) continue;
+            // if (!c.WithinBounds(mouse)) continue;
             if (c.OnClickUp(mouse)) break;
         }
     }
@@ -190,7 +190,6 @@ public static class UIScene
         for (int i = components.Count - 1; i >= 0; i--)
         {
             var c = components[i];
-            if (!c.WithinBounds(mouse)) continue;
             if (c.OnMouseMove(mouse)) break;
         }
     }
@@ -201,7 +200,6 @@ public static class UIScene
         for (int i = components.Count - 1; i >= 0; i--)
         {
             var c = components[i];
-            if (!c.WithinBounds(mouse)) continue;
             if (c.OnMouseWheel(mouse)) break;
         }
     }

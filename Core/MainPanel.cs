@@ -19,7 +19,7 @@ public class MainPanel : GameWindow
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
-        VSync = VSyncMode.On;
+        // VSync = VSyncMode.On;
         Dimensions = new Vector2(Size.X, Size.Y);
     }
 
@@ -47,6 +47,9 @@ public class MainPanel : GameWindow
         button = new Button(new Vector4(10, 10, 110, 45), "Button");
         button.Texture = "Button";
         button.TextColour = new Vector4(1, 0, 0, 1);
+        button.OnClick += LeftButton => { Console.WriteLine("Clicked"); };
+        button.OnHoverEnter += () => { Console.WriteLine("Entered"); };
+        button.OnHoverExit += () => { Console.WriteLine("Exited"); };
         label = new Label(new Vector2(10, Dimensions.Y * UIScene.InvDPIScaleY - 35.0f), 25.0f, "stuff");
     }
 
@@ -72,7 +75,7 @@ public class MainPanel : GameWindow
 
         if (label is not null && button is not null)
         {
-            label.Text = $"mouse: {UIScene.ConvertMouseScreenCoords(MouseState.Position)}, within bounds: {button.WithinBounds(MouseState)}";
+            label.Text = $"mouse: {UIScene.ConvertMouseScreenCoords(MouseState.Position)}, within bounds: {button.WithinBounds(MouseState)}, is pressed: {button._isPressed}";
         }
 
         FPSCount++;

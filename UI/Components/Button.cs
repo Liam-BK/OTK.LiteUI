@@ -20,6 +20,8 @@ public class Button : NineSlice
 
     private float _rolloverValue = 0;
 
+    private bool _isHovered = false;
+
     protected float RolloverValue
     {
         get => _rolloverValue;
@@ -27,7 +29,8 @@ public class Button : NineSlice
         {
             _rolloverValue = value;
             float divisor = TimeToRollover > 0 ? TimeToRollover : 1;
-            Colour = Vector4.Lerp(_baseColour, _rolloverColour, _rolloverValue / divisor);
+            var multiplier = new Vector4(_isPressed ? 0.5f : 1.0f, _isPressed ? 0.5f : 1.0f, _isPressed ? 0.5f : 1.0f, 1);
+            Colour = Vector4.Lerp(_baseColour, _rolloverColour, _rolloverValue / divisor) * multiplier;
         }
     }
 
@@ -51,6 +54,16 @@ public class Button : NineSlice
         }
     }
 
+    public bool _isPressed = false;
+
+    public event Action<MouseButton>? OnPointerDown;
+
+    public event Action<MouseButton>? OnClick;
+
+    public event Action? OnHoverEnter;
+
+    public event Action? OnHoverExit;
+
     public Button(Vector4 bounds, string text = "", float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
     {
         _baseColour = colour ?? Vector4.One;
@@ -61,26 +74,70 @@ public class Button : NineSlice
 
     public override bool OnClickDown(MouseState mouse)
     {
-        return true;
+        if (!IsVisible) return false;
+        _isPressed = WithinBounds(mouse);
+
+        if (_isPressed)
+        {
+            if (mouse.IsButtonDown(MouseButton.Left)) OnPointerDown?.Invoke(MouseButton.Left);
+            else if (mouse.IsButtonDown(MouseButton.Right)) OnPointerDown?.Invoke(MouseButton.Right);
+        }
+        return _isPressed;
+    }
+
+    public override bool OnMouseMove(MouseState mouse)
+    {
+        var nextHoverState = WithinBounds(mouse);
+        if (nextHoverState != _isHovered)
+        {
+            if (nextHoverState == false)
+            {
+                OnHoverExit?.Invoke();
+            }
+            else if (nextHoverState == true)
+            {
+                OnHoverEnter?.Invoke();
+            }
+            _isHovered = nextHoverState;
+        }
+        if (_isPressed)
+        {
+            _isPressed = WithinBounds(mouse);
+        }
+        return _isPressed;
     }
 
     public override bool OnClickUp(MouseState mouse)
     {
-        return true;
+        if (_isPressed && WithinBounds(mouse))
+        {
+            if (mouse.IsButtonReleased(MouseButton.Left))
+            {
+                OnClick?.Invoke(MouseButton.Left);
+            }
+            else if (mouse.IsButtonReleased(MouseButton.Right))
+            {
+                OnClick?.Invoke(MouseButton.Right);
+            }
+        }
+        _isPressed = false;
+        return false;
     }
 
     public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
     {
         if (!IsVisible) return;
+        var multiplier = new Vector4(_isPressed ? 0.5f : 1.0f, _isPressed ? 0.5f : 1.0f, _isPressed ? 0.5f : 1.0f, 1);
         if (WithinBounds(mouse))
         {
+
             if (TimeToRollover > 0) RolloverValue = Math.Min(TimeToRollover, RolloverValue + deltaTime);
-            else Colour = _rolloverColour;
+            else Colour = _rolloverColour * multiplier;
         }
         else
         {
             if (TimeToRollover > 0) RolloverValue = Math.Max(0, RolloverValue - deltaTime);
-            else Colour = _baseColour;
+            else Colour = _baseColour * multiplier;
         }
     }
 }
