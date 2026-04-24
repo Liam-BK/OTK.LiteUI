@@ -16,6 +16,8 @@ public class MainPanel : GameWindow
     public static TextureResolution resolution = TextureResolution.R256;
     public static Label? label = null;
     public static Button? button = null;
+    public static Checkbox? checkbox1 = null;
+    public static Checkbox? checkbox2 = null;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
@@ -33,6 +35,8 @@ public class MainPanel : GameWindow
         TextureManager.CreateResolution(UIScene.resolution, 128);
         if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/grass.png", "Grass", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Grass Texture");
         if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/DefaultButton.png", "Button", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Button Texture");
+        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/CheckboxEmpty.png", "Unchecked", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Unchecked Texture");
+        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/CheckboxFilled.png", "Checked", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Checked Texture");
         Vector2 offset = new Vector2(333.0f, 250);
         Vector4 quadOffset = new Vector4(offset.X, offset.Y, offset.X, offset.Y);
         float width = 100;
@@ -51,6 +55,25 @@ public class MainPanel : GameWindow
         button.OnHoverEnter += () => { Console.WriteLine("Entered"); };
         button.OnHoverExit += () => { Console.WriteLine("Exited"); };
         label = new Label(new Vector2(10, Dimensions.Y * UIScene.InvDPIScaleY - 35.0f), 25.0f, "stuff");
+        checkbox1 = new Checkbox(new Vector4(120, 10, 170, 60));
+        checkbox2 = new Checkbox(new Vector4(180, 10, 230, 60));
+        checkbox1.UncheckedTexture = "Unchecked";
+        checkbox1.CheckedTexture = "Checked";
+        checkbox1.UncheckedColour = new Vector4(1, 0, 0, 1);
+        checkbox1.CheckedColour = new Vector4(0, 1, 0, 1);
+        checkbox2.UncheckedTexture = "Unchecked";
+        checkbox2.CheckedTexture = "Checked";
+        checkbox1.OnClick += _ =>
+        {
+            checkbox1.Checked = true;
+            checkbox2.Checked = false;
+        };
+
+        checkbox2.OnClick += _ =>
+        {
+            checkbox1.Checked = false;
+            checkbox2.Checked = true;
+        };
     }
 
     protected override void OnResize(ResizeEventArgs e)
