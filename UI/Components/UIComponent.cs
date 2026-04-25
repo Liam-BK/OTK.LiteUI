@@ -67,7 +67,7 @@ public abstract class UIComponent : IUIElement
 
     }
 
-    public bool WithinBounds(MouseState mouse)
+    public virtual bool WithinBounds(MouseState mouse)
     {
         return WithinBounds(UIScene.ConvertMouseScreenCoords(mouse.Position));
     }

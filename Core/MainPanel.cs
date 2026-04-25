@@ -20,6 +20,8 @@ public class MainPanel : GameWindow
     public static Checkbox? checkbox1 = null;
     public static Checkbox? checkbox2 = null;
     public static StatusBar? statusBar = null;
+    public static Slider? slider = null;
+    public static Slider? verticalSlider = null;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
@@ -85,6 +87,13 @@ public class MainPanel : GameWindow
         statusBar.Texture = "Unchecked";
         statusBar.FillTexture = "Button";
         statusBar.IsVisible = false;
+        slider = new Slider(new Vector4(350, 10, 550, 40));
+        slider.Texture = "Unchecked";
+        slider.ThumbTexture = "Button";
+        verticalSlider = new Slider(new Vector4(560, 10, 590, 210));
+        verticalSlider.Texture = "Unchecked";
+        verticalSlider.ThumbTexture = "Checked";
+        verticalSlider.Value = 0.5f;
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -114,9 +123,9 @@ public class MainPanel : GameWindow
             FPSCount = 0;
         }
 
-        if (label is not null && button is not null)
+        if (label is not null && button is not null && slider is not null && verticalSlider is not null)
         {
-            label.Text = $"mouse: {UIScene.ConvertMouseScreenCoords(MouseState.Position)}, within bounds: {button.WithinBounds(MouseState)}, is pressed: {button._isPressed}";
+            label.Text = $"mouse: {UIScene.ConvertMouseScreenCoords(MouseState.Position)}, within bounds: {button.WithinBounds(MouseState)}, is pressed: {button._isPressed}\nslider: {slider.Value}\nvertical slider: {verticalSlider.Value}";
         }
 
         FPSCount++;
