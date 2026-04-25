@@ -101,6 +101,7 @@ public class StatusBar : NineSlice
 
     private void UpdateFill()
     {
+        if (!IsVisible) return;
         float multiplier1 = Math.Clamp(FillAmount / (Inset / Width), 0f, 1f);
         float multiplier2 = Math.Clamp((FillAmount - Inset / Width) / ((Width - 2 * Inset) / Width), 0, 1);
         float multiplier3 = Math.Clamp((FillAmount * Width - (Width - Inset)) / Inset, 0, 1);
@@ -158,24 +159,19 @@ public class StatusBar : NineSlice
 
     public override void SubmitData(InstanceRenderer renderer)
     {
+        if (!IsVisible) return;
         base.SubmitData(renderer);
-        if (FillAmount > 0)
-        {
-            renderer.AddInstance(FillTopLeft);
-            renderer.AddInstance(FillCenterLeft);
-            renderer.AddInstance(FillBottomLeft);
-        }
-        if (FillAmount > (Inset / Width))
-        {
-            renderer.AddInstance(FillTopCenter);
-            renderer.AddInstance(FillCenter);
-            renderer.AddInstance(FillBottomCenter);
-        }
-        if (FillAmount > ((Width - Inset) / Width))
-        {
-            renderer.AddInstance(FillTopRight);
-            renderer.AddInstance(FillCenterRight);
-            renderer.AddInstance(FillBottomRight);
-        }
+        if (FillAmount <= 0) return;
+        renderer.AddInstance(FillTopLeft);
+        renderer.AddInstance(FillCenterLeft);
+        renderer.AddInstance(FillBottomLeft);
+        if (FillAmount <= (Inset / Width)) return;
+        renderer.AddInstance(FillTopCenter);
+        renderer.AddInstance(FillCenter);
+        renderer.AddInstance(FillBottomCenter);
+        if (FillAmount <= ((Width - Inset) / Width)) return;
+        renderer.AddInstance(FillTopRight);
+        renderer.AddInstance(FillCenterRight);
+        renderer.AddInstance(FillBottomRight);
     }
 }

@@ -34,6 +34,16 @@ public class Button : NineSlice
         }
     }
 
+    public override bool IsVisible
+    {
+        get => base.IsVisible;
+        set
+        {
+            base.IsVisible = value;
+            label.IsVisible = value;
+        }
+    }
+
     private Vector4 _rolloverColour = new Vector4(0.75f, 0.75f, 0.75f, 1);
 
     public Vector4 RolloverColour
@@ -87,6 +97,7 @@ public class Button : NineSlice
 
     public override bool OnMouseMove(MouseState mouse)
     {
+        if (!IsVisible) return false;
         var nextHoverState = WithinBounds(mouse);
         if (nextHoverState != _isHovered)
         {
@@ -109,6 +120,7 @@ public class Button : NineSlice
 
     public override bool OnClickUp(MouseState mouse)
     {
+        if (!IsVisible) return false;
         if (_isPressed && WithinBounds(mouse))
         {
             if (mouse.IsButtonReleased(MouseButton.Left))
@@ -119,8 +131,10 @@ public class Button : NineSlice
             {
                 OnClick?.Invoke(MouseButton.Right);
             }
+
+            _isPressed = false;
+            return true;
         }
-        _isPressed = false;
         return false;
     }
 

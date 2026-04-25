@@ -56,6 +56,7 @@ public class MainPanel : GameWindow
         button.OnClick += LeftButton => { Console.WriteLine("Clicked"); };
         button.OnHoverEnter += () => { Console.WriteLine("Entered"); };
         button.OnHoverExit += () => { Console.WriteLine("Exited"); };
+        button.IsVisible = false;
         label = new Label(new Vector2(10, Dimensions.Y * UIScene.InvDPIScaleY - 35.0f), 25.0f, "stuff");
         checkbox1 = new Checkbox(new Vector4(120, 10, 170, 60));
         checkbox2 = new Checkbox(new Vector4(180, 10, 230, 60));
@@ -65,6 +66,8 @@ public class MainPanel : GameWindow
         checkbox1.CheckedColour = new Vector4(0, 1, 0, 1);
         checkbox2.UncheckedTexture = "Unchecked";
         checkbox2.CheckedTexture = "Checked";
+        checkbox1.IsVisible = false;
+        checkbox2.IsVisible = false;
         checkbox1.OnClick += _ =>
         {
             checkbox1.Checked = true;
@@ -81,6 +84,7 @@ public class MainPanel : GameWindow
         statusBar.FillAmount = 0.75f;
         statusBar.Texture = "Unchecked";
         statusBar.FillTexture = "Button";
+        statusBar.IsVisible = false;
     }
 
     protected override void OnResize(ResizeEventArgs e)

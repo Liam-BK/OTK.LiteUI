@@ -37,6 +37,7 @@ public class Checkbox : NineSlice
 
     public override bool OnMouseMove(MouseState mouse)
     {
+        if (!IsVisible) return false;
         if (_isPressed)
         {
             _isPressed = WithinBounds(mouse);
@@ -46,6 +47,7 @@ public class Checkbox : NineSlice
 
     public override bool OnClickUp(MouseState mouse)
     {
+        if (!IsVisible) return false;
         if (_isPressed && WithinBounds(mouse))
         {
             Checked = !Checked;
@@ -57,8 +59,9 @@ public class Checkbox : NineSlice
             {
                 OnClick?.Invoke(MouseButton.Right);
             }
+            _isPressed = false;
+            return true;
         }
-        _isPressed = false;
         return false;
     }
 

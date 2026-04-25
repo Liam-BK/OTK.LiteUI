@@ -6,7 +6,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 public abstract class UIComponent : IUIElement
 {
     public static GameWindow? window = null;
-    public bool IsVisible { get; set; } = true;
+    public virtual bool IsVisible { get; set; } = true;
     private IUIContainer? _parent = null;
     public IUIContainer? Parent { get => _parent; set => _parent = value; }
 
