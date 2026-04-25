@@ -11,7 +11,7 @@ public abstract class UIComponent : IUIElement
     public IUIContainer? Parent { get => _parent; set => _parent = value; }
 
     private Vector4 _bounds = Vector4.Zero;
-    public Vector4 Bounds { get => _bounds; set => _bounds = value; }
+    public virtual Vector4 Bounds { get => _bounds; set => _bounds = value; }
 
     public Vector2 Center => new Vector2((_bounds.X + _bounds.Z) * 0.5f, (_bounds.Y + _bounds.W) * 0.5f);
 
@@ -75,5 +75,11 @@ public abstract class UIComponent : IUIElement
     public bool WithinBounds(Vector2 position)
     {
         return position.X > Bounds.X && position.X <= Bounds.Z && position.Y > Bounds.Y && position.Y <= Bounds.W;
+    }
+
+    public static float MapValue(float value, float inputMin, float inputMax, float outputMin, float outputMax)
+    {
+        if (Math.Abs(inputMax - inputMin) < 0.0005f) return inputMin;
+        return outputMin + (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin);
     }
 }

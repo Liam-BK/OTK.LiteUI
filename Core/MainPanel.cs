@@ -14,10 +14,12 @@ public class MainPanel : GameWindow
     private static float tick = 0.5f;
     public static Vector2 Dimensions = new Vector2(1280, 720);
     public static TextureResolution resolution = TextureResolution.R256;
+    private static float count = 0;
     public static Label? label = null;
     public static Button? button = null;
     public static Checkbox? checkbox1 = null;
     public static Checkbox? checkbox2 = null;
+    public static StatusBar? statusBar = null;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
@@ -74,6 +76,11 @@ public class MainPanel : GameWindow
             checkbox1.Checked = false;
             checkbox2.Checked = true;
         };
+        statusBar = new StatusBar(new Vector4(240, 10, 340, 35));
+        statusBar.FillColour = new Vector4(0, 0, 1, 1);
+        statusBar.FillAmount = 0.75f;
+        statusBar.Texture = "Unchecked";
+        statusBar.FillTexture = "Button";
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -90,6 +97,13 @@ public class MainPanel : GameWindow
         _currentDelta = delta;
         _totalTime += delta;
         FPSTickTime += delta;
+        count += delta;
+        if (count > 2 * MathF.PI) count -= 2 * MathF.PI;
+        if (statusBar is not null)
+        {
+            statusBar.FillAmount = MathF.Sin(count) * 0.5f + 0.5f;
+        }
+
         if (FPSTickTime >= tick)
         {
             FPSTickTime -= tick;
