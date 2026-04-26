@@ -55,6 +55,26 @@ public class Label : UIComponent, IRenderable
 
     private bool _isDirty = true;
 
+    public override Vector4 Bounds
+    {
+        get
+        {
+            if (_glyphs.Count <= 0) return new Vector4(Origin.X, Origin.Y, Origin.X, Origin.Y);
+
+            Vector4 result = new Vector4(_glyphs[0].position.X - _glyphs[0].size.X * 0.5f, _glyphs[0].position.Y - _glyphs[0].size.Y * 0.5f, _glyphs[0].position.X + _glyphs[0].size.X * 0.5f, _glyphs[0].position.Y + _glyphs[0].size.Y * 0.5f);
+            foreach (var glyph in _glyphs)
+            {
+                var pos = glyph.position;
+                var halfSize = glyph.size * 0.5f;
+                result.X = Math.Min(result.X, pos.X - halfSize.X);
+                result.Y = Math.Min(result.Y, pos.Y - halfSize.Y);
+                result.Z = Math.Max(result.Z, pos.X + halfSize.X);
+                result.W = Math.Max(result.W, pos.Y + halfSize.Y);
+            }
+            return result;
+        }
+    }
+
     public Label(Vector2 origin, float size, string text = "", Vector4? colour = null)
     {
         Origin = origin;
@@ -103,7 +123,7 @@ public class Label : UIComponent, IRenderable
             float glyphWidth = c == ' ' ? 0.5f : (UVs.Z - UVs.X) / (UVs.W - UVs.Y) * glyphHeight;
 
             var glyph = new UIQuad();
-            glyph.position = new Vector2(XCursor + glyphWidth * 0.5f * Size, YCursor + glyphHeight * 0.5f * Size);
+            glyph.position = new Vector2(XCursor + glyphWidth * 0.5f * Size, YCursor - glyphHeight * 0.5f * Size - offset.Y * Size);
             glyph.size = new Vector2(glyphWidth * Size, glyphHeight * Size);
             glyph.UVOffset = new Vector2(UVs.X, 1 - UVs.W);
             glyph.UVRange = new Vector2(UVs.Z - UVs.X, UVs.W - UVs.Y);
@@ -158,7 +178,7 @@ public class Label : UIComponent, IRenderable
 
     public void SubmitData(InstanceRenderer renderer)
     {
-        if (!IsVisible) return;
+        if (!IsVisible || string.IsNullOrEmpty(Text)) return;
         if (_isDirty)
         {
             UpdateGlyphs();

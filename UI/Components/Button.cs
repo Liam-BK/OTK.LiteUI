@@ -66,6 +66,23 @@ public class Button : NineSlice
 
     public bool _isPressed = false;
 
+    public override Vector4 Bounds
+    {
+        get
+        {
+            return base.Bounds;
+        }
+        set
+        {
+            base.Bounds = value;
+            if (label is not null)
+            {
+                label.Origin = new Vector2((value.X + value.Z) * 0.5f, value.Y + (value.W - value.Y) * 0.25f);
+                label.Size = (value.W - value.Y) * 0.5f;
+            }
+        }
+    }
+
     public event Action<MouseButton>? OnPointerDown;
 
     public event Action<MouseButton>? OnClick;
