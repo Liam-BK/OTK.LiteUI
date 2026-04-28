@@ -3,6 +3,13 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
+
+public enum ComponentOrientation
+{
+    Horizontal,
+    Vertical
+}
+
 public abstract class UIComponent : IUIElement
 {
     public static GameWindow? window = null;

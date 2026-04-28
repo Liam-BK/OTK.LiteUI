@@ -22,6 +22,8 @@ public class MainPanel : GameWindow
     public static StatusBar? statusBar = null;
     public static Slider? slider = null;
     public static Slider? verticalSlider = null;
+    public static ScrollBar? horizontalScrollBar = null;
+    public static ScrollBar? verticalScrollBar = null;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
@@ -87,14 +89,29 @@ public class MainPanel : GameWindow
         statusBar.FillAmount = 0.75f;
         statusBar.Texture = "Unchecked";
         statusBar.FillTexture = "Button";
+        statusBar.Bounds = new Vector4(240, 30, 340, 55);
         // statusBar.IsVisible = false;
-        slider = new Slider(new Vector4(350, 10, 550, 40));
+        slider = new Slider(new Vector4(360, 10, 560, 40));
         slider.Texture = "Unchecked";
         slider.ThumbTexture = "Button";
-        verticalSlider = new Slider(new Vector4(560, 10, 590, 210));
+        slider.Bounds = new Vector4(360, 30, 560, 60);
+        verticalSlider = new Slider(new Vector4(570, 10, 600, 210));
         verticalSlider.Texture = "Unchecked";
         verticalSlider.ThumbTexture = "Checked";
         verticalSlider.Value = 0.5f;
+
+        horizontalScrollBar = new ScrollBar(new Vector4(610, 10, 710, 35));
+        horizontalScrollBar.Texture = "Unchecked";
+        horizontalScrollBar.ThumbTexture = "Button";
+        horizontalScrollBar.ContentSize = Vector2.One * 2;
+        horizontalScrollBar.Value = 0.5f;
+        horizontalScrollBar.Bounds = new Vector4(610, 30, 710, 55);
+        verticalScrollBar = new ScrollBar(new Vector4(720, 10, 750, 210));
+        verticalScrollBar.Texture = "Unchecked";
+        verticalScrollBar.ThumbTexture = "Button";
+        verticalScrollBar.ContentSize = Vector2.One * 2;
+        verticalScrollBar.Value = 0.5f;
+        verticalScrollBar.Bounds = new Vector4(720, 30, 750, 230);
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -124,9 +141,9 @@ public class MainPanel : GameWindow
             FPSCount = 0;
         }
 
-        if (label is not null && button is not null && slider is not null && verticalSlider is not null)
+        if (label is not null && button is not null && slider is not null && verticalSlider is not null && horizontalScrollBar is not null && verticalScrollBar is not null)
         {
-            label.Text = $"mouse: {UIScene.ConvertMouseScreenCoords(MouseState.Position)}, within bounds: {button.WithinBounds(MouseState)}, is pressed: {button._isPressed}\nslider: {slider.Value}\nvertical slider: {verticalSlider.Value}\nbounds: {label.Bounds}";
+            label.Text = $"mouse: {UIScene.ConvertMouseScreenCoords(MouseState.Position)}, within bounds: {button.WithinBounds(MouseState)}, is pressed: {button._isPressed}\nslider: {slider.Value}\nvertical slider: {verticalSlider.Value}\nbounds: {label.Bounds}\nhorizontal scrollbar: {horizontalScrollBar.Value}, vertical scrollBar: {verticalScrollBar.Value}";
         }
 
         FPSCount++;
