@@ -82,6 +82,15 @@ public class TextField : NineSlice
         timer.Restart();
     }
 
+    private void RemoveCharacter()
+    {
+        var sb = new StringBuilder();
+        sb.Append(Text);
+        sb.Remove(caretIndex, 1);
+        Text = sb.ToString();
+        label.ForceUpdateGlyphs();
+    }
+
     public override bool OnClickDown(MouseState mouse)
     {
         if (!WithinBounds(mouse))
@@ -130,23 +139,13 @@ public class TextField : NineSlice
         if (e.Key == Keys.Backspace)
         {
             if (caretIndex <= 0) return;
-            var sb = new StringBuilder();
-            sb.Append(Text);
-            sb.Remove(caretIndex - 1, 1);
             caretIndex--;
-            Text = sb.ToString();
-            label.ForceUpdateGlyphs();
-            UpdateCaretPos();
+            RemoveCharacter();
         }
         if (e.Key == Keys.Delete)
         {
             if (caretIndex >= Text.Length) return;
-            var sb = new StringBuilder();
-            sb.Append(Text);
-            sb.Remove(caretIndex, 1);
-            Text = sb.ToString();
-            label.ForceUpdateGlyphs();
-            UpdateCaretPos();
+            RemoveCharacter();
         }
         UpdateCaretPos();
     }
