@@ -1,4 +1,3 @@
-
 using OpenTK.Mathematics;
 
 public struct UIQuad : IInstanceData
