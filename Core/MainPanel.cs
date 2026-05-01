@@ -58,9 +58,6 @@ public class MainPanel : GameWindow
         button = new Button(new Vector4(10, 10, 110, 45), "Button");
         button.Texture = "Button";
         button.TextColour = new Vector4(1, 0, 0, 1);
-        button.OnClick += LeftButton => { Console.WriteLine("Clicked"); };
-        button.OnHoverEnter += () => { Console.WriteLine("Entered"); };
-        button.OnHoverExit += () => { Console.WriteLine("Exited"); };
         button.Bounds = new Vector4(10, 30, 110, 65);
         // button.IsVisible = false;
         label = new Label(new Vector2(10, Dimensions.Y * UIScene.InvDPIScaleY - 35.0f), 25.0f, $"The quick brown fox\njumped over\nthe lazy dog");
@@ -116,7 +113,7 @@ public class MainPanel : GameWindow
 
         textField = new TextField(new Vector4(760, 10, 960, 40));
         textField.Texture = "Unchecked";
-        textField.Text = "text box";
+        // textField.Text = "text box";
     }
 
     protected override void OnResize(ResizeEventArgs e)

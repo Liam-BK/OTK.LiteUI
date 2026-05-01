@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.Text;
 using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 public class TextField : NineSlice
@@ -18,6 +20,8 @@ public class TextField : NineSlice
             if (label is not null) label.Text = value;
         }
     }
+
+    private StringBuilder sb = new StringBuilder();
 
     public Vector4 TextColour
     {
@@ -65,10 +69,17 @@ public class TextField : NineSlice
     {
         label = new Label(new Vector2(Bounds.X + Inset, Center.Y - Height * 0.25f), Height * 0.5f, colour: new Vector4(0, 0, 0, 1));
         caret.position = label.FindCaretPosFromIndex(0, 0);
-        caret.size = new Vector2(1.8f, label.Size + Label._lineSpacing * 0.5f);
+        caret.size = new Vector2(2, label.Size + Label._lineSpacing * 0.5f);
         caret.textureLayer = -1;
         caret.colour = new Vector4(0, 0, 0, 1);
         timer.Start();
+    }
+
+    private void UpdateCaretPos()
+    {
+        caret.position = label.FindCaretPosFromIndex(caretIndex, caretLine);
+        caretVisible = true;
+        timer.Restart();
     }
 
     public override bool OnClickDown(MouseState mouse)
@@ -82,9 +93,41 @@ public class TextField : NineSlice
         UIScene.FocusedComponent = this;
         caretLine = label.FindLineFromMousePos(mouse);
         caretIndex = convertedMouse.X <= label.Bounds.Z ? label.FindCaretIndexFromMousePos(mouse) : label.FindLineEndIndex(caretLine);
-        caret.position = label.FindCaretPosFromIndex(caretIndex, caretLine);
+        UpdateCaretPos();
+
 
         return base.OnClickDown(mouse);
+    }
+
+    public override void OnTextInput(TextInputEventArgs e)
+    {
+        if (!CanFocus || !IsFocused || !IsVisible) return;
+        base.OnTextInput(e);
+        var sb = new StringBuilder();
+        sb.Append(Text);
+        var character = (char)e.Unicode;
+        if (caretIndex >= Text.Length)
+        {
+            sb.Append(character);
+        }
+        else
+        {
+            sb.Insert(caretIndex, character);
+        }
+        caretIndex++;
+        Text = sb.ToString();
+        label.ForceUpdateGlyphs();
+        UpdateCaretPos();
+    }
+
+    public override void OnKeyDown(KeyboardKeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (e.Key == Keys.Left) caretIndex = Math.Max(0, caretIndex - 1);
+        if (e.Key == Keys.Right) caretIndex = Math.Min(Text.Length, caretIndex + 1);
+        if (e.Key == Keys.Up) caretIndex = 0;
+        if (e.Key == Keys.Down) caretIndex = Text.Length;
+        UpdateCaretPos();
     }
 
     public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)

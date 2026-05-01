@@ -96,23 +96,6 @@ public class Label : UIComponent, IRenderable
         }
     }
 
-    private int NumberOfLines
-    {
-        get
-        {
-            int count = 1;
-            for (int i = 0; i < Text.Length; i++)
-            {
-                char c = Text[i];
-                if (c == '\n')
-                {
-                    count++;
-                }
-            }
-            return count;
-        }
-    }
-
     public Label(Vector2 origin, float size, string text = "", Vector4? colour = null)
     {
         UIScene.Register(this);
@@ -152,7 +135,7 @@ public class Label : UIComponent, IRenderable
             var previousGlyph = _lines[line][caretIndex - 1];
             float prevRight = previousGlyph.position.X + previousGlyph.size.X * 0.5f;
             float currentLeft = currentGlyph.position.X - currentGlyph.size.X * 0.5f;
-            var finalResult = new Vector2((prevRight + currentLeft) * 0.5f, y);
+            var finalResult = new Vector2(MathF.Round((prevRight + currentLeft) * 0.5f, MidpointRounding.AwayFromZero), y);
             return finalResult;
         }
     }
@@ -183,7 +166,7 @@ public class Label : UIComponent, IRenderable
         return _lines[line].Count;
     }
 
-    private void UpdateGlyphs()
+    public void ForceUpdateGlyphs()
     {
         _lines.Clear();
         _lines.Add(new List<UIQuad>());
@@ -217,7 +200,6 @@ public class Label : UIComponent, IRenderable
                 {
                     kern = 0.0f;
                 }
-                if (kern > 0) Console.WriteLine($"{c} : {Text[i + 1]} kern: {kern}");
             }
             offset /= fontData.ScaleFactor;
 
@@ -284,7 +266,7 @@ public class Label : UIComponent, IRenderable
         if (!IsVisible || string.IsNullOrEmpty(Text)) return;
         if (_isDirty)
         {
-            UpdateGlyphs();
+            ForceUpdateGlyphs();
             _isDirty = false;
         }
         for (int i = 0; i < _lines.Count; i++)
