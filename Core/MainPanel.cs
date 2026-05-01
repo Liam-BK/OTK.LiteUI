@@ -24,6 +24,7 @@ public class MainPanel : GameWindow
     public static Slider? verticalSlider = null;
     public static ScrollBar? horizontalScrollBar = null;
     public static ScrollBar? verticalScrollBar = null;
+    public static TextField? textField = null;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
@@ -62,7 +63,7 @@ public class MainPanel : GameWindow
         button.OnHoverExit += () => { Console.WriteLine("Exited"); };
         button.Bounds = new Vector4(10, 30, 110, 65);
         // button.IsVisible = false;
-        label = new Label(new Vector2(10, Dimensions.Y * UIScene.InvDPIScaleY - 35.0f), 25.0f, "stuff");
+        label = new Label(new Vector2(10, Dimensions.Y * UIScene.InvDPIScaleY - 35.0f), 25.0f, $"The quick brown fox\njumped over\nthe lazy dog");
         checkbox1 = new Checkbox(new Vector4(120, 10, 170, 60));
         checkbox2 = new Checkbox(new Vector4(180, 10, 230, 60));
         checkbox1.UncheckedTexture = "Unchecked";
@@ -112,6 +113,10 @@ public class MainPanel : GameWindow
         verticalScrollBar.ContentSize = Vector2.One * 2;
         verticalScrollBar.Value = 0.5f;
         verticalScrollBar.Bounds = new Vector4(720, 30, 750, 230);
+
+        textField = new TextField(new Vector4(760, 10, 960, 40));
+        textField.Texture = "Unchecked";
+        textField.Text = "text box";
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -141,9 +146,9 @@ public class MainPanel : GameWindow
             FPSCount = 0;
         }
 
-        if (label is not null && button is not null && slider is not null && verticalSlider is not null && horizontalScrollBar is not null && verticalScrollBar is not null)
+        if (label is not null)
         {
-            label.Text = $"mouse: {UIScene.ConvertMouseScreenCoords(MouseState.Position)}, within bounds: {button.WithinBounds(MouseState)}, is pressed: {button._isPressed}\nslider: {slider.Value}\nvertical slider: {verticalSlider.Value}\nbounds: {label.Bounds}\nhorizontal scrollbar: {horizontalScrollBar.Value}, vertical scrollBar: {verticalScrollBar.Value}";
+            label.Text = $"has focused component: {UIScene.FocusedComponent is not null}";
         }
 
         FPSCount++;

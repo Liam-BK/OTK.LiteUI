@@ -14,8 +14,8 @@ public static class UIScene
     public static Matrix4 projection;
     public static TextureResolution resolution = TextureResolution.R256;
     private const float referenceDPI = 96.0f;
-    public static List<IUIElement> components = new List<IUIElement>();
-    public static List<IUIElement> pendingRemovals = new List<IUIElement>();
+    public static List<UIComponent> components = new List<UIComponent>();
+    public static List<UIComponent> pendingRemovals = new List<UIComponent>();
 
     /// <summary>
     /// A Vector2 that can be multiplied with a position to multiply it by the inverse DPI scale.
@@ -97,6 +97,8 @@ public static class UIScene
         DPI
     }
 
+    public static UIComponent? FocusedComponent = null;
+
     public static void Initialize(GameWindow newWindow, TextureResolution resolution)
     {
         if (_initialized) return;
@@ -123,13 +125,13 @@ public static class UIScene
         projection = Matrix4.CreateOrthographicOffCenter(0, window.Size.X * InvDPIScaleX, 0, window.Size.Y * InvDPIScaleY, 0.01f, 1.0f);
     }
 
-    public static void Register(IUIElement component)
+    public static void Register(UIComponent component)
     {
         if (!_initialized) throw new InvalidOperationException("UIScene has not been initialized. Make sure to call 'Initialize' before doing any operations.");
         components.Add(component);
     }
 
-    public static void Deregister(IUIElement component)
+    public static void Deregister(UIComponent component)
     {
         if (!_initialized) throw new InvalidOperationException("UIScene has not been initialized. Make sure to call 'Initialize' before doing any operations.");
         pendingRemovals.Add(component);
@@ -141,9 +143,18 @@ public static class UIScene
         for (int i = components.Count - 1; i >= 0; i--)
         {
             var c = components[i];
-            if (!c.WithinBounds(mouse)) continue;
             if (c.OnClickDown(mouse)) break;
         }
+    }
+
+    public static void SetFocus(UIComponent? component)
+    {
+        if (FocusedComponent == component)
+            return;
+
+        FocusedComponent?.OnFocusLost();
+        FocusedComponent = component;
+        FocusedComponent?.OnFocusGained();
     }
 
     public static void OnClickUp(MouseState mouse)
@@ -152,8 +163,18 @@ public static class UIScene
         for (int i = components.Count - 1; i >= 0; i--)
         {
             var c = components[i];
-            // if (!c.WithinBounds(mouse)) continue;
-            if (c.OnClickUp(mouse)) break;
+            if (c.OnClickUp(mouse))
+            {
+                if (c.CanFocus && c.IsVisible)
+                {
+                    SetFocus(c);
+                }
+                else
+                {
+                    SetFocus(null);
+                }
+                break;
+            }
         }
     }
 
@@ -178,9 +199,9 @@ public static class UIScene
     public static void OnTextInput(TextInputEventArgs args)
     {
         if (!_initialized) return;
-        for (int i = components.Count - 1; i >= 0; i--)
+        if (FocusedComponent is not null)
         {
-            components[i].OnTextInput(args);
+            FocusedComponent.OnTextInput(args);
         }
     }
 

@@ -10,7 +10,7 @@ public enum ComponentOrientation
     Vertical
 }
 
-public abstract class UIComponent : IUIElement
+public abstract class UIComponent
 {
     public static GameWindow? window = null;
     public virtual bool IsVisible { get; set; } = true;
@@ -30,9 +30,23 @@ public abstract class UIComponent : IUIElement
 
     public virtual Vector4 Colour
     {
-        get;
-        set;
+        get
+        {
+            return _colour;
+        }
+        set
+        {
+            _colour = new Vector4(Math.Clamp(value.X, 0, 1), Math.Clamp(value.Y, 0, 1), Math.Clamp(value.Z, 0, 1), Math.Clamp(value.W, 0, 1));
+        }
     }
+
+    public virtual bool CanFocus => false;
+
+    public virtual void OnFocusGained() { }
+
+    public virtual void OnFocusLost() { }
+
+    public bool IsFocused => UIScene.FocusedComponent == this;
 
     public virtual bool OnClickDown(MouseState mouse)
     {
