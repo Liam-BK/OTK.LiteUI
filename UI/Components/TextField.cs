@@ -127,6 +127,27 @@ public class TextField : NineSlice
         if (e.Key == Keys.Right) caretIndex = Math.Min(Text.Length, caretIndex + 1);
         if (e.Key == Keys.Up) caretIndex = 0;
         if (e.Key == Keys.Down) caretIndex = Text.Length;
+        if (e.Key == Keys.Backspace)
+        {
+            if (caretIndex <= 0) return;
+            var sb = new StringBuilder();
+            sb.Append(Text);
+            sb.Remove(caretIndex - 1, 1);
+            caretIndex--;
+            Text = sb.ToString();
+            label.ForceUpdateGlyphs();
+            UpdateCaretPos();
+        }
+        if (e.Key == Keys.Delete)
+        {
+            if (caretIndex >= Text.Length) return;
+            var sb = new StringBuilder();
+            sb.Append(Text);
+            sb.Remove(caretIndex, 1);
+            Text = sb.ToString();
+            label.ForceUpdateGlyphs();
+            UpdateCaretPos();
+        }
         UpdateCaretPos();
     }
 
