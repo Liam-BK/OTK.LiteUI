@@ -111,7 +111,7 @@ public class MainPanel : GameWindow
         verticalScrollBar.Value = 0.5f;
         verticalScrollBar.Bounds = new Vector4(720, 30, 750, 230);
 
-        textField = new TextField(new Vector4(760, 10, 960, 40));
+        textField = new TextField(new Vector4(760, 10, 1160, 410));
         textField.Texture = "Unchecked";
         // textField.Text = "text box";
     }

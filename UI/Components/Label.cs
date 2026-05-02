@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -44,6 +45,11 @@ public class Label : UIComponent, IRenderable
             for (int i = 0; i < _lines.Count; i++) result += _lines[i].Count;
             return result;
         }
+    }
+
+    public int TotalLines
+    {
+        get => _lines.Count;
     }
 
     private List<List<UIQuad>> _lines = new List<List<UIQuad>>();
@@ -105,6 +111,16 @@ public class Label : UIComponent, IRenderable
         Text = text;
         FontKey = FontManager.DefaultFontKey;
         _lines.Add(new List<UIQuad>());
+    }
+
+    public int FindInsertionOffset(int line)
+    {
+        int result = 0;
+        for (int i = 0; i < line; i++)
+        {
+            result += _lines[i].Count;
+        }
+        return result + line;
     }
 
     public Vector2 FindCaretPosFromIndex(int caretIndex, int line)
@@ -219,6 +235,7 @@ public class Label : UIComponent, IRenderable
             XCursor += offset.X * Size;
         }
         ShiftAlignment();
+        _isDirty = false;
     }
 
     private void ShiftAlignment()
@@ -267,7 +284,6 @@ public class Label : UIComponent, IRenderable
         if (_isDirty)
         {
             ForceUpdateGlyphs();
-            _isDirty = false;
         }
         for (int i = 0; i < _lines.Count; i++)
         {

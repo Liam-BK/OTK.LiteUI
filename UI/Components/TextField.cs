@@ -4,6 +4,12 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
+public enum TextFieldMode
+{
+    SingleLine,
+    MultiLine
+}
+
 public class TextField : NineSlice
 {
     private Label label;
@@ -21,7 +27,7 @@ public class TextField : NineSlice
         }
     }
 
-    private StringBuilder sb = new StringBuilder();
+    public TextFieldMode Mode = TextFieldMode.MultiLine;
 
     public Vector4 TextColour
     {
@@ -41,6 +47,15 @@ public class TextField : NineSlice
 
     private bool caretVisible = false;
 
+    private int globalCaretIndex
+    {
+        get
+        {
+            if (label is null) return 0;
+            return label.FindInsertionOffset(caretLine) + caretIndex;
+        }
+    }
+
     UIQuad caret = new UIQuad();
 
     private float caretBlinkTime = 0.5f;
@@ -49,8 +64,10 @@ public class TextField : NineSlice
 
     public override bool CanFocus => true;
 
+
     private int caretIndex = 0;
     private int caretLine = 0;
+    private int desiredColumn = 0;
 
     public override bool IsVisible
     {
@@ -65,9 +82,20 @@ public class TextField : NineSlice
         }
     }
 
+    public float TextSize
+    {
+        set
+        {
+            label.Size = value;
+        }
+    }
+
+    private const float defaultTextSize = 25.0f;
+
     public TextField(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
     {
-        label = new Label(new Vector2(Bounds.X + Inset, Center.Y - Height * 0.25f), Height * 0.5f, colour: new Vector4(0, 0, 0, 1));
+        float textSize = Math.Min(Height * 0.5f, defaultTextSize);
+        label = new Label(new Vector2(Bounds.X + Inset, Bounds.W - textSize - Inset * 0.75f), textSize, colour: new Vector4(0, 0, 0, 1));
         caret.position = label.FindCaretPosFromIndex(0, 0);
         caret.size = new Vector2(2, label.Size + Label._lineSpacing * 0.5f);
         caret.textureLayer = -1;
@@ -84,16 +112,15 @@ public class TextField : NineSlice
 
     private void RemoveCharacter()
     {
-        var sb = new StringBuilder();
-        sb.Append(Text);
-        sb.Remove(caretIndex, 1);
+        var sb = new StringBuilder(Text);
+        sb.Remove(globalCaretIndex, 1);
         Text = sb.ToString();
         label.ForceUpdateGlyphs();
     }
 
     public override bool OnClickDown(MouseState mouse)
     {
-        if (!WithinBounds(mouse))
+        if (!WithinBounds(mouse) || !IsVisible)
         {
             UIScene.FocusedComponent = null;
             return false;
@@ -102,6 +129,7 @@ public class TextField : NineSlice
         UIScene.FocusedComponent = this;
         caretLine = label.FindLineFromMousePos(mouse);
         caretIndex = convertedMouse.X <= label.Bounds.Z ? label.FindCaretIndexFromMousePos(mouse) : label.FindLineEndIndex(caretLine);
+        desiredColumn = caretIndex;
         UpdateCaretPos();
 
 
@@ -112,18 +140,11 @@ public class TextField : NineSlice
     {
         if (!CanFocus || !IsFocused || !IsVisible) return;
         base.OnTextInput(e);
-        var sb = new StringBuilder();
-        sb.Append(Text);
+        var sb = new StringBuilder(Text);
         var character = (char)e.Unicode;
-        if (caretIndex >= Text.Length)
-        {
-            sb.Append(character);
-        }
-        else
-        {
-            sb.Insert(caretIndex, character);
-        }
+        sb.Insert(globalCaretIndex, character);
         caretIndex++;
+        desiredColumn = caretIndex;
         Text = sb.ToString();
         label.ForceUpdateGlyphs();
         UpdateCaretPos();
@@ -131,27 +152,101 @@ public class TextField : NineSlice
 
     public override void OnKeyDown(KeyboardKeyEventArgs e)
     {
+        if (!IsVisible || !CanFocus || !IsFocused) return;
         base.OnKeyDown(e);
-        if (e.Key == Keys.Left) caretIndex = Math.Max(0, caretIndex - 1);
-        if (e.Key == Keys.Right) caretIndex = Math.Min(Text.Length, caretIndex + 1);
-        if (e.Key == Keys.Up) caretIndex = 0;
-        if (e.Key == Keys.Down) caretIndex = Text.Length;
+        if (e.Key == Keys.Left)
+        {
+            if (caretIndex == 0 && caretLine > 0)
+            {
+                caretLine = Math.Max(0, caretLine - 1);
+                caretIndex = label.FindLineEndIndex(caretLine);
+            }
+            else
+            {
+                caretIndex = Math.Max(0, caretIndex - 1);
+            }
+            desiredColumn = caretIndex;
+        }
+        if (e.Key == Keys.Right)
+        {
+            int endIndex = label.FindLineEndIndex(caretLine);
+            if (caretIndex == endIndex && caretLine < label.TotalLines - 1)
+            {
+                caretLine++;
+                caretIndex = 0;
+            }
+            else
+            {
+                caretIndex = Math.Min(endIndex, caretIndex + 1);
+            }
+            desiredColumn = caretIndex;
+        }
+        if (e.Key == Keys.Up)
+        {
+            if (caretLine <= 0)
+            {
+                caretIndex = 0;
+                desiredColumn = caretIndex;
+            }
+            else
+            {
+                caretLine--;
+                caretIndex = Math.Min(desiredColumn, label.FindLineEndIndex(caretLine));
+            }
+        }
+        if (e.Key == Keys.Down)
+        {
+            if (caretLine >= label.TotalLines - 1)
+            {
+                caretIndex = label.FindLineEndIndex(caretLine);
+                desiredColumn = caretIndex;
+            }
+            else
+            {
+                caretLine++;
+                caretIndex = Math.Min(desiredColumn, label.FindLineEndIndex(caretLine));
+            }
+        }
         if (e.Key == Keys.Backspace)
         {
-            if (caretIndex <= 0) return;
-            caretIndex--;
+            if (caretIndex == 0 && caretLine <= 0) return;
+            else if (caretIndex == 0 && caretLine > 0)
+            {
+                caretLine--;
+                caretIndex = label.FindLineEndIndex(caretLine);
+            }
+            else
+            {
+                caretIndex--;
+            }
+            desiredColumn = caretIndex;
             RemoveCharacter();
         }
         if (e.Key == Keys.Delete)
         {
-            if (caretIndex >= Text.Length) return;
+            if (caretIndex >= label.FindLineEndIndex(caretLine) && caretLine >= label.TotalLines - 1) return;
             RemoveCharacter();
+        }
+        if (e.Key == Keys.Enter && Mode == TextFieldMode.MultiLine)
+        {
+            var sb = new StringBuilder(Text);
+            sb.Insert(globalCaretIndex, '\n');
+            caretIndex = 0;
+            desiredColumn = caretIndex;
+            caretLine++;
+            Text = sb.ToString();
+            label.ForceUpdateGlyphs();
+        }
+        if (e.Key == Keys.Enter && Mode == TextFieldMode.SingleLine)
+        {
+            UIScene.FocusedComponent = null;
         }
         UpdateCaretPos();
     }
 
     public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
     {
+        if (!IsVisible) return;
         base.OnUpdate(deltaTime, mouse, keyboard);
         if (timer.ElapsedMilliseconds >= caretBlinkTime * 1000)
         {
