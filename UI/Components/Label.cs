@@ -228,7 +228,7 @@ public class Label : UIComponent, IRenderable
             float right = glyph.position.X + glyph.size.X * 0.5f;
 
             _bounds.X = Math.Min(_bounds.X, left);
-            _bounds.Y = Origin.Y - (_lines.Count - 1) * (Size + _lineSpacing);
+            _bounds.Y = Origin.Y - (_lines.Count - 1) * (Size + _lineSpacing) - _lineSpacing;
             _bounds.Z = Math.Max(_bounds.Z, right);
             _bounds.W = Origin.Y + Size;
 

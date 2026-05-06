@@ -307,6 +307,12 @@ public class TextField : NineSlice
     {
         if (!IsVisible) return;
         base.SubmitData(renderer);
-        if (caretVisible && CanFocus && IsFocused) renderer.AddInstance(Utils.Clip(caret, label.ClipBounds));
+        float halfWidth = caret.size.X * 0.5f;
+        float halfHeight = caret.size.Y * 0.5f;
+        float left = caret.position.X - halfWidth;
+        float bottom = caret.position.Y - halfHeight;
+        float right = caret.position.X + halfWidth;
+        float top = caret.position.Y + halfHeight;
+        if (caretVisible && CanFocus && IsFocused && !(label.ClipBounds is Vector4 clip && (right < clip.X || left > clip.Z || top < clip.Y || bottom > clip.W))) renderer.AddInstance(Utils.Clip(caret, label.ClipBounds));
     }
 }
