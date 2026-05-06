@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -52,7 +51,7 @@ public class Label : UIComponent, IRenderable
         get => _lines.Count;
     }
 
-    private List<List<UIQuad>> _lines = new List<List<UIQuad>>();
+    private readonly List<List<UIQuad>> _lines = [];
 
     public const float _lineSpacing = 12.0f;
 
@@ -79,26 +78,13 @@ public class Label : UIComponent, IRenderable
 
     private bool _isDirty = true;
 
+    private Vector4 _bounds;
+
     public override Vector4 Bounds
     {
         get
         {
-            if (_lines.Count <= 0 || _lines[0].Count <= 0) return new Vector4(Origin.X, Origin.Y, Origin.X, Origin.Y);
-
-            Vector4 result = new Vector4(_lines[0][0].position.X - _lines[0][0].size.X * 0.5f, _lines[0][0].position.Y - _lines[0][0].size.Y * 0.5f, _lines[0][0].position.X + _lines[0][0].size.X * 0.5f, _lines[0][0].position.Y + _lines[0][0].size.Y * 0.5f);
-            foreach (var line in _lines)
-            {
-                foreach (var glyph in line)
-                {
-                    var pos = glyph.position;
-                    var halfSize = glyph.size * 0.5f;
-                    result.X = Math.Min(result.X, pos.X - halfSize.X);
-                    result.Y = Math.Min(result.Y, pos.Y - halfSize.Y);
-                    result.Z = Math.Max(result.Z, pos.X + halfSize.X);
-                    result.W = Math.Max(result.W, pos.Y + halfSize.Y);
-                }
-            }
-            return result;
+            return _bounds;
         }
     }
 
@@ -110,7 +96,8 @@ public class Label : UIComponent, IRenderable
         Colour = colour ?? Vector4.One;
         Text = text;
         FontKey = FontManager.DefaultFontKey;
-        _lines.Add(new List<UIQuad>());
+        _bounds = new Vector4(Origin.X, Origin.Y, Origin.X, Origin.Y);
+        _lines.Add([]);
     }
 
     public int FindInsertionOffset(int line)
@@ -156,23 +143,33 @@ public class Label : UIComponent, IRenderable
         }
     }
 
-    public int FindLineFromMousePos(MouseState mouse)
+    public int FindLineFromPos(MouseState mouse)
     {
         var convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
+        return FindLineFromPos(convertedMouse);
+    }
+
+    public int FindLineFromPos(Vector2 pos)
+    {
         float lineHeight = Size + _lineSpacing;
-        float localY = Origin.Y + lineHeight - convertedMouse.Y;
+        float localY = Origin.Y + lineHeight - pos.Y;
         int line = (int)Math.Floor(localY / lineHeight);
         return Math.Clamp(line, 0, _lines.Count - 1);
     }
 
-    public int FindCaretIndexFromMousePos(MouseState mouse)
+    public int FindCaretIndexFromPos(MouseState mouse)
     {
-        if (!WithinBounds(mouse)) return -1;
         var convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
-        int line = FindLineFromMousePos(mouse);
+        return FindCaretIndexFromPos(convertedMouse);
+    }
+
+    public int FindCaretIndexFromPos(Vector2 pos)
+    {
+        if (!WithinBounds(pos)) return -1;
+        int line = FindLineFromPos(pos);
         for (int i = 0; i < _lines[line].Count; i++)
         {
-            if (_lines[line][i].position.X > convertedMouse.X) return i;
+            if (_lines[line][i].position.X > pos.X) return i;
         }
         return _lines[line].Count;
     }
@@ -185,7 +182,8 @@ public class Label : UIComponent, IRenderable
     public void ForceUpdateGlyphs()
     {
         _lines.Clear();
-        _lines.Add(new List<UIQuad>());
+        _lines.Add([]);
+        _bounds = new Vector4(Origin.X, Origin.Y, Origin.X, Origin.Y);
         int currentLine = 0;
         float XCursor = Origin.X;
         float YCursor = Origin.Y;
@@ -202,7 +200,7 @@ public class Label : UIComponent, IRenderable
                 YCursor -= Size + _lineSpacing;
                 XCursor = Origin.X;
                 currentLine++;
-                _lines.Add(new List<UIQuad>());
+                _lines.Add([]);
                 continue;
             }
             if (!fontData.GlyphUVs.TryGetValue(c, out var UVs)) continue;
@@ -221,18 +219,27 @@ public class Label : UIComponent, IRenderable
 
             float glyphHeight = (float)(charBounds.W - charBounds.Y) / fontData.ScaleFactor;
             float glyphWidth = c == ' ' ? 0.5f : (UVs.Z - UVs.X) / (UVs.W - UVs.Y) * glyphHeight;
-
             var glyph = new UIQuad();
+
             glyph.position = new Vector2(XCursor + glyphWidth * 0.5f * Size, YCursor - glyphHeight * 0.5f * Size - offset.Y * Size);
             glyph.size = new Vector2(glyphWidth * Size, glyphHeight * Size);
+
+            float left = glyph.position.X - glyph.size.X * 0.5f;
+            float right = glyph.position.X + glyph.size.X * 0.5f;
+
+            _bounds.X = Math.Min(_bounds.X, left);
+            _bounds.Y = Origin.Y - (_lines.Count - 1) * (Size + _lineSpacing);
+            _bounds.Z = Math.Max(_bounds.Z, right);
+            _bounds.W = Origin.Y + Size;
+
             glyph.UVOffset = new Vector2(UVs.X, 1 - UVs.W);
             glyph.UVRange = new Vector2(UVs.Z - UVs.X, UVs.W - UVs.Y);
             glyph.colour = Colour;
             TextureManager.TryGetTexture(FontKey, UIScene.resolution, out var layer);
             glyph.textureLayer = layer;
+            glyph = Utils.Clip(glyph, ClipBounds);
             _lines[currentLine].Add(glyph);
-            XCursor += glyphWidth * Size + kern * Size;
-            XCursor += offset.X * Size;
+            XCursor += glyphWidth * Size + kern * Size + offset.X * Size;
         }
         ShiftAlignment();
         _isDirty = false;
@@ -289,7 +296,15 @@ public class Label : UIComponent, IRenderable
         {
             for (int j = 0; j < _lines[i].Count; j++)
             {
-                renderer.AddInstance(_lines[i][j]);
+                var glyph = _lines[i][j];
+                float halfWidth = glyph.size.X * 0.5f;
+                float halfHeight = glyph.size.Y * 0.5f;
+                float left = glyph.position.X - halfWidth;
+                float bottom = glyph.position.Y - halfHeight;
+                float right = glyph.position.X + halfWidth;
+                float top = glyph.position.Y + halfHeight;
+                if (ClipBounds is Vector4 clip && (right < clip.X || left > clip.Z || top < clip.Y || bottom > clip.W)) continue;
+                renderer.AddInstance(glyph);
             }
         }
     }

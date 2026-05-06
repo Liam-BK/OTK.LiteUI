@@ -1,4 +1,3 @@
-using System.Reflection;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -99,7 +98,7 @@ public static class UIScene
 
     public static UIComponent? FocusedComponent = null;
 
-    public static void Initialize(GameWindow newWindow, TextureResolution resolution)
+    public static void Initialize(GameWindow newWindow)
     {
         if (_initialized) return;
         _initialized = true;
@@ -199,10 +198,7 @@ public static class UIScene
     public static void OnTextInput(TextInputEventArgs args)
     {
         if (!_initialized) return;
-        if (FocusedComponent is not null)
-        {
-            FocusedComponent.OnTextInput(args);
-        }
+        FocusedComponent?.OnTextInput(args);
     }
 
     public static void OnMouseMove(MouseState mouse)

@@ -88,7 +88,7 @@ public class ScrollBar : NineSlice
         }
     }
 
-    private const float scrollSensitivity = 0.4f;
+    public const float scrollSensitivity = 0.4f;
 
     private bool _isPressed = false;
 

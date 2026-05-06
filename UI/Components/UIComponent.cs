@@ -17,14 +17,16 @@ public abstract class UIComponent
     private IUIContainer? _parent = null;
     public IUIContainer? Parent { get => _parent; set => _parent = value; }
 
+    public Vector4? ClipBounds = null;
+
     private Vector4 _bounds = Vector4.Zero;
     public virtual Vector4 Bounds { get => _bounds; set => _bounds = value; }
 
-    public Vector2 Center => new Vector2((_bounds.X + _bounds.Z) * 0.5f, (_bounds.Y + _bounds.W) * 0.5f);
+    public Vector2 Center => new Vector2((Bounds.X + Bounds.Z) * 0.5f, (Bounds.Y + Bounds.W) * 0.5f);
 
-    public float Height => _bounds.W - _bounds.Y;
+    public float Height => Bounds.W - Bounds.Y;
 
-    public float Width => _bounds.Z - _bounds.X;
+    public float Width => Bounds.Z - Bounds.X;
 
     protected Vector4 _colour = Vector4.One;
 

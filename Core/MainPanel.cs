@@ -38,7 +38,7 @@ public class MainPanel : GameWindow
         GL.ClearColor(0.2f, 0.2f, 0.2f, 1);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         GL.Enable(EnableCap.CullFace);
-        UIScene.Initialize(this, TextureResolution.R512);
+        UIScene.Initialize(this);
         TextureManager.CreateResolution(UIScene.resolution, 128);
         if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/grass.png", "Grass", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Grass Texture");
         if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/DefaultButton.png", "Button", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Button Texture");
@@ -111,9 +111,8 @@ public class MainPanel : GameWindow
         verticalScrollBar.Value = 0.5f;
         verticalScrollBar.Bounds = new Vector4(720, 30, 750, 230);
 
-        textField = new TextField(new Vector4(760, 10, 1160, 410));
+        textField = new TextField(new Vector4(760, 10, 1160, 110));
         textField.Texture = "Unchecked";
-        // textField.Text = "text box";
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -143,9 +142,9 @@ public class MainPanel : GameWindow
             FPSCount = 0;
         }
 
-        if (label is not null)
+        if (label is not null && textField is not null)
         {
-            label.Text = $"has focused component: {UIScene.FocusedComponent is not null}";
+            label.Text = $"index: {textField.caretIndex}, line: {textField.caretLine}";
         }
 
         FPSCount++;

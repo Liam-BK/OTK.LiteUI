@@ -63,10 +63,23 @@ public class TextField : NineSlice
     private static Stopwatch timer = new Stopwatch();
 
     public override bool CanFocus => true;
+    public Vector2 Scroll
+    {
+        get;
+        private set;
+    } = Vector2.Zero;
 
+    private Vector2 ScrollLimits
+    {
+        get
+        {
+            if (label is null) return Vector2.Zero;
+            return new Vector2(Math.Max(label.Width - (Width - Inset * 2), 0), Math.Max(label.Height - (Height - Inset * 2), 0));
+        }
+    }
 
-    private int caretIndex = 0;
-    private int caretLine = 0;
+    public int caretIndex = 0;
+    public int caretLine = 0;
     private int desiredColumn = 0;
 
     public override bool IsVisible
@@ -90,17 +103,34 @@ public class TextField : NineSlice
         }
     }
 
+    public override Vector4 Bounds
+    {
+        get
+        {
+            return base.Bounds;
+        }
+        set
+        {
+            base.Bounds = value;
+            if (label is not null) label.ClipBounds = new Vector4(Bounds.X + Inset, Bounds.Y + Inset, Bounds.Z - Inset, Bounds.W - Inset);
+        }
+    }
+
     private const float defaultTextSize = 25.0f;
+
+    private readonly Vector2 labelOrigin;
 
     public TextField(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
     {
         float textSize = Math.Min(Height * 0.5f, defaultTextSize);
-        label = new Label(new Vector2(Bounds.X + Inset, Bounds.W - textSize - Inset * 0.75f), textSize, colour: new Vector4(0, 0, 0, 1));
+        labelOrigin = new Vector2(Bounds.X + Inset, Bounds.W - textSize - Inset);
+        label = new Label(labelOrigin, textSize, colour: new Vector4(0, 0, 0, 1));
         caret.position = label.FindCaretPosFromIndex(0, 0);
         caret.size = new Vector2(2, label.Size + Label._lineSpacing * 0.5f);
         caret.textureLayer = -1;
         caret.colour = new Vector4(0, 0, 0, 1);
         timer.Start();
+        label.ClipBounds = new Vector4(Bounds.X + Inset, Bounds.Y + Inset, Bounds.Z - Inset, Bounds.W - Inset);
     }
 
     private void UpdateCaretPos()
@@ -127,8 +157,8 @@ public class TextField : NineSlice
         }
         Vector2 convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
         UIScene.FocusedComponent = this;
-        caretLine = label.FindLineFromMousePos(mouse);
-        caretIndex = convertedMouse.X <= label.Bounds.Z ? label.FindCaretIndexFromMousePos(mouse) : label.FindLineEndIndex(caretLine);
+        caretLine = label.FindLineFromPos(mouse);
+        caretIndex = convertedMouse.X <= label.Bounds.Z ? label.FindCaretIndexFromPos(mouse) : label.FindLineEndIndex(caretLine);
         desiredColumn = caretIndex;
         UpdateCaretPos();
 
@@ -244,6 +274,24 @@ public class TextField : NineSlice
         UpdateCaretPos();
     }
 
+    public override bool OnMouseWheel(MouseState mouse)
+    {
+        if (!WithinBounds(mouse) || !IsVisible) return base.OnMouseWheel(mouse);
+
+        Scroll = new Vector2(
+            Math.Clamp(Scroll.X - mouse.ScrollDelta.X * ScrollBar.scrollSensitivity, 0, ScrollLimits.X),
+            Math.Clamp(Scroll.Y - mouse.ScrollDelta.Y * ScrollBar.scrollSensitivity, 0, ScrollLimits.Y)
+        );
+
+        label.Origin = new Vector2(
+            labelOrigin.X - Scroll.X,
+            labelOrigin.Y + Scroll.Y
+        );
+
+        UpdateCaretPos();
+        return true;
+    }
+
     public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
     {
         if (!IsVisible) return;
@@ -259,6 +307,6 @@ public class TextField : NineSlice
     {
         if (!IsVisible) return;
         base.SubmitData(renderer);
-        if (caretVisible && CanFocus && IsFocused) renderer.AddInstance(caret);
+        if (caretVisible && CanFocus && IsFocused) renderer.AddInstance(Utils.Clip(caret, label.ClipBounds));
     }
 }
