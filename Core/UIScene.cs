@@ -13,6 +13,17 @@ public static class UIScene
     public static Matrix4 projection;
     public static TextureResolution resolution = TextureResolution.R256;
     private const float referenceDPI = 96.0f;
+    public static string ClipboardString
+    {
+        get
+        {
+            return window?.ClipboardString ?? "";
+        }
+        set
+        {
+            if (window is not null) window.ClipboardString = value;
+        }
+    }
     public static List<UIComponent> components = new List<UIComponent>();
     public static List<UIComponent> pendingRemovals = new List<UIComponent>();
 

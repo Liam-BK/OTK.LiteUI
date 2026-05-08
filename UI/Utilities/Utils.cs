@@ -2,9 +2,8 @@ using OpenTK.Mathematics;
 
 public static class Utils
 {
-    public static UIQuad Clip(UIQuad quad, Vector4? clipBounds)
+    public static UIQuad Clip(UIQuad quad, Vector4 clipBounds)
     {
-        if (clipBounds is not Vector4 clip) return quad;
         float halfWidth = quad.size.X * 0.5f;
         float halfHeight = quad.size.Y * 0.5f;
         float left = quad.position.X - halfWidth;
@@ -19,10 +18,10 @@ public static class Utils
             return quad;
         }
 
-        float nLeft = MathF.Max(left, clip.X);
-        float nRight = MathF.Min(right, clip.Z);
-        float nBottom = MathF.Max(bottom, clip.Y);
-        float nTop = MathF.Min(top, clip.W);
+        float nLeft = MathF.Max(left, clipBounds.X);
+        float nRight = MathF.Min(right, clipBounds.Z);
+        float nBottom = MathF.Max(bottom, clipBounds.Y);
+        float nTop = MathF.Min(top, clipBounds.W);
 
         float uMin = (nLeft - left) / width;
         float uMax = (nRight - left) / width;

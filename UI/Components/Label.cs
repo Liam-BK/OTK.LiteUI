@@ -53,7 +53,7 @@ public class Label : UIComponent, IRenderable
 
     private readonly List<List<UIQuad>> _lines = [];
 
-    public const float _lineSpacing = 12.0f;
+    public const float LineSpacing = 12.0f;
 
     public string FontKey
     {
@@ -96,7 +96,9 @@ public class Label : UIComponent, IRenderable
         Colour = colour ?? Vector4.One;
         Text = text;
         FontKey = FontManager.DefaultFontKey;
-        _bounds = new Vector4(Origin.X, Origin.Y, Origin.X, Origin.Y);
+        float w = Origin.Y - (_lines.Count - 1) * (Size + LineSpacing) + Size;
+        float y = w - _lines.Count * (Size + LineSpacing);
+        _bounds = new Vector4(Origin.X, y, Origin.X, w);
         _lines.Add([]);
     }
 
@@ -112,7 +114,7 @@ public class Label : UIComponent, IRenderable
 
     public Vector2 FindCaretPosFromIndex(int caretIndex, int line)
     {
-        float y = Origin.Y - line * (Size + _lineSpacing) + Size * 0.5f;
+        float y = Origin.Y - line * (Size + LineSpacing) + Size * 0.5f;
         int lineGlyphCount = _lines[line].Count;
         if (lineGlyphCount == 0) return new Vector2(Origin.X, y);
         else if (_lines[line].Count == 1)
@@ -151,7 +153,7 @@ public class Label : UIComponent, IRenderable
 
     public int FindLineFromPos(Vector2 pos)
     {
-        float lineHeight = Size + _lineSpacing;
+        float lineHeight = Size + LineSpacing;
         float localY = Origin.Y + lineHeight - pos.Y;
         int line = (int)Math.Floor(localY / lineHeight);
         return Math.Clamp(line, 0, _lines.Count - 1);
@@ -197,7 +199,7 @@ public class Label : UIComponent, IRenderable
             char c = Text[i];
             if (c == '\n')
             {
-                YCursor -= Size + _lineSpacing;
+                YCursor -= Size + LineSpacing;
                 XCursor = Origin.X;
                 currentLine++;
                 _lines.Add([]);
@@ -228,19 +230,18 @@ public class Label : UIComponent, IRenderable
             float right = glyph.position.X + glyph.size.X * 0.5f;
 
             _bounds.X = Math.Min(_bounds.X, left);
-            _bounds.Y = Origin.Y - (_lines.Count - 1) * (Size + _lineSpacing) - _lineSpacing;
             _bounds.Z = Math.Max(_bounds.Z, right);
-            _bounds.W = Origin.Y + Size;
 
             glyph.UVOffset = new Vector2(UVs.X, 1 - UVs.W);
             glyph.UVRange = new Vector2(UVs.Z - UVs.X, UVs.W - UVs.Y);
             glyph.colour = Colour;
             TextureManager.TryGetTexture(FontKey, UIScene.resolution, out var layer);
             glyph.textureLayer = layer;
-            glyph = Utils.Clip(glyph, ClipBounds);
             _lines[currentLine].Add(glyph);
             XCursor += glyphWidth * Size + kern * Size + offset.X * Size;
         }
+        _bounds.Y = Origin.Y - (_lines.Count - 1) * (Size + LineSpacing) - LineSpacing;
+        _bounds.W = Origin.Y + Size;
         ShiftAlignment();
         _isDirty = false;
     }
@@ -303,8 +304,14 @@ public class Label : UIComponent, IRenderable
                 float bottom = glyph.position.Y - halfHeight;
                 float right = glyph.position.X + halfWidth;
                 float top = glyph.position.Y + halfHeight;
-                if (ClipBounds is Vector4 clip && (right < clip.X || left > clip.Z || top < clip.Y || bottom > clip.W)) continue;
-                renderer.AddInstance(glyph);
+                if (ClipBounds is Vector4 clip && !(right < clip.X || left > clip.Z || top < clip.Y || bottom > clip.W))
+                {
+                    renderer.AddInstance(Utils.Clip(glyph, clip));
+                }
+                else if (ClipBounds is null)
+                {
+                    renderer.AddInstance(glyph);
+                }
             }
         }
     }

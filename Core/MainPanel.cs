@@ -144,7 +144,7 @@ public class MainPanel : GameWindow
 
         if (label is not null && textField is not null)
         {
-            label.Text = $"index: {textField.caretIndex}, line: {textField.caretLine}";
+            label.Text = $"scroll offset: {textField.ScrollOffset}";
         }
 
         FPSCount++;
