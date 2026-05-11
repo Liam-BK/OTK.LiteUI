@@ -1,5 +1,6 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -26,6 +27,7 @@ public static class UIScene
     }
     public static List<UIComponent> components = new List<UIComponent>();
     public static List<UIComponent> pendingRemovals = new List<UIComponent>();
+    private static bool cursorUpdated = false;
 
     /// <summary>
     /// A Vector2 that can be multiplied with a position to multiply it by the inverse DPI scale.
@@ -214,12 +216,14 @@ public static class UIScene
 
     public static void OnMouseMove(MouseState mouse)
     {
-        if (!_initialized) return;
+        if (!_initialized || window is null) return;
         for (int i = components.Count - 1; i >= 0; i--)
         {
             var c = components[i];
             if (c.OnMouseMove(mouse)) break;
         }
+        if (!cursorUpdated) window.Cursor = MouseCursor.Default;
+        cursorUpdated = false;
     }
 
     public static void OnMouseWheel(MouseState mouse)
@@ -234,7 +238,7 @@ public static class UIScene
 
     public static void OnUpdate(float delta, MouseState mouse, KeyboardState keys)
     {
-        if (!_initialized) return;
+        if (!_initialized || window is null) return;
         for (int i = components.Count - 1; i >= 0; i--)
         {
             components[i].OnUpdate(delta, mouse, keys);
@@ -253,6 +257,13 @@ public static class UIScene
             if (!components.Remove(component)) throw new InvalidOperationException("Attempted to deregister a UI element that was not registered.");
         }
         if (pendingRemovals.Count > 0) pendingRemovals.Clear();
+    }
+
+    public static void SetCursor(MouseCursor cursor)
+    {
+        if (!_initialized || window is null) return;
+        cursorUpdated = true;
+        window.Cursor = cursor;
     }
 
     public static Vector2 ConvertMouseScreenCoords(Vector2 position)

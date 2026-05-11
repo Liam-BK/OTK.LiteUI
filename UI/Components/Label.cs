@@ -115,6 +115,7 @@ public class Label : UIComponent, IRenderable
     public Vector2 FindCaretPosFromIndex(int caretIndex, int line)
     {
         float y = Origin.Y - line * (Size + LineSpacing) + Size * 0.5f;
+        if (line < 0 || line >= _lines.Count) return new Vector2(Origin.X, y);
         int lineGlyphCount = _lines[line].Count;
         if (lineGlyphCount == 0) return new Vector2(Origin.X, y);
         else if (_lines[line].Count == 1)
@@ -260,6 +261,7 @@ public class Label : UIComponent, IRenderable
 
     private void ShiftAlignment(int line)
     {
+        if (_lines.Count <= 0 || line >= _lines.Count) return;
         if (_lines[line].Count == 0) return;
         float multiplier;
         switch (Alignment)

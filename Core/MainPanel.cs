@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -144,7 +145,7 @@ public class MainPanel : GameWindow
 
         if (label is not null && textField is not null)
         {
-            label.Text = $"scroll offset: {textField.ScrollOffset}";
+            label.Text = $"anchor index: {textField.selectionAnchorIndex}, anchor line: {textField.selectionAnchorLine},\ncaret index: {textField.caretIndex}, caret line: {textField.caretLine}";
         }
 
         FPSCount++;

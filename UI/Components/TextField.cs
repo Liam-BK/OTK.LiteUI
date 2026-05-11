@@ -1,7 +1,9 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 public enum TextFieldMode
@@ -34,6 +36,20 @@ public class TextField : NineSlice
             if (label is null) return 0;
             return label.FindInsertionOffset(caretLine) + caretIndex;
         }
+    }
+
+    private int GlobalAnchorIndex
+    {
+        get
+        {
+            if (label is null) return 0;
+            return label.FindInsertionOffset(selectionAnchorLine) + selectionAnchorIndex;
+        }
+    }
+
+    private int SubstringStartIndex
+    {
+        get => GlobalCaretIndex <= GlobalAnchorIndex ? GlobalCaretIndex : GlobalAnchorIndex;
     }
 
     private Vector4 ViewPort
@@ -126,6 +142,21 @@ public class TextField : NineSlice
     public int caretLine = 0;
     private int desiredColumn = 0;
 
+    public int selectionAnchorIndex = 0;
+    public int selectionAnchorLine = 0;
+
+    private bool IsSelecting
+    {
+        get => GlobalAnchorIndex != GlobalCaretIndex;
+    }
+
+    private bool IsClicked = false;
+
+    private int SelectedRange
+    {
+        get => Math.Abs(GlobalAnchorIndex - GlobalCaretIndex);
+    }
+
     public TextField(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
     {
         TextSize = Math.Min(Height * 0.5f, defaultTextSize);
@@ -186,11 +217,11 @@ public class TextField : NineSlice
         UpdateLabelOrigin();
     }
 
-    private void RemoveCharacter()
+    private void RemoveCharacter(int range = 1)
     {
-        if (caretIndex >= label.FindLineEndIndex(caretLine)) return;
+        if (GlobalCaretIndex >= Text.Length) return;
         var sb = new StringBuilder(Text);
-        sb.Remove(GlobalCaretIndex, 1);
+        sb.Remove(SubstringStartIndex, range);
         Text = sb.ToString();
         label.ForceUpdateGlyphs();
     }
@@ -215,14 +246,230 @@ public class TextField : NineSlice
         stopwatch.Restart();
     }
 
+    private void MoveLeft()
+    {
+        if (caretIndex <= 0 && caretLine > 0)
+        {
+            caretLine = Math.Max(0, caretLine - 1);
+            caretIndex = label.FindLineEndIndex(caretLine);
+        }
+        else
+        {
+            caretIndex = Math.Max(0, caretIndex - 1);
+        }
+        desiredColumn = caretIndex;
+    }
+
+    private void MoveUp()
+    {
+        if (caretLine == 0)
+        {
+            caretIndex = 0;
+        }
+        else
+        {
+            caretLine = Math.Max(0, caretLine - 1);
+            caretIndex = Math.Min(label.FindLineEndIndex(caretLine), desiredColumn);
+        }
+    }
+
+    private void MoveRight()
+    {
+        if (caretLine < label.TotalLines - 1 && caretIndex >= label.FindLineEndIndex(caretLine))
+        {
+            caretIndex = 0;
+            caretLine++;
+        }
+        else if (caretIndex < label.FindLineEndIndex(caretLine))
+        {
+            caretIndex++;
+        }
+        desiredColumn = caretIndex;
+    }
+
+    private void MoveDown()
+    {
+        if (caretLine >= label.TotalLines - 1)
+        {
+            caretIndex = label.FindLineEndIndex(caretLine);
+        }
+        else
+        {
+            caretLine = Math.Min(label.TotalLines - 1, caretLine + 1);
+            caretIndex = Math.Min(label.FindLineEndIndex(caretLine), desiredColumn);
+        }
+    }
+
+    private void CollapseSelectionLeft()
+    {
+        var globalIndex = GlobalCaretIndex;
+        var globalAnchor = GlobalAnchorIndex;
+        if (!IsSelecting) return;
+        if (globalAnchor > globalIndex)
+        {
+            selectionAnchorIndex = caretIndex;
+            selectionAnchorLine = caretLine;
+        }
+        else if (globalIndex > globalAnchor)
+        {
+            caretIndex = selectionAnchorIndex;
+            caretLine = selectionAnchorLine;
+        }
+    }
+
+    private void CollapseSelectionRight()
+    {
+        var globalIndex = GlobalCaretIndex;
+        var globalAnchor = GlobalAnchorIndex;
+        if (!IsSelecting) return;
+        if (globalAnchor > globalIndex)
+        {
+            caretIndex = selectionAnchorIndex;
+            caretLine = selectionAnchorLine;
+        }
+        else if (globalIndex > globalAnchor)
+        {
+            selectionAnchorIndex = caretIndex;
+            selectionAnchorLine = caretLine;
+        }
+    }
+
+    private void HandleTextEditShortcuts(KeyboardKeyEventArgs e)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            if (e.Control && e.Key == Keys.C) Copy();
+            else if (e.Control && e.Key == Keys.X) Cut();
+            else if (e.Control && e.Key == Keys.V) Paste();
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            if (e.Command && e.Key == Keys.C) Copy();
+            else if (e.Command && e.Key == Keys.X) Cut();
+            else if (e.Command && e.Key == Keys.V) Paste();
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
+        {
+            if (e.Shift && e.Control && e.Key == Keys.C) Copy();
+            else if (e.Shift && e.Control && e.Key == Keys.X) Cut();
+            else if (e.Shift && e.Control && e.Key == Keys.V) Paste();
+        }
+    }
+
+    private void Copy()
+    {
+        UIScene.ClipboardString = Text.Substring(SubstringStartIndex, Math.Max(0, SelectedRange));
+    }
+
+    private void Cut()
+    {
+        Copy();
+        RemoveCharacter(SelectedRange);
+        CollapseSelectionLeft();
+    }
+
+    private void Paste()
+    {
+        var inserted = UIScene.ClipboardString;
+        int caretShift = inserted.Length;
+        RemoveCharacter(SelectedRange);
+        CollapseSelectionLeft();
+        var sb = new StringBuilder(Text);
+        sb.Insert(SubstringStartIndex, inserted);
+        Text = sb.ToString();
+        label.ForceUpdateGlyphs();
+        caretIndex += caretShift;
+        CollapseSelectionRight();
+    }
+
+    private void SubmitHighlightData(InstanceRenderer renderer)
+    {
+        var globalIndex = GlobalCaretIndex;
+        var globalAnchor = GlobalAnchorIndex;
+        if (globalIndex == globalAnchor) return;
+        if (caretLine == selectionAnchorLine)
+        {
+            var left = label.FindCaretPosFromIndex(globalIndex < globalAnchor ? caretIndex : selectionAnchorIndex, globalIndex < globalAnchor ? caretLine : selectionAnchorLine);
+            var right = label.FindCaretPosFromIndex(globalIndex < globalAnchor ? selectionAnchorIndex : caretIndex, globalIndex < globalAnchor ? selectionAnchorLine : caretLine);
+            var highlightQuad = new UIQuad
+            {
+                position = new Vector2((left.X + right.X) * 0.5f, (left.Y + right.Y) * 0.5f),
+                size = new Vector2(right.X - left.X, TextSize + Label.LineSpacing),
+                colour = new Vector4(0, 0, 1, 0.25f),
+                textureLayer = -1
+            };
+            renderer.AddInstance(Utils.Clip(highlightQuad, ViewPort));
+        }
+        else
+        {
+            var startIndex = globalIndex < globalAnchor ? caretIndex : selectionAnchorIndex;
+            var startLine = globalIndex < globalAnchor ? caretLine : selectionAnchorLine;
+            var endIndex = globalIndex < globalAnchor ? selectionAnchorIndex : caretIndex;
+            var endLine = globalIndex < globalAnchor ? selectionAnchorLine : caretLine;
+            for (int i = startLine; i <= endLine; i++)
+            {
+                if (i == startLine)
+                {
+                    var left = label.FindCaretPosFromIndex(startIndex, i);
+                    var right = label.FindCaretPosFromIndex(label.FindLineEndIndex(i), i);
+                    var result = new UIQuad
+                    {
+                        position = new Vector2((left.X + right.X) * 0.5f, (left.Y + right.Y) * 0.5f),
+                        size = new Vector2(right.X - left.X, TextSize + Label.LineSpacing),
+                        colour = new Vector4(0, 0, 1, 0.25f),
+                        textureLayer = -1
+                    };
+                    renderer.AddInstance(result);
+                }
+                else if (i == endLine)
+                {
+                    var left = label.FindCaretPosFromIndex(0, i);
+                    var right = label.FindCaretPosFromIndex(endIndex, i);
+                    var result = new UIQuad
+                    {
+                        position = new Vector2((left.X + right.X) * 0.5f, (left.Y + right.Y) * 0.5f),
+                        size = new Vector2(right.X - left.X, TextSize + Label.LineSpacing),
+                        colour = new Vector4(0, 0, 1, 0.25f),
+                        textureLayer = -1
+                    };
+                    renderer.AddInstance(result);
+                }
+                else
+                {
+                    renderer.AddInstance(FullLineHighlight(i));
+                }
+            }
+        }
+    }
+
+    private UIQuad FullLineHighlight(int line)
+    {
+        var left = label.FindCaretPosFromIndex(0, line);
+        var right = label.FindCaretPosFromIndex(label.FindLineEndIndex(line), line);
+        var result = new UIQuad
+        {
+            position = new Vector2((left.X + right.X) * 0.5f, (left.Y + right.Y) * 0.5f),
+            size = new Vector2(right.X - left.X, TextSize + Label.LineSpacing),
+            colour = new Vector4(0, 0, 1, 0.25f),
+            textureLayer = -1
+        };
+        return result;
+    }
+
     public override void OnTextInput(TextInputEventArgs e)
     {
         if (!CanFocus || !IsFocused || !IsVisible) return;
         base.OnTextInput(e);
-        var sb = new StringBuilder(Text);
         var character = (char)e.Unicode;
-        sb.Insert(GlobalCaretIndex, character);
+        if (IsSelecting)
+        {
+            RemoveCharacter(SelectedRange);
+            CollapseSelectionLeft();
+        }
+        var sb = new StringBuilder(Text);
+        sb.Insert(SubstringStartIndex, character);
         caretIndex++;
+        CollapseSelectionRight();
         desiredColumn = caretIndex;
         Text = sb.ToString();
         label.ForceUpdateGlyphs();
@@ -233,16 +480,23 @@ public class TextField : NineSlice
 
     public override void OnKeyDown(KeyboardKeyEventArgs e)
     {
+        if (!CanFocus || !IsFocused || !IsVisible) return;
         base.OnKeyDown(e);
         if (e.Key == Keys.Enter)
         {
             if (Mode == TextFieldMode.MultiLine)
             {
+                if (IsSelecting)
+                {
+                    RemoveCharacter(SelectedRange);
+                    CollapseSelectionLeft();
+                }
                 var sb = new StringBuilder(Text);
                 sb.Insert(GlobalCaretIndex, '\n');
                 caretIndex = 0;
                 desiredColumn = caretIndex;
                 caretLine++;
+                CollapseSelectionRight();
                 Text = sb.ToString();
                 label.ForceUpdateGlyphs();
             }
@@ -254,58 +508,41 @@ public class TextField : NineSlice
         }
         else if (e.Key == Keys.Backspace)
         {
-            if (caretIndex == 0)
+            bool canDelete = IsSelecting || caretIndex > 0 || caretLine > 0;
+            if (!IsSelecting || e.Shift) MoveLeft();
+            var range = SelectedRange;
+            CollapseSelectionLeft();
+            if (canDelete)
             {
-                caretLine = Math.Max(0, caretLine - 1);
-                caretIndex = label.FindLineEndIndex(caretLine);
+                RemoveCharacter(Math.Max(1, range));
             }
-            else
-            {
-                caretIndex = Math.Max(0, caretIndex - 1);
-            }
-            desiredColumn = caretIndex;
-            RemoveCharacter();
         }
         else if (e.Key == Keys.Delete)
         {
-            RemoveCharacter();
+            RemoveCharacter(Math.Max(1, SelectedRange));
+            CollapseSelectionLeft();
         }
         else if (e.Key == Keys.Up)
         {
-            caretLine = Math.Max(0, caretLine - 1);
-            caretIndex = Math.Min(label.FindLineEndIndex(caretLine), desiredColumn);
+            if (!IsSelecting || e.Shift) MoveUp();
+            if (!e.Shift) CollapseSelectionLeft();
         }
         else if (e.Key == Keys.Down)
         {
-            caretLine = Math.Min(label.TotalLines - 1, caretLine + 1);
-            caretIndex = Math.Min(label.FindLineEndIndex(caretLine), desiredColumn);
+            if (!IsSelecting || e.Shift) MoveDown();
+            if (!e.Shift) CollapseSelectionRight();
         }
         else if (e.Key == Keys.Left)
         {
-            if (caretIndex <= 0 && caretLine > label.TotalLines - 1)
-            {
-                caretLine = Math.Max(0, caretLine - 1);
-                caretIndex = label.FindLineEndIndex(caretLine);
-            }
-            else
-            {
-                caretIndex = Math.Max(0, caretIndex - 1);
-            }
-            desiredColumn = caretIndex;
+            if (!IsSelecting || e.Shift) MoveLeft();
+            if (!e.Shift) CollapseSelectionLeft();
         }
         else if (e.Key == Keys.Right)
         {
-            if (caretLine < label.TotalLines - 1 && caretIndex >= label.FindLineEndIndex(caretLine))
-            {
-                caretIndex = 0;
-                caretLine++;
-            }
-            else if (caretIndex < label.FindLineEndIndex(caretLine))
-            {
-                caretIndex++;
-            }
-            desiredColumn = caretIndex;
+            if (!IsSelecting || e.Shift) MoveRight();
+            if (!e.Shift) CollapseSelectionRight();
         }
+        HandleTextEditShortcuts(e);
         UpdateCaretPosition();
         ApplyAutoScroll();
         SetCaretVisible();
@@ -330,30 +567,81 @@ public class TextField : NineSlice
             UIScene.FocusedComponent = null;
             return false;
         }
+        IsClicked = true;
         Vector2 convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
         UIScene.FocusedComponent = this;
         caretLine = label.FindLineFromPos(mouse);
         caretIndex = convertedMouse.X <= label.Bounds.Z ? label.FindCaretIndexFromPos(mouse) : label.FindLineEndIndex(caretLine);
         desiredColumn = caretIndex;
+        selectionAnchorIndex = caretIndex;
+        selectionAnchorLine = caretLine;
         UpdateCaretPosition();
+        SetCaretVisible();
 
         return base.OnClickDown(mouse);
     }
 
     public override bool OnMouseMove(MouseState mouse)
     {
+        if (WithinBounds(mouse)) UIScene.SetCursor(MouseCursor.IBeam);
+        if (IsClicked)
+        {
+            Vector2 convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
+            caretLine = label.FindLineFromPos(mouse);
+            caretIndex = convertedMouse.X <= label.Bounds.Z ? label.FindCaretIndexFromPos(mouse) : label.FindLineEndIndex(caretLine);
+            desiredColumn = caretIndex;
+            UpdateCaretPosition();
+            ApplyAutoScroll();
+            return true;
+        }
         return base.OnMouseMove(mouse);
+    }
+
+    public override bool OnClickUp(MouseState mouse)
+    {
+        IsClicked = false;
+        return base.OnClickUp(mouse);
     }
 
     public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
     {
         base.OnUpdate(deltaTime, mouse, keyboard);
+        var convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
+        var view = ViewPort;
+        if (IsClicked)
+        {
+            if (IsClicked && convertedMouse.X < view.X)
+            {
+                caretIndex = Math.Max(0, caretIndex - 1);
+                UpdateCaretPosition();
+                ApplyAutoScroll();
+            }
+            if (convertedMouse.Y > view.W)
+            {
+                caretLine = Math.Max(0, caretLine - 1);
+                UpdateCaretPosition();
+                ApplyAutoScroll();
+            }
+            if (convertedMouse.X > view.Z)
+            {
+                caretIndex = Math.Min(label.FindLineEndIndex(caretLine), caretIndex + 1);
+                UpdateCaretPosition();
+                ApplyAutoScroll();
+            }
+            if (convertedMouse.Y < view.Y)
+            {
+                caretLine = Math.Min(label.TotalLines - 1, caretLine + 1);
+                UpdateCaretPosition();
+                ApplyAutoScroll();
+            }
+        }
         UpdateBlinkTime();
     }
 
     public override void SubmitData(InstanceRenderer renderer)
     {
         base.SubmitData(renderer);
+        SubmitHighlightData(renderer);
         if (CaretVisible) renderer.AddInstance(Utils.Clip(caret, ViewPort));
     }
 }
