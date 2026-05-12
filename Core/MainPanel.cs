@@ -26,6 +26,7 @@ public class MainPanel : GameWindow
     public static ScrollBar? horizontalScrollBar = null;
     public static ScrollBar? verticalScrollBar = null;
     public static TextField? textField = null;
+    public static NumericSpinner? spinner = null;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
@@ -114,6 +115,10 @@ public class MainPanel : GameWindow
 
         textField = new TextField(new Vector4(760, 10, 1160, 110));
         textField.Texture = "Unchecked";
+
+        spinner = new NumericSpinner(new Vector4(1170, 10, 1420, 55));
+        spinner.Texture = "Unchecked";
+        spinner.ButtonTexture = "Button";
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -143,9 +148,9 @@ public class MainPanel : GameWindow
             FPSCount = 0;
         }
 
-        if (label is not null && textField is not null)
+        if (label is not null && spinner is not null)
         {
-            label.Text = $"anchor index: {textField.selectionAnchorIndex}, anchor line: {textField.selectionAnchorLine},\ncaret index: {textField.caretIndex}, caret line: {textField.caretLine}";
+            label.Text = $"spinner value: {spinner.Value}";
         }
 
         FPSCount++;

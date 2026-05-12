@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using OpenTK.Mathematics;
@@ -14,7 +13,7 @@ public enum TextFieldMode
 
 public class TextField : NineSlice
 {
-    private readonly Label label;
+    protected readonly Label label;
 
     public string Text
     {
@@ -27,7 +26,21 @@ public class TextField : NineSlice
 
     private UIQuad caret = new();
 
-    public TextFieldMode Mode = TextFieldMode.MultiLine;
+    protected bool LockMode = false;
+
+    private TextFieldMode _mode = TextFieldMode.MultiLine;
+
+    public TextFieldMode Mode
+    {
+        get
+        {
+            return _mode;
+        }
+        set
+        {
+            if (!LockMode) _mode = value;
+        }
+    }
 
     private int GlobalCaretIndex
     {
@@ -120,13 +133,14 @@ public class TextField : NineSlice
         }
         set
         {
-            _scrollOffset = new Vector2(Math.Clamp(value.X, 0, MaxScroll.X), Math.Clamp(value.Y, 0, MaxScroll.Y));
+            _scrollOffset = new Vector2(Math.Clamp(value.X, 0, MaxScroll.X), Mode == TextFieldMode.SingleLine ? 0 : Math.Clamp(value.Y, 0, MaxScroll.Y));
         }
     }
 
     private const float caretBlinkTime = 0.5f;
-    private static readonly Stopwatch stopwatch = new();
+
     private bool _caretVisible = false;
+
     private bool CaretVisible
     {
         get
@@ -138,12 +152,14 @@ public class TextField : NineSlice
         }
     }
 
-    public int caretIndex = 0;
-    public int caretLine = 0;
+    private float _caretBlinkAccumulation = 0;
+
+    protected int caretIndex = 0;
+    protected int caretLine = 0;
     private int desiredColumn = 0;
 
-    public int selectionAnchorIndex = 0;
-    public int selectionAnchorLine = 0;
+    protected int selectionAnchorIndex = 0;
+    protected int selectionAnchorLine = 0;
 
     private bool IsSelecting
     {
@@ -157,9 +173,11 @@ public class TextField : NineSlice
         get => Math.Abs(GlobalAnchorIndex - GlobalCaretIndex);
     }
 
+    public event Action? OnEnterPressed;
+
     public TextField(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
     {
-        TextSize = Math.Min(Height * 0.5f, defaultTextSize);
+        TextSize = Math.Min(Math.Max(1, Height * 0.5f), defaultTextSize);
         var textColour = new Vector4(0, 0, 0, 1);
         label = new Label(LabelPosition, TextSize)
         {
@@ -169,7 +187,6 @@ public class TextField : NineSlice
         caret.size = new Vector2(UIScene.InvDPIScaleX, TextSize + Label.LineSpacing);
         caret.colour = textColour;
         UpdateCaretPosition();
-        stopwatch.Start();
     }
 
     private void UpdateLabelOrigin()
@@ -231,11 +248,12 @@ public class TextField : NineSlice
         caret.position = label.FindCaretPosFromIndex(caretIndex, caretLine);
     }
 
-    private void UpdateBlinkTime()
+    private void UpdateBlinkTime(float deltaTime)
     {
-        if (stopwatch.ElapsedMilliseconds >= caretBlinkTime * 1000.0f)
+        _caretBlinkAccumulation += deltaTime;
+        if (_caretBlinkAccumulation >= caretBlinkTime)
         {
-            stopwatch.Restart();
+            _caretBlinkAccumulation -= caretBlinkTime;
             _caretVisible = !_caretVisible;
         }
     }
@@ -243,7 +261,7 @@ public class TextField : NineSlice
     private void SetCaretVisible()
     {
         _caretVisible = true;
-        stopwatch.Restart();
+        _caretBlinkAccumulation = 0;
     }
 
     private void MoveLeft()
@@ -503,6 +521,7 @@ public class TextField : NineSlice
             else if (Mode == TextFieldMode.SingleLine)
             {
                 UIScene.FocusedComponent = null;
+                OnEnterPressed?.Invoke();
                 return;
             }
         }
@@ -565,7 +584,7 @@ public class TextField : NineSlice
         if (!WithinBounds(mouse) || !IsVisible)
         {
             UIScene.FocusedComponent = null;
-            return false;
+            return base.OnClickDown(mouse);
         }
         IsClicked = true;
         Vector2 convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
@@ -578,7 +597,7 @@ public class TextField : NineSlice
         UpdateCaretPosition();
         SetCaretVisible();
 
-        return base.OnClickDown(mouse);
+        return true;
     }
 
     public override bool OnMouseMove(MouseState mouse)
@@ -635,7 +654,7 @@ public class TextField : NineSlice
                 ApplyAutoScroll();
             }
         }
-        UpdateBlinkTime();
+        UpdateBlinkTime(deltaTime);
     }
 
     public override void SubmitData(InstanceRenderer renderer)
