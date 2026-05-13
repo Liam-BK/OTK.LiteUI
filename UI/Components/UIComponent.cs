@@ -17,7 +17,18 @@ public abstract class UIComponent
     private IUIContainer? _parent = null;
     public IUIContainer? Parent { get => _parent; set => _parent = value; }
 
-    public Vector4? ClipBounds = null;
+    public virtual Vector4? ClipBounds
+    {
+        get
+        {
+            return _clipBounds;
+        }
+        set
+        {
+            _clipBounds = value;
+        }
+    }
+    private Vector4? _clipBounds = null;
 
     private Vector4 _bounds = Vector4.Zero;
     public virtual Vector4 Bounds { get => _bounds; set => _bounds = value; }
