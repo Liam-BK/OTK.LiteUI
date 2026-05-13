@@ -90,7 +90,7 @@ public class ImageData
         // Step 1: if larger → downscale
         if (Width > target || Height > target)
         {
-            Downscale(target, target);
+            DownscaleBilinear(target, target);
         }
 
         // Step 2: if smaller → pad
@@ -155,6 +155,53 @@ public class ImageData
                 for (int c = 0; c < Channels; c++)
                 {
                     newPixels[dstIndex + c] = Pixels[srcIndex + c];
+                }
+            }
+        }
+
+        Pixels = newPixels;
+        Width = targetWidth;
+        Height = targetHeight;
+    }
+
+    private void DownscaleBilinear(int targetWidth, int targetHeight)
+    {
+        byte[] newPixels = new byte[targetWidth * targetHeight * Channels];
+
+        float scaleX = (float)(Width - 1) / targetWidth;
+        float scaleY = (float)(Height - 1) / targetHeight;
+
+        for (int y = 0; y < targetHeight; y++)
+        {
+            for (int x = 0; x < targetWidth; x++)
+            {
+                float gx = x * scaleX;
+                float gy = y * scaleY;
+
+                int x0 = (int)MathF.Floor(gx);
+                int y0 = (int)MathF.Floor(gy);
+
+                int x1 = Math.Min(x0 + 1, Width - 1);
+                int y1 = Math.Min(y0 + 1, Height - 1);
+
+                float tx = gx - x0;
+                float ty = gy - y0;
+
+                int dstIndex = (y * targetWidth + x) * Channels;
+
+                for (int c = 0; c < Channels; c++)
+                {
+                    byte c00 = Pixels[(y0 * Width + x0) * Channels + c];
+                    byte c10 = Pixels[(y0 * Width + x1) * Channels + c];
+                    byte c01 = Pixels[(y1 * Width + x0) * Channels + c];
+                    byte c11 = Pixels[(y1 * Width + x1) * Channels + c];
+
+                    float top = c00 + (c10 - c00) * tx;
+                    float bottom = c01 + (c11 - c01) * tx;
+
+                    float value = top + (bottom - top) * ty;
+
+                    newPixels[dstIndex + c] = (byte)value;
                 }
             }
         }

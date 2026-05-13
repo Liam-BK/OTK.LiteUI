@@ -27,10 +27,11 @@ public class MainPanel : GameWindow
     public static ScrollBar? verticalScrollBar = null;
     public static TextField? textField = null;
     public static NumericSpinner? spinner = null;
+    public static NineSlice? nineSlice = null;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
-        // VSync = VSyncMode.On;
+        VSync = VSyncMode.On;
         Dimensions = new Vector2(Size.X, Size.Y);
     }
 
@@ -119,6 +120,10 @@ public class MainPanel : GameWindow
         spinner = new NumericSpinner(new Vector4(1170, 10, 1420, 55));
         spinner.Texture = "Unchecked";
         spinner.ButtonTexture = "Button";
+
+        nineSlice = new NineSlice(horizontalTestBounds, 15, 0.25f);
+        nineSlice.Texture = "Unchecked";
+        // nineSlice.ClipBounds = new Vector4(nineSlice.Bounds.X, nineSlice.Bounds.Y, nineSlice.Bounds.X + nineSlice.Width * 0.5f, nineSlice.Bounds.Y + nineSlice.Height * 0.5f);
     }
 
     protected override void OnResize(ResizeEventArgs e)

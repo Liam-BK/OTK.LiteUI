@@ -126,14 +126,29 @@ public class NineSlice : UIComponent, IRenderable
     {
         if (!IsVisible) return;
         UpdateQuadrants();
-        renderer.AddInstance(topLeft);
-        renderer.AddInstance(topCenter);
-        renderer.AddInstance(topRight);
-        renderer.AddInstance(centerLeft);
-        renderer.AddInstance(center);
-        renderer.AddInstance(centerRight);
-        renderer.AddInstance(bottomLeft);
-        renderer.AddInstance(bottomCenter);
-        renderer.AddInstance(bottomRight);
+        if (ClipBounds.HasValue)
+        {
+            renderer.AddInstance(Utils.Clip(topLeft, ClipBounds.Value));
+            renderer.AddInstance(Utils.Clip(topCenter, ClipBounds.Value));
+            renderer.AddInstance(Utils.Clip(topRight, ClipBounds.Value));
+            renderer.AddInstance(Utils.Clip(centerLeft, ClipBounds.Value));
+            renderer.AddInstance(Utils.Clip(center, ClipBounds.Value));
+            renderer.AddInstance(Utils.Clip(centerRight, ClipBounds.Value));
+            renderer.AddInstance(Utils.Clip(bottomLeft, ClipBounds.Value));
+            renderer.AddInstance(Utils.Clip(bottomCenter, ClipBounds.Value));
+            renderer.AddInstance(Utils.Clip(bottomRight, ClipBounds.Value));
+        }
+        else
+        {
+            renderer.AddInstance(topLeft);
+            renderer.AddInstance(topCenter);
+            renderer.AddInstance(topRight);
+            renderer.AddInstance(centerLeft);
+            renderer.AddInstance(center);
+            renderer.AddInstance(centerRight);
+            renderer.AddInstance(bottomLeft);
+            renderer.AddInstance(bottomCenter);
+            renderer.AddInstance(bottomRight);
+        }
     }
 }
