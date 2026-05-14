@@ -41,7 +41,7 @@ public class Panel : NineSlice, IUIContainer
 
     public override bool OnClickDown(MouseState mouse)
     {
-        if (!IsVisible) return false;
+        if (!IsVisible || !WithinBounds(mouse)) return false;
         foreach (var element in Children)
         {
             bool result = element.OnClickDown(mouse);
@@ -52,7 +52,7 @@ public class Panel : NineSlice, IUIContainer
 
     public override bool OnClickUp(MouseState mouse)
     {
-        if (!IsVisible) return false;
+        if (!IsVisible || !WithinBounds(mouse)) return false;
         foreach (var element in Children)
         {
             bool result = element.OnClickUp(mouse);
@@ -63,7 +63,7 @@ public class Panel : NineSlice, IUIContainer
 
     public override bool OnMouseMove(MouseState mouse)
     {
-        if (!IsVisible) return false;
+        if (!IsVisible || !WithinBounds(mouse)) return false;
         foreach (var element in Children)
         {
             bool result = element.OnMouseMove(mouse);

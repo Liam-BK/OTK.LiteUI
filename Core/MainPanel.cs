@@ -121,13 +121,16 @@ public class MainPanel : GameWindow
         spinner.Texture = "Unchecked";
         spinner.ButtonTexture = "Button";
 
-        float padding = 10;
+        float padding = 15;
         panel = new Panel(testBounds, new VerticalLayout(new Vector4(testBounds.X + padding, testBounds.Y + padding, testBounds.Z - padding, testBounds.W - padding), new Vector2(100, 40), padding), 15, 0.25f);
         panel.Texture = "Button";
-        panel.AddChild(spinner);
+        panel.AddChild(checkbox1);
         panel.AddChild(textField);
+        panel.AddChild(slider);
+        panel.AddChild(checkbox2);
         panel.AddChild(statusBar);
         panel.AddChild(button);
+        panel.AddChild(spinner);
     }
 
     protected override void OnResize(ResizeEventArgs e)

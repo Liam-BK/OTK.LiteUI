@@ -65,6 +65,7 @@ public class Slider : NineSlice
         float halfThumbSize = Orientation == ComponentOrientation.Horizontal ? Height * 0.55f : Width * 0.55f;
         _thumb = new NineSlice(new Vector4(x - halfThumbSize, y - halfThumbSize, x + halfThumbSize, y + halfThumbSize));
         _thumbColour = colour ?? Vector4.One;
+        UIScene.Deregister(_thumb);
     }
 
     private void SetValueFromThumbPosition()
@@ -165,5 +166,13 @@ public class Slider : NineSlice
         if (!IsVisible) return;
         base.OnUpdate(deltaTime, mouse, keyboard);
         _thumb.Colour = _thumbPressed ? _thumbColour * new Vector4(0.5f, 0.5f, 0.5f, 1.0f) : _thumbColour;
+    }
+
+    public override void SubmitData(InstanceRenderer renderer)
+    {
+        if (!IsVisible) return;
+        base.SubmitData(renderer);
+        _thumb.ClipBounds = ClipBounds;
+        _thumb.SubmitData(renderer);
     }
 }

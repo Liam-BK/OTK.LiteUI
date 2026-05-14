@@ -99,6 +99,7 @@ public class ScrollBar : NineSlice
         Orientation = Width >= Height ? ComponentOrientation.Horizontal : ComponentOrientation.Vertical;
         _thumb = new NineSlice(bounds);
         _thumbColour = colour ?? Vector4.One;
+        UIScene.Deregister(_thumb);
     }
 
     private void UpdateThumbFromValue()
@@ -217,5 +218,13 @@ public class ScrollBar : NineSlice
     public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
     {
         _thumb.Colour = _thumbColour * (_isPressed ? 0.5f : 1.0f);
+    }
+
+    public override void SubmitData(InstanceRenderer renderer)
+    {
+        if (!IsVisible) return;
+        base.SubmitData(renderer);
+        _thumb.ClipBounds = ClipBounds;
+        _thumb.SubmitData(renderer);
     }
 }

@@ -21,6 +21,17 @@ public class NumericSpinner : TextField
 
     public double StepAmount = 1.0;
 
+    public override Vector4? ClipBounds
+    {
+        get => base.ClipBounds;
+        set
+        {
+            base.ClipBounds = value;
+            if (Increment is not null) Increment.ClipBounds = value;
+            if (Decrement is not null) Decrement.ClipBounds = value;
+        }
+    }
+
     public override Vector4 Bounds
     {
         get

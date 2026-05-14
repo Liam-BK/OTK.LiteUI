@@ -662,8 +662,19 @@ public class TextField : NineSlice
     {
         if (!IsVisible) return;
         base.SubmitData(renderer);
+        label.ClipBounds = ClipBounds;
         label.SubmitData(renderer);
         SubmitHighlightData(renderer);
-        if (CaretVisible) renderer.AddInstance(Utils.Clip(caret, ViewPort));
+        if (CaretVisible)
+        {
+            if (ClipBounds.HasValue)
+            {
+                renderer.AddInstance(Utils.Clip(caret, ClipBounds.Value));
+            }
+            else
+            {
+                renderer.AddInstance(Utils.Clip(caret, ViewPort));
+            }
+        }
     }
 }

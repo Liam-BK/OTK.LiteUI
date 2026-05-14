@@ -19,6 +19,16 @@ public class Checkbox : NineSlice
         set;
     }
 
+    public override Vector4 Bounds
+    {
+        get => base.Bounds;
+        set
+        {
+            var result = new Vector4(value.Z - (value.W - value.Y), value.Y, value.Z, value.W);
+            base.Bounds = result;
+        }
+    }
+
     public event Action<MouseButton>? OnClick;
 
     public Checkbox(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
