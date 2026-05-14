@@ -27,7 +27,7 @@ public class MainPanel : GameWindow
     public static ScrollBar? verticalScrollBar = null;
     public static TextField? textField = null;
     public static NumericSpinner? spinner = null;
-    public static NineSlice? nineSlice = null;
+    public static Panel? panel = null;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
@@ -121,9 +121,13 @@ public class MainPanel : GameWindow
         spinner.Texture = "Unchecked";
         spinner.ButtonTexture = "Button";
 
-        nineSlice = new NineSlice(horizontalTestBounds, 15, 0.25f);
-        nineSlice.Texture = "Unchecked";
-        // nineSlice.ClipBounds = new Vector4(nineSlice.Bounds.X, nineSlice.Bounds.Y, nineSlice.Bounds.X + nineSlice.Width * 0.5f, nineSlice.Bounds.Y + nineSlice.Height * 0.5f);
+        float padding = 10;
+        panel = new Panel(testBounds, new VerticalLayout(new Vector4(testBounds.X + padding, testBounds.Y + padding, testBounds.Z - padding, testBounds.W - padding), new Vector2(100, 40), padding), 15, 0.25f);
+        panel.Texture = "Button";
+        panel.AddChild(spinner);
+        panel.AddChild(textField);
+        panel.AddChild(statusBar);
+        panel.AddChild(button);
     }
 
     protected override void OnResize(ResizeEventArgs e)

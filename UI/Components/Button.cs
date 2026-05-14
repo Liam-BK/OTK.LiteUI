@@ -16,7 +16,7 @@ public class Button : NineSlice
         }
     }
 
-    public float TimeToRollover = 0.0f;
+    public float TimeToRollover = 0.2f;
 
     private float _rolloverValue = 0;
 
@@ -97,6 +97,7 @@ public class Button : NineSlice
         label = new Label(new Vector2((bounds.X + bounds.Z) * 0.5f, bounds.Y + (bounds.W - bounds.Y) * 0.25f), (bounds.W - bounds.Y) * 0.5f, text);
         label.Alignment = TextAlignment.Center;
         label.Colour = new Vector4(0, 0, 0, 1);
+        UIScene.Deregister(label);
     }
 
     public override bool OnClickDown(MouseState mouse)
@@ -170,5 +171,12 @@ public class Button : NineSlice
             if (TimeToRollover > 0) RolloverValue = Math.Max(0, RolloverValue - deltaTime);
             else Colour = _baseColour * multiplier;
         }
+    }
+
+    public override void SubmitData(InstanceRenderer renderer)
+    {
+        base.SubmitData(renderer);
+        label.ClipBounds = ClipBounds;
+        label.SubmitData(renderer);
     }
 }

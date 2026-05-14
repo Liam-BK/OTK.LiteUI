@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -13,24 +14,40 @@ public enum ComponentOrientation
 public abstract class UIComponent
 {
     public static GameWindow? window = null;
+
     public virtual bool IsVisible { get; set; } = true;
+
     private IUIContainer? _parent = null;
+
     public IUIContainer? Parent { get => _parent; set => _parent = value; }
+
+    private Vector4? _clipBounds = null;
 
     public virtual Vector4? ClipBounds
     {
         get
         {
-            return _clipBounds;
+            if (_clipBounds is null && Parent is null) return null;
+            if (Parent is not null && Parent is UIComponent element)
+            {
+                var clip = element.ClipBounds;
+                if (clip.HasValue && _clipBounds.HasValue) return new Vector4(Math.Max(clip.Value.X, _clipBounds.Value.X), Math.Max(clip.Value.Y, _clipBounds.Value.Y), Math.Min(clip.Value.Z, _clipBounds.Value.Z), Math.Min(clip.Value.W, _clipBounds.Value.W));
+                else if (clip.HasValue && !_clipBounds.HasValue) return clip.Value;
+                else return _clipBounds;
+            }
+            else
+            {
+                return _clipBounds;
+            }
         }
         set
         {
             _clipBounds = value;
         }
     }
-    private Vector4? _clipBounds = null;
 
     private Vector4 _bounds = Vector4.Zero;
+
     public virtual Vector4 Bounds { get => _bounds; set => _bounds = value; }
 
     public Vector2 Center => new Vector2((Bounds.X + Bounds.Z) * 0.5f, (Bounds.Y + Bounds.W) * 0.5f);
@@ -60,6 +77,11 @@ public abstract class UIComponent
     public virtual void OnFocusLost() { }
 
     public bool IsFocused => UIScene.FocusedComponent == this;
+
+    public virtual void Deregister(List<UIComponent> registry)
+    {
+        if (!registry.Remove(this)) throw new InvalidOperationException("Attempted to deregister a UI element that was not registered.");
+    }
 
     public virtual bool OnClickDown(MouseState mouse)
     {

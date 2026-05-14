@@ -254,7 +254,7 @@ public static class UIScene
         }
         foreach (var component in pendingRemovals)
         {
-            if (!components.Remove(component)) throw new InvalidOperationException("Attempted to deregister a UI element that was not registered.");
+            component.Deregister(components);
         }
         if (pendingRemovals.Count > 0) pendingRemovals.Clear();
     }

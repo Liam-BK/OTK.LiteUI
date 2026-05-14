@@ -187,6 +187,7 @@ public class TextField : NineSlice
         caret.size = new Vector2(UIScene.InvDPIScaleX, TextSize + Label.LineSpacing);
         caret.colour = textColour;
         UpdateCaretPosition();
+        UIScene.Deregister(label);
     }
 
     private void UpdateLabelOrigin()
@@ -659,7 +660,9 @@ public class TextField : NineSlice
 
     public override void SubmitData(InstanceRenderer renderer)
     {
+        if (!IsVisible) return;
         base.SubmitData(renderer);
+        label.SubmitData(renderer);
         SubmitHighlightData(renderer);
         if (CaretVisible) renderer.AddInstance(Utils.Clip(caret, ViewPort));
     }

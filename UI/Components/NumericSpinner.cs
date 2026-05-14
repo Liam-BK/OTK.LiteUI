@@ -1,5 +1,4 @@
 using System.Text;
-using Assimp.Configs;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -21,6 +20,30 @@ public class NumericSpinner : TextField
     private readonly Button Increment;
 
     public double StepAmount = 1.0;
+
+    public override Vector4 Bounds
+    {
+        get
+        {
+            return base.Bounds;
+        }
+        set
+        {
+            var inputBounds = value;
+            var height = value.W - value.Y;
+            if (Increment is not null)
+            {
+                inputBounds.Z = value.Z - height;
+                Increment.Bounds = new Vector4(inputBounds.Z, inputBounds.Y, inputBounds.Z + height, inputBounds.W);
+            }
+            if (Decrement is not null)
+            {
+                inputBounds.X = value.X + height;
+                Decrement.Bounds = new Vector4(inputBounds.X - height, inputBounds.Y, inputBounds.X, inputBounds.W);
+            }
+            base.Bounds = inputBounds;
+        }
+    }
 
     public string ButtonTexture
     {
@@ -104,6 +127,7 @@ public class NumericSpinner : TextField
         Decrement = new Button(new Vector4(bounds.X, bounds.Y, bounds.X + buttonWidth, bounds.W), "-");
         Decrement.OnClick += _ =>
         {
+            EvaluateExpression();
             var value = Value;
             if (MaxClamp == 0 && MinClamp == 0)
             {
@@ -118,6 +142,7 @@ public class NumericSpinner : TextField
         Increment = new Button(new Vector4(bounds.Z - buttonWidth, bounds.Y, bounds.Z, bounds.W), "+");
         Increment.OnClick += _ =>
         {
+            EvaluateExpression();
             var value = Value;
             if (MaxClamp == 0 && MinClamp == 0)
             {
@@ -134,10 +159,14 @@ public class NumericSpinner : TextField
         float right = bounds.Z - buttonWidth;
 
         Bounds = new Vector4(left, bounds.Y, right, bounds.W);
+
+        UIScene.Deregister(Increment);
+        UIScene.Deregister(Decrement);
     }
 
     public override void OnTextInput(TextInputEventArgs e)
     {
+        if (!IsVisible) return;
         if (GetTokenType((char)e.Unicode) == TokenType.Invalid) return;
         if ((char)e.Unicode == '.' && HasDecimalAtCaretGroup()) return;
         base.OnTextInput(e);
@@ -168,11 +197,34 @@ public class NumericSpinner : TextField
 
     public override void OnKeyDown(KeyboardKeyEventArgs e)
     {
+        if (!IsVisible) return;
         base.OnKeyDown(e);
         if (e.Key == Keys.Enter)
         {
             EvaluateExpression();
         }
+    }
+
+    public override bool OnClickDown(MouseState mouse)
+    {
+        if (!IsVisible) return false;
+        if (!WithinBounds(mouse)) EvaluateExpression();
+        var result = base.OnClickDown(mouse);
+        result |= Increment.OnClickDown(mouse);
+        result |= Decrement.OnClickDown(mouse);
+        return result;
+    }
+
+    public override bool OnClickUp(MouseState mouse)
+    {
+        return base.OnClickUp(mouse) || Decrement.OnClickUp(mouse) || Increment.OnClickUp(mouse);
+    }
+
+    public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
+    {
+        Decrement.OnUpdate(deltaTime, mouse, keyboard);
+        Increment.OnUpdate(deltaTime, mouse, keyboard);
+        base.OnUpdate(deltaTime, mouse, keyboard);
     }
 
     private void EvaluateExpression()
@@ -327,5 +379,13 @@ public class NumericSpinner : TextField
         else if (operatorToken == "*" || operatorToken == "/") return 2;
         else if (operatorToken == "NEG") return 3;
         else return 0;
+    }
+
+    public override void SubmitData(InstanceRenderer renderer)
+    {
+        if (!IsVisible) return;
+        base.SubmitData(renderer);
+        Decrement.SubmitData(renderer);
+        Increment.SubmitData(renderer);
     }
 }
