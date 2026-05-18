@@ -233,6 +233,7 @@ public class NumericSpinner : TextField
 
     public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
     {
+        if (!IsVisible) return;
         Decrement.OnUpdate(deltaTime, mouse, keyboard);
         Increment.OnUpdate(deltaTime, mouse, keyboard);
         base.OnUpdate(deltaTime, mouse, keyboard);

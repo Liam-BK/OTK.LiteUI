@@ -49,7 +49,7 @@ public class MainPanel : GameWindow
         if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/CheckboxFilled.png", "Checked", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Checked Texture");
         Vector2 offset = new Vector2(333.0f, 250);
         Vector4 quadOffset = new Vector4(offset.X, offset.Y, offset.X, offset.Y);
-        float width = 100;
+        float width = 200;
         float height = 100;
         float halfHeight = 42.0f;
         float halfWidth = 333.0f;
@@ -62,7 +62,6 @@ public class MainPanel : GameWindow
         button.Texture = "Button";
         button.TextColour = new Vector4(1, 0, 0, 1);
         button.Bounds = new Vector4(10, 30, 110, 65);
-        // button.IsVisible = false;
         label = new Label(new Vector2(10, Dimensions.Y * UIScene.InvDPIScaleY - 35.0f), 25.0f, $"The quick brown fox\njumped over\nthe lazy dog");
         checkbox1 = new Checkbox(new Vector4(120, 10, 170, 60));
         checkbox2 = new Checkbox(new Vector4(180, 10, 230, 60));
@@ -72,8 +71,6 @@ public class MainPanel : GameWindow
         checkbox1.CheckedColour = new Vector4(0, 1, 0, 1);
         checkbox2.UncheckedTexture = "Unchecked";
         checkbox2.CheckedTexture = "Checked";
-        // checkbox1.IsVisible = false;
-        // checkbox2.IsVisible = false;
         checkbox1.OnClick += _ =>
         {
             checkbox1.Checked = true;
@@ -91,7 +88,6 @@ public class MainPanel : GameWindow
         statusBar.Texture = "Unchecked";
         statusBar.FillTexture = "Button";
         statusBar.Bounds = new Vector4(240, 30, 340, 55);
-        // statusBar.IsVisible = false;
         slider = new Slider(new Vector4(360, 10, 560, 40));
         slider.Texture = "Unchecked";
         slider.ThumbTexture = "Button";
@@ -114,7 +110,7 @@ public class MainPanel : GameWindow
         verticalScrollBar.Value = 0.5f;
         verticalScrollBar.Bounds = new Vector4(720, 30, 750, 230);
 
-        textField = new TextField(new Vector4(760, 10, 1160, 110));
+        textField = new TextField(new Vector4(760, 10, 1160, 55));
         textField.Texture = "Unchecked";
 
         spinner = new NumericSpinner(new Vector4(1170, 10, 1420, 55));
@@ -122,15 +118,15 @@ public class MainPanel : GameWindow
         spinner.ButtonTexture = "Button";
 
         float padding = 15;
-        panel = new Panel(testBounds, new VerticalLayout(new Vector4(testBounds.X + padding, testBounds.Y + padding, testBounds.Z - padding, testBounds.W - padding), new Vector2(100, 40), padding), 15, 0.25f);
+        panel = new Panel(testBounds, new VerticalLayout(new Vector2(100, 40), padding), 15, 0.25f);
         panel.Texture = "Button";
-        panel.AddChild(checkbox1);
-        panel.AddChild(textField);
-        panel.AddChild(slider);
-        panel.AddChild(checkbox2);
-        panel.AddChild(statusBar);
-        panel.AddChild(button);
         panel.AddChild(spinner);
+        panel.AddChild(textField);
+        panel.AddChild(checkbox1);
+        panel.AddChild(checkbox2);
+        panel.AddChild(slider);
+        panel.AddChild(button);
+        panel.AddChild(statusBar);
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -162,7 +158,7 @@ public class MainPanel : GameWindow
 
         if (label is not null && spinner is not null)
         {
-            label.Text = $"spinner value: {spinner.Value}";
+            label.Text = $"max scroll: {textField?.MaxScroll.Y}";
         }
 
         FPSCount++;

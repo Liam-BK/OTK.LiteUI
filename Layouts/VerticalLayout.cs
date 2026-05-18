@@ -14,24 +14,17 @@ public class VerticalLayout : ILayout
         set;
     }
 
-    public Vector4 LayoutBounds
+    public VerticalLayout(Vector2 elementSize, float padding)
     {
-        get;
-        set;
-    }
-
-    public VerticalLayout(Vector4 layoutBounds, Vector2 elementSize, float padding)
-    {
-        LayoutBounds = layoutBounds;
         ElementSize = elementSize;
         Padding = padding;
     }
 
-    public void Apply(List<UIComponent> elements)
+    public void Apply(Vector4 viewport, List<UIComponent> elements)
     {
-        float x = LayoutBounds.X + Padding;
-        float w = LayoutBounds.W - Padding;
-        float boundsWidth = (LayoutBounds.Z - LayoutBounds.X) - 2 * Padding;
+        float x = viewport.X + Padding;
+        float w = viewport.W - Padding;
+        float boundsWidth = (viewport.Z - viewport.X) - 2 * Padding;
         foreach (var element in elements)
         {
             element.Bounds = new Vector4(x, w - ElementSize.Y, x + boundsWidth, w);

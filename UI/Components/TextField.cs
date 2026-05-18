@@ -11,7 +11,7 @@ public enum TextFieldMode
     MultiLine
 }
 
-public class TextField : NineSlice
+public class TextField : NineSlice, IScrollable
 {
     protected readonly Label label;
 
@@ -65,7 +65,7 @@ public class TextField : NineSlice
         get => GlobalCaretIndex <= GlobalAnchorIndex ? GlobalCaretIndex : GlobalAnchorIndex;
     }
 
-    private Vector4 ViewPort
+    public Vector4 ViewPort
     {
         get
         {
@@ -119,7 +119,7 @@ public class TextField : NineSlice
         {
             if (label is null) return Vector2.Zero;
             var view = ViewPort;
-            return new Vector2(Math.Max(label.Width - (view.Z - view.X), 0), Math.Max(label.Height - (view.W - view.Y), 0));
+            return new Vector2(Math.Max(label.Width - (view.Z - view.X), 0), Math.Max(label.Height - (view.W - view.Y) - Inset, 0));
         }
     }
 
@@ -177,6 +177,7 @@ public class TextField : NineSlice
 
     public TextField(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
     {
+        Console.WriteLine($"Intended text size: {Height * 0.5f}");
         TextSize = Math.Min(Math.Max(1, Height * 0.5f), defaultTextSize);
         var textColour = new Vector4(0, 0, 0, 1);
         label = new Label(LabelPosition, TextSize)
@@ -195,7 +196,6 @@ public class TextField : NineSlice
         label.Origin = LabelPosition;
         label.ForceUpdateGlyphs();
         UpdateCaretPosition();
-
     }
 
     private void ApplyAutoScroll()
@@ -571,13 +571,41 @@ public class TextField : NineSlice
     public override bool OnMouseWheel(MouseState mouse)
     {
         if (!WithinBounds(mouse) || !IsVisible) return base.OnMouseWheel(mouse);
+        bool consumesScroll = ConsumesScroll(mouse);
 
-        ScrollOffset = new Vector2(
-            ScrollOffset.X - mouse.ScrollDelta.X * ScrollBar.scrollSensitivity,
-            ScrollOffset.Y - mouse.ScrollDelta.Y * ScrollBar.scrollSensitivity);
+        if (consumesScroll)
+        {
+            ScrollOffset = new Vector2(
+                        ScrollOffset.X - mouse.ScrollDelta.X * ScrollBar.scrollSensitivity,
+                        ScrollOffset.Y - mouse.ScrollDelta.Y * ScrollBar.scrollSensitivity);
+            UpdateLabelOrigin();
+        }
+        return consumesScroll;
+    }
 
-        UpdateLabelOrigin();
-        return true;
+    private bool ConsumesScroll(MouseState mouse)
+    {
+        float dy = mouse.ScrollDelta.Y;
+        float dx = mouse.ScrollDelta.X;
+
+        if (Math.Abs(dy) >= Math.Abs(dx))
+        {
+            if (dy > 0)
+                return ScrollOffset.Y > 0;
+
+            if (dy < 0)
+                return ScrollOffset.Y < MaxScroll.Y;
+        }
+        else
+        {
+            if (dx > 0)
+                return ScrollOffset.X > 0;
+
+            if (dx < 0)
+                return ScrollOffset.X < MaxScroll.X;
+        }
+
+        return false;
     }
 
     public override bool OnClickDown(MouseState mouse)
@@ -662,14 +690,22 @@ public class TextField : NineSlice
     {
         if (!IsVisible) return;
         base.SubmitData(renderer);
-        label.ClipBounds = ClipBounds;
+        if (ClipBounds.HasValue)
+        {
+            label.ClipBounds = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(ViewPort.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(ViewPort.W, ClipBounds.Value.W));
+        }
+        else
+        {
+            label.ClipBounds = ViewPort;
+        }
         label.SubmitData(renderer);
         SubmitHighlightData(renderer);
         if (CaretVisible)
         {
             if (ClipBounds.HasValue)
             {
-                renderer.AddInstance(Utils.Clip(caret, ClipBounds.Value));
+                var clip = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(ViewPort.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(ViewPort.W, ClipBounds.Value.W));
+                renderer.AddInstance(Utils.Clip(caret, clip));
             }
             else
             {

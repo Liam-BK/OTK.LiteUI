@@ -14,11 +14,5 @@ public interface ILayout
         set;
     }
 
-    public Vector4 LayoutBounds
-    {
-        get;
-        set;
-    }
-
-    public void Apply(List<UIComponent> elements);
+    public void Apply(Vector4 viewport, List<UIComponent> elements);
 }

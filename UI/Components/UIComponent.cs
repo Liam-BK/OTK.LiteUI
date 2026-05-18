@@ -27,18 +27,26 @@ public abstract class UIComponent
     {
         get
         {
-            if (_clipBounds is null && Parent is null) return null;
-            if (Parent is not null && Parent is UIComponent element)
-            {
-                var clip = element.ClipBounds;
-                if (clip.HasValue && _clipBounds.HasValue) return new Vector4(Math.Max(clip.Value.X, _clipBounds.Value.X), Math.Max(clip.Value.Y, _clipBounds.Value.Y), Math.Min(clip.Value.Z, _clipBounds.Value.Z), Math.Min(clip.Value.W, _clipBounds.Value.W));
-                else if (clip.HasValue && !_clipBounds.HasValue) return clip.Value;
-                else return _clipBounds;
-            }
-            else
-            {
+            if (Parent is not UIComponent parent)
                 return _clipBounds;
-            }
+
+            var parentClip = parent.ClipBounds;
+
+            if (!parentClip.HasValue)
+                return _clipBounds;
+
+            if (!_clipBounds.HasValue)
+                return parentClip;
+
+            float left = Math.Max(parentClip.Value.X, _clipBounds.Value.X);
+            float bottom = Math.Max(parentClip.Value.Y, _clipBounds.Value.Y);
+            float right = Math.Min(parentClip.Value.Z, _clipBounds.Value.Z);
+            float top = Math.Min(parentClip.Value.W, _clipBounds.Value.W);
+
+            if (left >= right || bottom >= top)
+                return null;
+
+            return new Vector4(left, bottom, right, top);
         }
         set
         {

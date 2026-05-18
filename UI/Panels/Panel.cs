@@ -2,10 +2,54 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-public class Panel : NineSlice, IUIContainer
+public class Panel : NineSlice, IUIContainer, IScrollable
 {
     private List<UIComponent> _children = new List<UIComponent>();
+
     public List<UIComponent> Children => _children;
+
+    public Vector2 MaxScroll
+    {
+        get
+        {
+            var view = ViewPort;
+            var contentBounds = ContentBounds;
+            var contentWidth = Math.Abs(contentBounds.Z - contentBounds.X);
+            var contentHeight = Math.Abs(contentBounds.W - contentBounds.Y);
+            return new Vector2(Math.Max(contentWidth - (view.Z - view.X), 0), Math.Max(contentHeight - (view.W - view.Y), 0));
+        }
+    }
+
+    private Vector2 _scrollOffset = Vector2.Zero;
+
+    public Vector2 ScrollOffset
+    {
+        get
+        {
+            return _scrollOffset;
+        }
+        set
+        {
+            _scrollOffset = new Vector2(Math.Clamp(value.X, 0, MaxScroll.X), Math.Clamp(value.Y, 0, MaxScroll.Y));
+        }
+    }
+
+    private Vector4 ContentBounds
+    {
+        get
+        {
+            var result = ViewPort;
+            for (int i = 0; i < Children.Count; i++)
+            {
+                result.X = Math.Min(Children[i].Bounds.X, result.X);
+                result.Y = Math.Min(Children[i].Bounds.Y, result.Y);
+                result.Z = Math.Max(Children[i].Bounds.Z, result.Z);
+                result.W = Math.Max(Children[i].Bounds.W, result.W);
+            }
+            result.Y -= Layout.Padding;
+            return result;
+        }
+    }
 
     public ILayout Layout
     {
@@ -13,19 +57,32 @@ public class Panel : NineSlice, IUIContainer
         set;
     }
 
+    public Vector4 ViewPort => new(Bounds.X + Inset, Bounds.Y + Inset, Bounds.Z - Inset, Bounds.W - Inset);
+
     public Panel(Vector4 bounds, ILayout layout, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
     {
         Layout = layout;
     }
 
+    private void ApplyLayout()
+    {
+        Layout.Apply(ViewPort, Children);
+        foreach (var child in Children)
+        {
+            var bounds = child.Bounds;
+            var view = ViewPort;
+            bounds = new Vector4(view.X + ScrollOffset.X, bounds.Y + ScrollOffset.Y, view.Z + ScrollOffset.X, bounds.W + ScrollOffset.Y);
+            child.Bounds = bounds;
+        }
+    }
 
     public void AddChild(UIComponent child)
     {
         UIScene.Deregister(child);
         child.Parent = this;
-        child.ClipBounds = Layout.LayoutBounds;
+        child.ClipBounds = ViewPort;
         Children.Add(child);
-        Layout.Apply(Children);
+        ApplyLayout();
     }
 
     public void SetLayout(ILayout layout)
@@ -36,7 +93,7 @@ public class Panel : NineSlice, IUIContainer
     public void RemoveChild(UIComponent child)
     {
         Children.Remove(child);
-        Layout.Apply(Children);
+        ApplyLayout();
     }
 
     public override bool OnClickDown(MouseState mouse)
@@ -78,9 +135,14 @@ public class Panel : NineSlice, IUIContainer
         foreach (var element in Children)
         {
             bool result = element.OnMouseWheel(mouse);
-            if (result) return true;
+            if (result)
+            {
+                ApplyLayout();
+                return true;
+            }
         }
-        Layout.Apply(Children);
+        ScrollOffset = new Vector2(ScrollOffset.X + mouse.ScrollDelta.X, ScrollOffset.Y - mouse.ScrollDelta.Y);
+        ApplyLayout();
         return base.OnMouseWheel(mouse);
     }
 
@@ -114,7 +176,7 @@ public class Panel : NineSlice, IUIContainer
     public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
     {
         if (!IsVisible) return;
-        if (Layout is not null) Layout.Apply(Children);
+        if (Layout is not null) ApplyLayout();
         foreach (var element in Children)
         {
             element.OnUpdate(deltaTime, mouse, keyboard);
