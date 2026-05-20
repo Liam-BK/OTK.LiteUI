@@ -2,6 +2,16 @@ using OpenTK.Mathematics;
 
 public interface ILayout
 {
+    public float MaxScrollInsetMultiplierX
+    {
+        get;
+    }
+
+    public float MaxScrollInsetMultiplierY
+    {
+        get;
+    }
+
     public float Padding
     {
         get;

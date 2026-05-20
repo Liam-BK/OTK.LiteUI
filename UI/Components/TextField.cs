@@ -82,6 +82,7 @@ public class TextField : NineSlice, IScrollable
             if (label is not null)
             {
                 label.ClipBounds = ViewPort;
+                label.Size = ViewPort.W - ViewPort.Y;
                 UpdateLabelOrigin();
             }
         }
@@ -97,17 +98,15 @@ public class TextField : NineSlice, IScrollable
 
     private const float defaultTextSize = 25.0f;
 
-    private float _textSize;
-
     public float TextSize
     {
         private get
         {
-            return _textSize;
+            return label is not null ? label.Size : 0;
         }
         set
         {
-            _textSize = value;
+            if (label is not null) label.Size = value;
         }
     }
 
@@ -148,15 +147,15 @@ public class TextField : NineSlice, IScrollable
             float halfWidth = caret.size.X * 0.5f;
             float halfHeight = caret.size.Y * 0.5f;
             var view = ViewPort;
-            return _caretVisible && CanFocus && IsFocused && !(caret.position.X - halfWidth > view.Z || caret.position.X + halfWidth < view.X || caret.position.Y - halfHeight > view.W || caret.position.Y + halfHeight < view.Y);
+            return _caretVisible && IsFocused && !(caret.position.X - halfWidth > view.Z || caret.position.X + halfWidth < view.X || caret.position.Y - halfHeight > view.W || caret.position.Y + halfHeight < view.Y);
         }
     }
 
     private float _caretBlinkAccumulation = 0;
 
-    protected int caretIndex = 0;
-    protected int caretLine = 0;
-    private int desiredColumn = 0;
+    public int caretIndex = 0;
+    public int caretLine = 0;
+    public int desiredColumn = 0;
 
     protected int selectionAnchorIndex = 0;
     protected int selectionAnchorLine = 0;
@@ -177,7 +176,6 @@ public class TextField : NineSlice, IScrollable
 
     public TextField(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
     {
-        Console.WriteLine($"Intended text size: {Height * 0.5f}");
         TextSize = Math.Min(Math.Max(1, Height * 0.5f), defaultTextSize);
         var textColour = new Vector4(0, 0, 0, 1);
         label = new Label(LabelPosition, TextSize)
@@ -477,7 +475,7 @@ public class TextField : NineSlice, IScrollable
 
     public override void OnTextInput(TextInputEventArgs e)
     {
-        if (!CanFocus || !IsFocused || !IsVisible) return;
+        if (!IsVisible || !IsFocused) return;
         base.OnTextInput(e);
         var character = (char)e.Unicode;
         if (IsSelecting)
@@ -499,7 +497,7 @@ public class TextField : NineSlice, IScrollable
 
     public override void OnKeyDown(KeyboardKeyEventArgs e)
     {
-        if (!CanFocus || !IsFocused || !IsVisible) return;
+        if (!IsVisible || !IsFocused) return;
         base.OnKeyDown(e);
         if (e.Key == Keys.Enter)
         {

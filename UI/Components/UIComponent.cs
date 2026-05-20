@@ -84,7 +84,7 @@ public abstract class UIComponent
 
     public virtual void OnFocusLost() { }
 
-    public bool IsFocused => UIScene.FocusedComponent == this;
+    public bool IsFocused => CanFocus && UIScene.FocusedComponent == this;
 
     public virtual void Deregister(List<UIComponent> registry)
     {

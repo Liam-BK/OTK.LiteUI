@@ -16,7 +16,7 @@ public class Panel : NineSlice, IUIContainer, IScrollable
             var contentBounds = ContentBounds;
             var contentWidth = Math.Abs(contentBounds.Z - contentBounds.X);
             var contentHeight = Math.Abs(contentBounds.W - contentBounds.Y);
-            return new Vector2(Math.Max(contentWidth - (view.Z - view.X), 0), Math.Max(contentHeight - (view.W - view.Y), 0));
+            return new Vector2(Math.Max(contentWidth - (view.Z - view.X) + Layout.MaxScrollInsetMultiplierX * Inset, 0), Math.Max(contentHeight - (view.W - view.Y) + Layout.MaxScrollInsetMultiplierY * Inset, 0));
         }
     }
 
@@ -71,7 +71,7 @@ public class Panel : NineSlice, IUIContainer, IScrollable
         {
             var bounds = child.Bounds;
             var view = ViewPort;
-            bounds = new Vector4(view.X + ScrollOffset.X, bounds.Y + ScrollOffset.Y, view.Z + ScrollOffset.X, bounds.W + ScrollOffset.Y);
+            bounds = new Vector4(bounds.X - ScrollOffset.X, bounds.Y + ScrollOffset.Y, bounds.Z - ScrollOffset.X, bounds.W + ScrollOffset.Y);
             child.Bounds = bounds;
         }
     }
@@ -141,7 +141,7 @@ public class Panel : NineSlice, IUIContainer, IScrollable
                 return true;
             }
         }
-        ScrollOffset = new Vector2(ScrollOffset.X + mouse.ScrollDelta.X, ScrollOffset.Y - mouse.ScrollDelta.Y);
+        ScrollOffset = new Vector2(ScrollOffset.X - mouse.ScrollDelta.X, ScrollOffset.Y - mouse.ScrollDelta.Y);
         ApplyLayout();
         return base.OnMouseWheel(mouse);
     }

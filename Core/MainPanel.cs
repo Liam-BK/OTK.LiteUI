@@ -26,7 +26,7 @@ public class MainPanel : GameWindow
     public static ScrollBar? horizontalScrollBar = null;
     public static ScrollBar? verticalScrollBar = null;
     public static TextField? textField = null;
-    public static NumericSpinner? spinner = null;
+    public static NumericField? spinner = null;
     public static Panel? panel = null;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
@@ -113,12 +113,12 @@ public class MainPanel : GameWindow
         textField = new TextField(new Vector4(760, 10, 1160, 55));
         textField.Texture = "Unchecked";
 
-        spinner = new NumericSpinner(new Vector4(1170, 10, 1420, 55));
+        spinner = new NumericField(new Vector4(1170, 10, 1420, 55));
         spinner.Texture = "Unchecked";
-        spinner.ButtonTexture = "Button";
 
         float padding = 15;
-        panel = new Panel(testBounds, new VerticalLayout(new Vector2(100, 40), padding), 15, 0.25f);
+        panel = new Panel(horizontalTestBounds, new HorizontalLayout(new Vector2(150, 35), padding), 15, 0.25f);
+        // panel = new Panel(testBounds, new VerticalLayout(new Vector2(150, 35), padding), 15, 0.25f);
         panel.Texture = "Button";
         panel.AddChild(spinner);
         panel.AddChild(textField);
@@ -158,7 +158,7 @@ public class MainPanel : GameWindow
 
         if (label is not null && spinner is not null)
         {
-            label.Text = $"max scroll: {textField?.MaxScroll.Y}";
+            label.Text = $"max scroll: {panel?.MaxScroll}";
         }
 
         FPSCount++;
