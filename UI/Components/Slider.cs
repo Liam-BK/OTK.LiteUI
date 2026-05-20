@@ -26,6 +26,8 @@ public class Slider : NineSlice
     }
     private float _value = 0.0f;
 
+    private float HalfThumbSize => Orientation == ComponentOrientation.Horizontal ? Height * 0.5f : Width * 0.5f;
+
     public float Value
     {
         get => _value;
@@ -60,9 +62,9 @@ public class Slider : NineSlice
     public Slider(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
     {
         Orientation = Width >= Height ? ComponentOrientation.Horizontal : ComponentOrientation.Vertical;
-        float x = (Orientation == ComponentOrientation.Horizontal) ? Bounds.X : Bounds.X + Width * 0.5f;
-        float y = (Orientation == ComponentOrientation.Horizontal) ? Bounds.Y + Height * 0.5f : Bounds.Y;
-        float halfThumbSize = Orientation == ComponentOrientation.Horizontal ? Height * 0.55f : Width * 0.55f;
+        float halfThumbSize = HalfThumbSize;
+        float x = (Orientation == ComponentOrientation.Horizontal) ? Bounds.X + halfThumbSize : Bounds.X + Width * 0.5f;
+        float y = (Orientation == ComponentOrientation.Horizontal) ? Bounds.Y + Height * 0.5f : Bounds.Y + halfThumbSize;
         _thumb = new NineSlice(new Vector4(x - halfThumbSize, y - halfThumbSize, x + halfThumbSize, y + halfThumbSize));
         _thumbColour = colour ?? Vector4.One;
         UIScene.Deregister(_thumb);
@@ -70,27 +72,30 @@ public class Slider : NineSlice
 
     private void SetValueFromThumbPosition()
     {
+        var halfThumbSize = HalfThumbSize;
         if (Orientation == ComponentOrientation.Horizontal)
         {
-            _value = (_thumb.Center.X - Bounds.X) / (Width == 0 ? 1 : Width);
+            _value = (_thumb.Center.X - (Bounds.X + halfThumbSize)) / Math.Max(1, Width - halfThumbSize * 2);
+            _value = Math.Clamp(_value, 0, 1);
             OnValueChanged?.Invoke(_value);
             return;
         }
-        _value = (_thumb.Center.Y - Bounds.Y) / (Height == 0 ? 1 : Height);
+        _value = (_thumb.Center.Y - (Bounds.Y + halfThumbSize)) / Math.Max(1, Height - halfThumbSize * 2);
+        _value = Math.Clamp(_value, 0, 1);
         OnValueChanged?.Invoke(_value);
     }
 
     private void SetThumbPositionFromValue()
     {
-        float x = (Orientation == ComponentOrientation.Horizontal) ? Bounds.X + Width * _value : Bounds.X + Width * 0.5f;
-        float y = (Orientation == ComponentOrientation.Horizontal) ? Bounds.Y + Height * 0.5f : Bounds.Y + Height * _value;
-        float halfThumbSize = Orientation == ComponentOrientation.Horizontal ? Height * 0.55f : Width * 0.55f;
-        _thumb.Bounds = new Vector4(x - halfThumbSize, y - halfThumbSize, x + halfThumbSize, y + halfThumbSize);
+        var halfThumbSize = HalfThumbSize;
+        float x = (Orientation == ComponentOrientation.Horizontal) ? MathHelper.Lerp(Bounds.X + halfThumbSize, Bounds.Z - halfThumbSize, _value) : Bounds.X + Width * 0.5f;
+        float y = (Orientation == ComponentOrientation.Horizontal) ? Bounds.Y + Height * 0.5f : MathHelper.Lerp(Bounds.Y + halfThumbSize, Bounds.W - halfThumbSize, _value);
+        SetThumbPos(x, y);
     }
 
     private void SetThumbPos(float x, float y)
     {
-        float halfThumbSize = Orientation == ComponentOrientation.Horizontal ? Height * 0.55f : Width * 0.55f;
+        var halfThumbSize = HalfThumbSize;
         _thumb.Bounds = new Vector4(x - halfThumbSize, y - halfThumbSize, x + halfThumbSize, y + halfThumbSize);
     }
 
@@ -134,9 +139,10 @@ public class Slider : NineSlice
         var convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
         if (_thumbPressed)
         {
+            var halfThumbSize = HalfThumbSize;
             if (Orientation == ComponentOrientation.Horizontal)
             {
-                float x = Math.Clamp(convertedMouse.X - _clickOffset.X, Bounds.X, Bounds.Z);
+                float x = Math.Clamp(convertedMouse.X - _clickOffset.X, Bounds.X + halfThumbSize, Bounds.Z - halfThumbSize);
                 float y = Center.Y;
                 SetThumbPos(x, y);
                 SetValueFromThumbPosition();
@@ -144,7 +150,7 @@ public class Slider : NineSlice
             else
             {
                 float x = Center.X;
-                float y = Math.Clamp(convertedMouse.Y - _clickOffset.Y, Bounds.Y, Bounds.W);
+                float y = Math.Clamp(convertedMouse.Y - _clickOffset.Y, Bounds.Y + halfThumbSize, Bounds.W - halfThumbSize);
                 SetThumbPos(x, y);
                 SetValueFromThumbPosition();
             }
