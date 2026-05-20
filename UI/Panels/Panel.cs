@@ -16,7 +16,7 @@ public class Panel : NineSlice, IUIContainer, IScrollable
             var contentBounds = ContentBounds;
             var contentWidth = Math.Abs(contentBounds.Z - contentBounds.X);
             var contentHeight = Math.Abs(contentBounds.W - contentBounds.Y);
-            return new Vector2(Math.Max(contentWidth - (view.Z - view.X) + Layout.MaxScrollInsetMultiplierX * Inset, 0), Math.Max(contentHeight - (view.W - view.Y) + Layout.MaxScrollInsetMultiplierY * Inset, 0));
+            return new Vector2(Math.Max(contentWidth - (view.Z - view.X), 0), Math.Max(contentHeight - (view.W - view.Y), 0));
         }
     }
 
@@ -38,7 +38,11 @@ public class Panel : NineSlice, IUIContainer, IScrollable
     {
         get
         {
-            var result = ViewPort;
+            if (Children.Count == 0)
+            {
+                return Vector4.Zero;
+            }
+            var result = Children[0].Bounds;
             for (int i = 0; i < Children.Count; i++)
             {
                 result.X = Math.Min(Children[i].Bounds.X, result.X);
@@ -46,7 +50,6 @@ public class Panel : NineSlice, IUIContainer, IScrollable
                 result.Z = Math.Max(Children[i].Bounds.Z, result.Z);
                 result.W = Math.Max(Children[i].Bounds.W, result.W);
             }
-            result.Y -= Layout.Padding;
             return result;
         }
     }
