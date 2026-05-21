@@ -22,13 +22,13 @@ public class VerticalLayout : ILayout
 
     public void Apply(Vector4 viewport, List<UIComponent> elements)
     {
-        float x = viewport.X;
-        float w = viewport.W;
-        float boundsWidth = (viewport.Z - viewport.X);
+        float left = viewport.X;
+        float top = viewport.W;
+        float elementWidth = (viewport.Z - viewport.X);
         foreach (var element in elements)
         {
-            element.Bounds = new Vector4(x, w - ElementSize.Y, x + boundsWidth, w);
-            w -= ElementSize.Y + Padding;
+            element.Bounds = new Vector4(left, top - ElementSize.Y, left + elementWidth, top);
+            top -= ElementSize.Y + Padding;
         }
     }
 }

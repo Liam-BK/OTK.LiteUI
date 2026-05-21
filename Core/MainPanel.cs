@@ -118,7 +118,10 @@ public class MainPanel : GameWindow
 
         float padding = 15;
         // panel = new Panel(horizontalTestBounds, new HorizontalLayout(new Vector2(150, 35), padding), 15, 0.25f);
-        panel = new Panel(testBounds, new VerticalLayout(new Vector2(150, 35), padding), 15, 0.25f);
+        // panel = new Panel(testBounds, new VerticalLayout(new Vector2(150, 35), padding), 15, 0.25f);
+        // panel = new Panel(testBounds, new FlowLayout(new Vector2(400, 35), padding), 15, 0.25f);
+        // panel = new Panel(testBounds, new VerticalGridLayout(2, new Vector2(400, 35), padding), 15, 0.25f);
+        panel = new Panel(horizontalTestBounds, new HorizontalGridLayout(1, new Vector2(150, 35), padding), 15, 0.25f);
         panel.Texture = "Button";
         panel.AddChild(spinner);
         panel.AddChild(textField);
