@@ -7,7 +7,10 @@ public interface IUIContainer
     List<UIComponent> Children { get; }
 
     void AddChild(UIComponent child);
+
     void RemoveChild(UIComponent child);
+
+    void Clear();
 
     void SetLayout(ILayout layout);
 }

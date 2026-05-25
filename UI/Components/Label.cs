@@ -90,7 +90,6 @@ public class Label : UIComponent, IRenderable
 
     public Label(Vector2 origin, float size, string text = "", Vector4? colour = null)
     {
-        UIScene.Register(this);
         Origin = origin;
         Size = size;
         Colour = colour ?? Vector4.One;
@@ -100,6 +99,7 @@ public class Label : UIComponent, IRenderable
         float y = w - _lines.Count * (Size + LineSpacing);
         _bounds = new Vector4(Origin.X, y, Origin.X, w);
         _lines.Add([]);
+        UIScene.Register(this);
     }
 
     public int FindInsertionOffset(int line)

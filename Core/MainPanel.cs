@@ -1,8 +1,8 @@
-using System.Runtime.InteropServices;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 public class MainPanel : GameWindow
 {
@@ -28,6 +28,8 @@ public class MainPanel : GameWindow
     public static TextField? textField = null;
     public static NumericField? spinner = null;
     public static Panel? panel = null;
+
+    public static FileNavigator? navigator = null;
     public MainPanel(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
         WindowState = WindowState.Fullscreen;
@@ -51,8 +53,8 @@ public class MainPanel : GameWindow
         Vector4 quadOffset = new Vector4(offset.X, offset.Y, offset.X, offset.Y);
         float width = 200;
         float height = 100;
-        float halfHeight = 42.0f;
-        float halfWidth = 333.0f;
+        float halfHeight = 35.0f;
+        float halfWidth = 300.0f;
 
         Vector4 testBounds = new Vector4(Dimensions.X * 0.5f - width, Dimensions.Y * 0.5f - height, Dimensions.X * 0.5f + width, Dimensions.Y * 0.5f + height) + quadOffset;
         Vector4 horizontalTestBounds = new Vector4(Dimensions.X * 0.5f - halfWidth, Dimensions.Y * 0.5f - halfHeight, Dimensions.X * 0.5f + halfWidth, Dimensions.Y * 0.5f + halfHeight) + quadOffset;
@@ -117,10 +119,6 @@ public class MainPanel : GameWindow
         spinner.Texture = "Unchecked";
 
         float padding = 15;
-        // panel = new Panel(horizontalTestBounds, new HorizontalLayout(new Vector2(150, 35), padding), 15, 0.25f);
-        // panel = new Panel(testBounds, new VerticalLayout(new Vector2(150, 35), padding), 15, 0.25f);
-        // panel = new Panel(testBounds, new FlowLayout(new Vector2(400, 35), padding), 15, 0.25f);
-        // panel = new Panel(testBounds, new VerticalGridLayout(2, new Vector2(400, 35), padding), 15, 0.25f);
         panel = new Panel(horizontalTestBounds, new HorizontalGridLayout(1, new Vector2(150, 35), padding), 15, 0.25f);
         panel.Texture = "Button";
         panel.AddChild(spinner);
@@ -130,6 +128,39 @@ public class MainPanel : GameWindow
         panel.AddChild(slider);
         panel.AddChild(button);
         panel.AddChild(statusBar);
+
+        navigator = new FileNavigator(new Vector4(50, 200, 450, 500));
+        navigator.Texture = "Button";
+        navigator.TextFieldTexture = "Unchecked";
+        navigator.SubPanelTexture = "Unchecked";
+        navigator.ButtonTexture = "Button";
+        navigator.BackButtonTexture = "Button";
+        // navigator.Bounds = verticalTestBounds;
+        // navigator.Bounds = new Vector4(100, 250, 300, 550);
+        navigator.Bounds = new Vector4(50, 250, 350, 550);
+    }
+
+    protected override void OnKeyDown(KeyboardKeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (e.Key == Keys.S && e.Command)
+        {
+            navigator?.SelectFile().ContinueWith(task =>
+                {
+                    string[]? result = task.Result;
+                    if (result != null)
+                    {
+                        foreach (var value in result)
+                        {
+                            Console.WriteLine($"confirmed: {value}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("canceled");
+                    }
+                });
+        }
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -159,9 +190,9 @@ public class MainPanel : GameWindow
             FPSCount = 0;
         }
 
-        if (label is not null && spinner is not null)
+        if (label is not null && navigator is not null)
         {
-            label.Text = $"max scroll: {panel?.MaxScroll}";
+            label.Text = $"is pressed: {navigator.IsPressed}";
         }
 
         FPSCount++;

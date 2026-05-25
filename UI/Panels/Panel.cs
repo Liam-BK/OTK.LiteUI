@@ -54,6 +54,20 @@ public class Panel : NineSlice, IUIContainer, IScrollable
         }
     }
 
+    public override Vector4 Bounds
+    {
+        get => base.Bounds;
+        set
+        {
+            base.Bounds = value;
+            var view = ViewPort;
+            foreach (var child in Children)
+            {
+                child.ClipBounds = view;
+            }
+        }
+    }
+
     public ILayout Layout
     {
         private get;
@@ -99,6 +113,11 @@ public class Panel : NineSlice, IUIContainer, IScrollable
         ApplyLayout();
     }
 
+    public void Clear()
+    {
+        Children.Clear();
+    }
+
     public override bool OnClickDown(MouseState mouse)
     {
         if (!IsVisible || !WithinBounds(mouse)) return false;
@@ -134,7 +153,7 @@ public class Panel : NineSlice, IUIContainer, IScrollable
 
     public override bool OnMouseWheel(MouseState mouse)
     {
-        if (!IsVisible) return false;
+        if (!IsVisible || !WithinBounds(mouse)) return false;
         foreach (var element in Children)
         {
             bool result = element.OnMouseWheel(mouse);

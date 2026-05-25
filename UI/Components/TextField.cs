@@ -20,7 +20,12 @@ public class TextField : NineSlice, IScrollable
         get => label.Text ?? "";
         set
         {
-            if (label is not null) label.Text = value;
+            if (label is not null)
+            {
+                bool textChanged = value != label.Text;
+                label.Text = value;
+                if (textChanged) OnTextChanged?.Invoke();
+            }
         }
     }
 
@@ -82,7 +87,8 @@ public class TextField : NineSlice, IScrollable
             if (label is not null)
             {
                 label.ClipBounds = ViewPort;
-                label.Size = ViewPort.W - ViewPort.Y;
+                AutoScaleTextSize();
+                caret.size = new Vector2(UIScene.InvDPIScaleX, TextSize + Label.LineSpacing);
                 UpdateLabelOrigin();
             }
         }
@@ -100,13 +106,17 @@ public class TextField : NineSlice, IScrollable
 
     public float TextSize
     {
-        private get
+        get
         {
             return label is not null ? label.Size : 0;
         }
         set
         {
-            if (label is not null) label.Size = value;
+            if (label is not null)
+            {
+                label.Size = value;
+                UpdateLabelOrigin();
+            }
         }
     }
 
@@ -173,6 +183,7 @@ public class TextField : NineSlice, IScrollable
     }
 
     public event Action? OnEnterPressed;
+    public event Action? OnTextChanged;
 
     public TextField(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
     {
@@ -183,6 +194,7 @@ public class TextField : NineSlice, IScrollable
             Colour = textColour,
             ClipBounds = ViewPort
         };
+        // AutoScaleTextSize();
         caret.size = new Vector2(UIScene.InvDPIScaleX, TextSize + Label.LineSpacing);
         caret.colour = textColour;
         UpdateCaretPosition();
@@ -194,6 +206,12 @@ public class TextField : NineSlice, IScrollable
         label.Origin = LabelPosition;
         label.ForceUpdateGlyphs();
         UpdateCaretPosition();
+    }
+
+    private void AutoScaleTextSize()
+    {
+        var textSizeMultiplier = 0.85f;
+        label.Size = Math.Min((ViewPort.W - ViewPort.Y) * textSizeMultiplier, defaultTextSize);
     }
 
     private void ApplyAutoScroll()
@@ -484,7 +502,7 @@ public class TextField : NineSlice, IScrollable
             CollapseSelectionLeft();
         }
         var sb = new StringBuilder(Text);
-        sb.Insert(SubstringStartIndex, character);
+        sb.Insert(Math.Clamp(SubstringStartIndex, 0, Text.Length), character);
         caretIndex++;
         CollapseSelectionRight();
         desiredColumn = caretIndex;
@@ -690,11 +708,11 @@ public class TextField : NineSlice, IScrollable
         base.SubmitData(renderer);
         if (ClipBounds.HasValue)
         {
-            label.ClipBounds = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(ViewPort.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(ViewPort.W, ClipBounds.Value.W));
+            label.ClipBounds = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(Bounds.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(Bounds.W, ClipBounds.Value.W));
         }
         else
         {
-            label.ClipBounds = ViewPort;
+            label.ClipBounds = new Vector4(ViewPort.X, Bounds.Y, ViewPort.Z, Bounds.W);
         }
         label.SubmitData(renderer);
         SubmitHighlightData(renderer);
@@ -702,12 +720,12 @@ public class TextField : NineSlice, IScrollable
         {
             if (ClipBounds.HasValue)
             {
-                var clip = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(ViewPort.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(ViewPort.W, ClipBounds.Value.W));
+                var clip = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(Bounds.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(Bounds.W, ClipBounds.Value.W));
                 renderer.AddInstance(Utils.Clip(caret, clip));
             }
             else
             {
-                renderer.AddInstance(Utils.Clip(caret, ViewPort));
+                renderer.AddInstance(Utils.Clip(caret, new Vector4(ViewPort.X, Bounds.Y, ViewPort.Z, Bounds.W)));
             }
         }
     }

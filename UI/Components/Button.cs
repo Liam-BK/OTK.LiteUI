@@ -3,7 +3,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 public class Button : NineSlice
 {
-    private Label label;
+    protected Label label;
     public string Text
     {
         get
@@ -25,13 +25,7 @@ public class Button : NineSlice
     protected float RolloverValue
     {
         get => _rolloverValue;
-        set
-        {
-            _rolloverValue = value;
-            float divisor = TimeToRollover > 0 ? TimeToRollover : 1;
-            var multiplier = new Vector4(_isPressed ? 0.5f : 1.0f, _isPressed ? 0.5f : 1.0f, _isPressed ? 0.5f : 1.0f, 1);
-            Colour = Vector4.Lerp(_baseColour, _rolloverColour, _rolloverValue / divisor) * multiplier;
-        }
+        set => _rolloverValue = value;
     }
 
     public override bool IsVisible
@@ -64,7 +58,16 @@ public class Button : NineSlice
         }
     }
 
-    public bool _isPressed = false;
+    public bool isPressed = false;
+
+    public override Vector4 Colour
+    {
+        get => _baseColour;
+        set
+        {
+            _baseColour = value;
+        }
+    }
 
     public override Vector4 Bounds
     {
@@ -103,14 +106,14 @@ public class Button : NineSlice
     public override bool OnClickDown(MouseState mouse)
     {
         if (!IsVisible) return false;
-        _isPressed = WithinBounds(mouse);
+        isPressed = WithinBounds(mouse);
 
-        if (_isPressed)
+        if (isPressed)
         {
             if (mouse.IsButtonDown(MouseButton.Left)) OnPointerDown?.Invoke(MouseButton.Left);
             else if (mouse.IsButtonDown(MouseButton.Right)) OnPointerDown?.Invoke(MouseButton.Right);
         }
-        return _isPressed;
+        return isPressed;
     }
 
     public override bool OnMouseMove(MouseState mouse)
@@ -129,17 +132,17 @@ public class Button : NineSlice
             }
             _isHovered = nextHoverState;
         }
-        if (_isPressed)
+        if (isPressed)
         {
-            _isPressed = WithinBounds(mouse);
+            isPressed = WithinBounds(mouse);
         }
-        return _isPressed;
+        return isPressed;
     }
 
     public override bool OnClickUp(MouseState mouse)
     {
         if (!IsVisible) return false;
-        if (_isPressed && WithinBounds(mouse))
+        if (isPressed && WithinBounds(mouse))
         {
             if (mouse.IsButtonReleased(MouseButton.Left))
             {
@@ -150,7 +153,7 @@ public class Button : NineSlice
                 OnClick?.Invoke(MouseButton.Right);
             }
 
-            _isPressed = false;
+            isPressed = false;
             return true;
         }
         return false;
@@ -159,18 +162,11 @@ public class Button : NineSlice
     public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
     {
         if (!IsVisible) return;
-        var multiplier = new Vector4(_isPressed ? 0.5f : 1.0f, _isPressed ? 0.5f : 1.0f, _isPressed ? 0.5f : 1.0f, 1);
-        if (WithinBounds(mouse))
-        {
-
-            if (TimeToRollover > 0) RolloverValue = Math.Min(TimeToRollover, RolloverValue + deltaTime);
-            else Colour = _rolloverColour * multiplier;
-        }
-        else
-        {
-            if (TimeToRollover > 0) RolloverValue = Math.Max(0, RolloverValue - deltaTime);
-            else Colour = _baseColour * multiplier;
-        }
+        var multiplier = new Vector4(isPressed ? 0.5f : 1.0f, isPressed ? 0.5f : 1.0f, isPressed ? 0.5f : 1.0f, 1);
+        if (TimeToRollover == 0) RolloverValue = WithinBounds(mouse) ? 1 : 0;
+        else RolloverValue = Math.Clamp(RolloverValue + deltaTime * (WithinBounds(mouse) ? 1 : -1) / TimeToRollover, 0, 1);
+        var lerpColour = Vector4.Lerp(_baseColour, _rolloverColour, Math.Clamp(RolloverValue, 0, 1));
+        ForceUpdateQuadrantColours(lerpColour * multiplier);
     }
 
     public override void SubmitData(InstanceRenderer renderer)
