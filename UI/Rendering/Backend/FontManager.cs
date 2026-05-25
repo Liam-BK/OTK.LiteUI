@@ -21,7 +21,7 @@ internal class FontData
     public float ScaleFactor = 1;
 }
 
-namespace OTK.LiteUI.UI.Rendering
+namespace OTK.LiteUI.UI.Rendering.Backend
 {
     public static class FontManager
     {

@@ -16,7 +16,7 @@ public enum TextureResolution
     R4096
 }
 
-namespace OTK.LiteUI.UI.Rendering
+namespace OTK.LiteUI.UI.Rendering.Backend
 {
     public static class TextureManager
     {
