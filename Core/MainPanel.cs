@@ -192,7 +192,7 @@ public class MainPanel : GameWindow
 
         if (label is not null && navigator is not null)
         {
-            label.Text = $"is pressed: {navigator.IsPressed}";
+            // label.Text = $"is pressed:";
         }
 
         FPSCount++;

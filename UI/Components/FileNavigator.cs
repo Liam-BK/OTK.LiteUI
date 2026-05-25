@@ -18,8 +18,6 @@ public class FileNavigator : NineSlice
 
     public Vector4 ViewPort => new(Bounds.X + Inset, Bounds.Y + Inset, Bounds.Z - Inset, Bounds.W - Inset);
 
-    public bool IsPressed => Confirm.isPressed || Back.isPressed || Cancel.isPressed;
-
     private const float textFieldWidth = 190.0f;
     private const float buttonWidth = 90.0f;
     private const float padding = 10.0f;
@@ -96,18 +94,14 @@ public class FileNavigator : NineSlice
             if (value.Z - value.X < MinimumSize.X)
             {
                 var halfDiff = (MinimumSize.X - (value.Z - value.X)) * 0.5f;
-                Console.WriteLine($"x axis original value: {value}");
                 value.X -= halfDiff;
                 value.Z += halfDiff;
-                Console.WriteLine($"diff: {halfDiff * 2}, value: {value}");
             }
             if (value.W - value.Y < MinimumSize.Y)
             {
                 var halfDiff = (MinimumSize.Y - (value.W - value.Y)) * 0.5f;
-                Console.WriteLine($"y axis original value: {value}");
                 value.Y -= halfDiff;
                 value.W += halfDiff;
-                Console.WriteLine($"diff: {halfDiff * 2}, value: {value}");
             }
             base.Bounds = value;
             if (_isInitialized)
