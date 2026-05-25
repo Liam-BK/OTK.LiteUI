@@ -1,33 +1,38 @@
 using OpenTK.Mathematics;
+using OTK.LiteUI.UI.Interfaces;
+using OTK.LiteUI.UI.Components;
 
-public class HorizontalLayout : ILayout
+namespace OTK.LiteUI.Layouts
 {
-    public float Padding
+    public class HorizontalLayout : ILayout
     {
-        get;
-        set;
-    }
-
-    public Vector2 ElementSize
-    {
-        get;
-        set;
-    }
-
-    public HorizontalLayout(Vector2 elementSize, float padding)
-    {
-        ElementSize = elementSize;
-        Padding = padding;
-    }
-
-    public void Apply(Vector4 viewport, List<UIComponent> elements)
-    {
-        float left = viewport.X;
-        float top = viewport.W;
-        foreach (var element in elements)
+        public float Padding
         {
-            element.Bounds = new Vector4(left, top - ElementSize.Y, left + ElementSize.X, top);
-            left += ElementSize.X + Padding;
+            get;
+            set;
+        }
+
+        public Vector2 ElementSize
+        {
+            get;
+            set;
+        }
+
+        public HorizontalLayout(Vector2 elementSize, float padding)
+        {
+            ElementSize = elementSize;
+            Padding = padding;
+        }
+
+        public void Apply(Vector4 viewport, List<UIComponent> elements)
+        {
+            float left = viewport.X;
+            float top = viewport.W;
+            foreach (var element in elements)
+            {
+                element.Bounds = new Vector4(left, top - ElementSize.Y, left + ElementSize.X, top);
+                left += ElementSize.X + Padding;
+            }
         }
     }
 }

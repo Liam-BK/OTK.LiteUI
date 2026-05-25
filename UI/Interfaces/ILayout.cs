@@ -1,18 +1,22 @@
 using OpenTK.Mathematics;
+using OTK.LiteUI.UI.Components;
 
-public interface ILayout
+namespace OTK.LiteUI.UI.Interfaces
 {
-    public float Padding
+    public interface ILayout
     {
-        get;
-        set;
-    }
+        public float Padding
+        {
+            get;
+            set;
+        }
 
-    public Vector2 ElementSize
-    {
-        get;
-        set;
-    }
+        public Vector2 ElementSize
+        {
+            get;
+            set;
+        }
 
-    public void Apply(Vector4 viewport, List<UIComponent> elements);
+        public void Apply(Vector4 viewport, List<UIComponent> elements);
+    }
 }

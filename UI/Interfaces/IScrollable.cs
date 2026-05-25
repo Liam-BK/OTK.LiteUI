@@ -1,20 +1,23 @@
 using OpenTK.Mathematics;
 
-public interface IScrollable
+namespace OTK.LiteUI.UI.Interfaces
 {
-    public Vector4 ViewPort
+    public interface IScrollable
     {
-        get;
-    }
+        public Vector4 ViewPort
+        {
+            get;
+        }
 
-    public Vector2 ScrollOffset
-    {
-        get;
-        set;
-    }
+        public Vector2 ScrollOffset
+        {
+            get;
+            set;
+        }
 
-    public Vector2 MaxScroll
-    {
-        get;
+        public Vector2 MaxScroll
+        {
+            get;
+        }
     }
 }

@@ -1,16 +1,17 @@
-using System.ComponentModel;
-using OpenTK.Mathematics;
-using OpenTK.Windowing.GraphicsLibraryFramework;
+using OTK.LiteUI.UI.Components;
 
-public interface IUIContainer
+namespace OTK.LiteUI.UI.Interfaces
 {
-    List<UIComponent> Children { get; }
+    public interface IUIContainer
+    {
+        List<UIComponent> Children { get; }
 
-    void AddChild(UIComponent child);
+        void AddChild(UIComponent child);
 
-    void RemoveChild(UIComponent child);
+        void RemoveChild(UIComponent child);
 
-    void Clear();
+        void Clear();
 
-    void SetLayout(ILayout layout);
+        void SetLayout(ILayout layout);
+    }
 }

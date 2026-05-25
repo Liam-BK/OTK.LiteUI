@@ -3,6 +3,10 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using OTK.LiteUI.UI.Components;
+using OTK.LiteUI.Core;
+using OTK.LiteUI.Layouts;
+using OTK.LiteUI.UI.Rendering;
 
 public class MainPanel : GameWindow
 {

@@ -1,48 +1,51 @@
 using OpenTK.Mathematics;
 
-public interface IInstanceData
+namespace OTK.LiteUI.UI.Rendering
 {
-    public void Pack(List<float> ToPack);
-}
-
-public static class Instancing
-{
-    public static void WriteToBuffer(List<float> ToPack, float value)
+    public interface IInstanceData
     {
-        ToPack.Add(value);
+        public void Pack(List<float> ToPack);
     }
 
-    public static void WriteToBuffer(List<float> ToPack, int value)
+    public static class Instancing
     {
-        ToPack.Add(value);
-    }
+        public static void WriteToBuffer(List<float> ToPack, float value)
+        {
+            ToPack.Add(value);
+        }
 
-    public static void WriteToBuffer(List<float> ToPack, Vector2 value)
-    {
-        ToPack.Add(value.X);
-        ToPack.Add(value.Y);
-    }
+        public static void WriteToBuffer(List<float> ToPack, int value)
+        {
+            ToPack.Add(value);
+        }
 
-    public static void WriteToBuffer(List<float> ToPack, Vector3 value)
-    {
-        ToPack.Add(value.X);
-        ToPack.Add(value.Y);
-        ToPack.Add(value.Z);
-    }
+        public static void WriteToBuffer(List<float> ToPack, Vector2 value)
+        {
+            ToPack.Add(value.X);
+            ToPack.Add(value.Y);
+        }
 
-    public static void WriteToBuffer(List<float> ToPack, Vector4 value)
-    {
-        ToPack.Add(value.X);
-        ToPack.Add(value.Y);
-        ToPack.Add(value.Z);
-        ToPack.Add(value.W);
-    }
+        public static void WriteToBuffer(List<float> ToPack, Vector3 value)
+        {
+            ToPack.Add(value.X);
+            ToPack.Add(value.Y);
+            ToPack.Add(value.Z);
+        }
 
-    public static void WriteToBuffer(List<float> ToPack, Matrix4 value)
-    {
-        WriteToBuffer(ToPack, value.Column0);
-        WriteToBuffer(ToPack, value.Column1);
-        WriteToBuffer(ToPack, value.Column2);
-        WriteToBuffer(ToPack, value.Column3);
+        public static void WriteToBuffer(List<float> ToPack, Vector4 value)
+        {
+            ToPack.Add(value.X);
+            ToPack.Add(value.Y);
+            ToPack.Add(value.Z);
+            ToPack.Add(value.W);
+        }
+
+        public static void WriteToBuffer(List<float> ToPack, Matrix4 value)
+        {
+            WriteToBuffer(ToPack, value.Column0);
+            WriteToBuffer(ToPack, value.Column1);
+            WriteToBuffer(ToPack, value.Column2);
+            WriteToBuffer(ToPack, value.Column3);
+        }
     }
 }
