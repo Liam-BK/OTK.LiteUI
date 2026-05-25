@@ -79,7 +79,7 @@ public class NineSlice : UIComponent, IRenderable
     {
         int textureLayer;
         if (Texture == "") textureLayer = -1;
-        else TextureManager.TryGetTexture(Texture, UIScene.resolution, out textureLayer);
+        else TextureManager.TryGetTexture(Texture, UIScene.Resolution, out textureLayer);
 
         topLeft.position = new Vector2(Bounds.X + Inset * 0.5f, Bounds.W - Inset * 0.5f);
         topLeft.size = new Vector2(Inset, Inset);

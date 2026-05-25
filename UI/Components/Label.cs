@@ -184,6 +184,7 @@ public class Label : UIComponent, IRenderable
 
     public void ForceUpdateGlyphs()
     {
+        if (FontManager.DefaultFontKey == "") return;
         _lines.Clear();
         _lines.Add([]);
         _bounds = new Vector4(Origin.X, Origin.Y, Origin.X, Origin.Y);
@@ -236,7 +237,7 @@ public class Label : UIComponent, IRenderable
             glyph.UVOffset = new Vector2(UVs.X, 1 - UVs.W);
             glyph.UVRange = new Vector2(UVs.Z - UVs.X, UVs.W - UVs.Y);
             glyph.colour = Colour;
-            TextureManager.TryGetTexture(FontKey, UIScene.resolution, out var layer);
+            TextureManager.TryGetTexture(FontKey, UIScene.Resolution, out var layer);
             glyph.textureLayer = layer;
             _lines[currentLine].Add(glyph);
             XCursor += glyphWidth * Size + kern * Size + offset.X * Size;

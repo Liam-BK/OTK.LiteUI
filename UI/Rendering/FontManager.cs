@@ -85,7 +85,7 @@ public static class FontManager
         image.FlipImageVertically();
 
         image = ConvertFromAlphaToRGBA(image);
-        image.ConvertToResolution(UIScene.resolution, EmptyPixelType.Transparent);
+        image.ConvertToResolution(UIScene.Resolution, EmptyPixelType.Transparent);
         string fontKey = Path.GetFileNameWithoutExtension(filePath);
 
         if (DefaultFontKey is "") DefaultFontKey = fontKey;

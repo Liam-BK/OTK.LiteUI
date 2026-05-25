@@ -44,11 +44,12 @@ public class MainPanel : GameWindow
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         GL.Enable(EnableCap.CullFace);
         UIScene.Initialize(this);
-        TextureManager.CreateResolution(UIScene.resolution, 128);
-        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/grass.png", "Grass", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Grass Texture");
-        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/DefaultButton.png", "Button", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Button Texture");
-        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/CheckboxEmpty.png", "Unchecked", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Unchecked Texture");
-        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/CheckboxFilled.png", "Checked", out resolution, UIScene.resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Checked Texture");
+        UIScene.Resolution = TextureResolution.R256;
+        TextureManager.CreateTextureArray(128);
+        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/grass.png", "Grass", out resolution, UIScene.Resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Grass Texture");
+        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/DefaultButton.png", "Button", out resolution, UIScene.Resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Button Texture");
+        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/CheckboxEmpty.png", "Unchecked", out resolution, UIScene.Resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Unchecked Texture");
+        if (!TextureManager.TryLoadTexture("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Textures/CheckboxFilled.png", "Checked", out resolution, UIScene.Resolution, EmptyPixelType.Transparent)) Console.WriteLine("Failed To Load Checked Texture");
         Vector2 offset = new Vector2(333.0f, 250);
         Vector4 quadOffset = new Vector4(offset.X, offset.Y, offset.X, offset.Y);
         float width = 200;

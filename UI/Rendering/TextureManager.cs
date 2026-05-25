@@ -47,11 +47,13 @@ public static class TextureManager
         };
     }
 
-    public static void CreateResolution(TextureResolution res, int maxLayers)
+    public static void CreateTextureArray(int maxLayers)
     {
         int handle = GL.GenTexture();
 
         GL.BindTexture(TextureTarget.Texture2DArray, handle);
+
+        var res = UIScene.Resolution;
 
         GL.TexImage3D(
             TextureTarget.Texture2DArray,

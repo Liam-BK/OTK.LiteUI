@@ -12,7 +12,7 @@ public static class UIScene
     private static InstanceRenderer? renderer;
     private static Material? material;
     public static Matrix4 projection;
-    public static TextureResolution resolution = TextureResolution.R256;
+    public static TextureResolution Resolution = TextureResolution.R256;
     private const float referenceDPI = 96.0f;
     public static string ClipboardString
     {
