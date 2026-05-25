@@ -6,19 +6,22 @@ using static StbTrueTypeSharp.StbTrueType;
 using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Utilities;
 
-internal class FontData
+namespace OTK.LiteUI.UI.Rendering.Backend
 {
-    public ImageData Bitmap { get; set; } = new();
+    internal class FontData
+    {
+        public ImageData Bitmap { get; set; } = new();
 
-    public Dictionary<char, Vector4> GlyphUVs = new();
+        public Dictionary<char, Vector4> GlyphUVs = new();
 
-    public Dictionary<char, Vector4> GlyphBounds = new();
+        public Dictionary<char, Vector4> GlyphBounds = new();
 
-    public Dictionary<char, Vector2> Offsets = new();
+        public Dictionary<char, Vector2> Offsets = new();
 
-    public Dictionary<(char, char), float> Kerning = new();
+        public Dictionary<(char, char), float> Kerning = new();
 
-    public float ScaleFactor = 1;
+        public float ScaleFactor = 1;
+    }
 }
 
 namespace OTK.LiteUI.UI.Rendering.Backend
