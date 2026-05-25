@@ -149,7 +149,7 @@ public static class UIScene
         pendingRemovals.Add(component);
     }
 
-    public static void OnClickDown(MouseState mouse)
+    private static void OnClickDown(MouseState mouse)
     {
         if (!_initialized) return;
         for (int i = components.Count - 1; i >= 0; i--)
@@ -169,7 +169,7 @@ public static class UIScene
         FocusedComponent?.OnFocusGained();
     }
 
-    public static void OnClickUp(MouseState mouse)
+    private static void OnClickUp(MouseState mouse)
     {
         if (!_initialized) return;
         for (int i = components.Count - 1; i >= 0; i--)
@@ -190,7 +190,7 @@ public static class UIScene
         }
     }
 
-    public static void OnKeyDown(KeyboardKeyEventArgs args)
+    private static void OnKeyDown(KeyboardKeyEventArgs args)
     {
         if (!_initialized) return;
         for (int i = components.Count - 1; i >= 0; i--)
@@ -199,7 +199,7 @@ public static class UIScene
         }
     }
 
-    public static void OnKeyUp(KeyboardKeyEventArgs args)
+    private static void OnKeyUp(KeyboardKeyEventArgs args)
     {
         if (!_initialized) return;
         for (int i = components.Count - 1; i >= 0; i--)
@@ -208,13 +208,13 @@ public static class UIScene
         }
     }
 
-    public static void OnTextInput(TextInputEventArgs args)
+    private static void OnTextInput(TextInputEventArgs args)
     {
         if (!_initialized) return;
         FocusedComponent?.OnTextInput(args);
     }
 
-    public static void OnMouseMove(MouseState mouse)
+    private static void OnMouseMove(MouseState mouse)
     {
         if (!_initialized || window is null) return;
         for (int i = components.Count - 1; i >= 0; i--)
@@ -226,7 +226,7 @@ public static class UIScene
         cursorUpdated = false;
     }
 
-    public static void OnMouseWheel(MouseState mouse)
+    private static void OnMouseWheel(MouseState mouse)
     {
         if (!_initialized) return;
         for (int i = components.Count - 1; i >= 0; i--)
@@ -236,7 +236,7 @@ public static class UIScene
         }
     }
 
-    public static void OnUpdate(float delta, MouseState mouse, KeyboardState keys)
+    private static void OnUpdate(float delta, MouseState mouse, KeyboardState keys)
     {
         if (!_initialized || window is null) return;
         for (int i = components.Count - 1; i >= 0; i--)
