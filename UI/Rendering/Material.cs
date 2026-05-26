@@ -39,8 +39,8 @@ namespace OTK.LiteUI.UI.Rendering
             using var vStream = ResourceIO.GetLoadingStream(vertexPath);
             using var fStream = ResourceIO.GetLoadingStream(fragmentPath);
 
-            if (vStream is null) throw new Exception($"Vertex stream could not be created.");
-            if (fStream is null) throw new Exception($"Fragment stream could not be created.");
+            if (vStream is null) throw new Exception($"Vertex stream at {vertexPath} could not be created.");
+            if (fStream is null) throw new Exception($"Fragment stream at {fragmentPath} could not be created.");
 
             material.CompileShaderProgram(new StreamReader(vStream).ReadToEnd(), new StreamReader(fStream).ReadToEnd());
 

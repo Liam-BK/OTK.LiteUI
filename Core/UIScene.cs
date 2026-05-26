@@ -121,8 +121,8 @@ namespace OTK.LiteUI.Core
             if (_initialized) return;
             _initialized = true;
             window = newWindow;
-            var mesh = Mesh.Load("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Meshes/Quad.obj");
-            material = Material.Load("/Users/liam/VS Code Projects/OTK.LiteUI/Assets/Materials/UIMaterial.mat");
+            var mesh = Mesh.Load("Assets.Meshes.Quad.obj");
+            material = Material.Load("Assets.Materials.UIMaterial.mat");
             InstanceAttribType[] attribTypes = [InstanceAttribType.Position2D, InstanceAttribType.Vec2, InstanceAttribType.TexCoords, InstanceAttribType.Vec2, InstanceAttribType.Color4, InstanceAttribType.Single];
             renderer = new Renderer(mesh, material, attribTypes);
             window.KeyDown += OnKeyDown;

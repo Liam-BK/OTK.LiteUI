@@ -1,7 +1,7 @@
 <Material>
     <Shaders>
-        <Vertex Path="Assets/Shaders/VertexShaders/UIVShader.vert"/>
-        <Fragment Path="Assets/Shaders/FragmentShaders/UIFShader.frag"/>
+        <Vertex Path="Assets.Shaders.VertexShaders.UIVShader.vert"/>
+        <Fragment Path="Assets.Shaders.FragmentShaders.UIFShader.frag"/>
     </Shaders>
 
     <RenderState>
