@@ -202,7 +202,6 @@ namespace OTK.LiteUI.UI.Rendering
 
                 TextureManager.Bind(res, unit);
 
-                // You need a uniform per array (example naming)
                 string uniformName = $"uTexture";
                 int loc = GL.GetUniformLocation(Shader, uniformName);
 

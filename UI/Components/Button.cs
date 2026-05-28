@@ -86,6 +86,7 @@ namespace OTK.LiteUI.UI.Components
                 {
                     label.Origin = new Vector2((value.X + value.Z) * 0.5f, value.Y + (value.W - value.Y) * 0.25f);
                     label.Size = (value.W - value.Y) * 0.5f;
+                    label.ClipBounds = value;
                 }
             }
         }
@@ -176,7 +177,8 @@ namespace OTK.LiteUI.UI.Components
         public override void SubmitData(Renderer renderer)
         {
             base.SubmitData(renderer);
-            label.ClipBounds = ClipBounds;
+            if (!ClipBounds.HasValue) label.ClipBounds = Bounds;
+            else label.ClipBounds = new Vector4(Math.Max(ClipBounds.Value.X, Bounds.X), Math.Max(ClipBounds.Value.Y, Bounds.Y), Math.Min(ClipBounds.Value.Z, Bounds.Z), Math.Min(ClipBounds.Value.W, Bounds.W));
             label.SubmitData(renderer);
         }
     }

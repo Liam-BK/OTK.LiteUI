@@ -18,7 +18,7 @@ namespace OTK.LiteUI.UI.Components
     {
         public static GameWindow? window = null;
 
-        public virtual bool IsVisible { get; set; } = true;
+        public virtual bool IsVisible { get; set; } = false;
 
         private IUIContainer? _parent = null;
 

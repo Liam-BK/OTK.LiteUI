@@ -1,6 +1,3 @@
-
-using System.Reflection;
-
 namespace OTK.LiteUI.UI.Utilities
 {
     public static class ResourceIO

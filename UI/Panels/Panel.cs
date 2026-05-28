@@ -81,6 +81,19 @@ namespace OTK.LiteUI.UI.Components
 
         public Vector4 ViewPort => new(Bounds.X + Inset, Bounds.Y + Inset, Bounds.Z - Inset, Bounds.W - Inset);
 
+        public override bool IsVisible
+        {
+            get => base.IsVisible;
+            set
+            {
+                base.IsVisible = value;
+                foreach (var element in Children)
+                {
+                    element.IsVisible = value;
+                }
+            }
+        }
+
         public Panel(Vector4 bounds, ILayout layout, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
         {
             Layout = layout;

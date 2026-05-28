@@ -82,6 +82,14 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        public ILayout CurrentDirectoryLayout
+        {
+            set
+            {
+                CurrentDirectory.Layout = value;
+            }
+        }
+
         public string BackButtonTexture
         {
             set
@@ -168,6 +176,7 @@ namespace OTK.LiteUI.UI.Components
             AddChild(Back);
             AddChild(QuickAccess);
             AddChild(CurrentDirectory);
+            PositionElements();
             var desktop = FileReference.SetUpFileRef(FileReference.Directories.Desktop);
             var documents = FileReference.SetUpFileRef(FileReference.Directories.Documents);
             var downloads = FileReference.SetUpFileRef(FileReference.Directories.Downloads);
@@ -231,6 +240,7 @@ namespace OTK.LiteUI.UI.Components
         private void PositionElements()
         {
             var view = ViewPort;
+            // var rightPanelLeft = view.X + 
             Back.Bounds = new Vector4(view.X, view.W - componentHeight, view.X + buttonWidth, view.W);
             NameInput.Bounds = new Vector4(view.X, view.Y, view.X + textFieldWidth, view.Y + componentHeight);
             Search.TextSize = componentHeight * 0.4f;
@@ -518,7 +528,11 @@ namespace OTK.LiteUI.UI.Components
             set
             {
                 base.Bounds = value;
-                if (label is not null) label.Origin = new Vector2(Bounds.X + Inset, label.Origin.Y);
+                if (label is not null)
+                {
+                    label.Origin = new Vector2(Bounds.X + Inset, label.Origin.Y);
+                    label.ClipBounds = value;
+                }
             }
         }
 
@@ -526,6 +540,7 @@ namespace OTK.LiteUI.UI.Components
         {
             label.Alignment = TextAlignment.Left;
             label.Origin = new Vector2(Bounds.X + Inset, label.Origin.Y);
+            label.ClipBounds = bounds;
         }
 
         public override bool OnClickDown(MouseState mouse)

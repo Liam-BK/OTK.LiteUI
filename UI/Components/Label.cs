@@ -93,6 +93,18 @@ namespace OTK.LiteUI.UI.Components
             {
                 return _bounds;
             }
+            set
+            {
+                _bounds = value;
+                Size = _bounds.W - _bounds.Y;
+                var y = _bounds.W - Size;
+                float x;
+                if (Alignment == TextAlignment.Left) x = _bounds.X;
+                else if (Alignment == TextAlignment.Center) x = (_bounds.X + _bounds.Z) * 0.5f;
+                else x = _bounds.Z;
+                Origin = new Vector2(x, y);
+                _isDirty = true;
+            }
         }
 
         public Label(Vector2 origin, float size, string text = "", Vector4? colour = null)

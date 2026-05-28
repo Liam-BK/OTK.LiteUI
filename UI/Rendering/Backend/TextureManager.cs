@@ -29,9 +29,7 @@ namespace OTK.LiteUI.UI.Rendering.Backend
         private static readonly List<string> _textureNames = new();
 
         private static readonly TextureUnit[] _units =
-            Enumerable.Range(0, 32)
-                .Select(i => TextureUnit.Texture0 + i)
-                .ToArray();
+            [.. Enumerable.Range(0, 32).Select(i => TextureUnit.Texture0 + i)];
 
         public static int TextureCount => _textureNames.Count;
 
@@ -108,7 +106,7 @@ namespace OTK.LiteUI.UI.Rendering.Backend
 
             foreach (var file in Directory.GetFiles(directory))
             {
-                if (Path.GetExtension(file).ToLower() != ".png")
+                if (!Path.GetExtension(file).Equals(".png", StringComparison.CurrentCultureIgnoreCase))
                     continue;
 
                 string name = Path.GetFileNameWithoutExtension(file);
