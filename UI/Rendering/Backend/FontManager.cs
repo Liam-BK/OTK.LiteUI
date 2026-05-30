@@ -237,8 +237,6 @@ namespace OTK.LiteUI.UI.Rendering.Backend
             }
         }
 
-
-
         private static Dictionary<(char, char), float> GenerateKerningTable(string filePath, char firstChar, char lastChar)
         {
             Dictionary<(char, char), float> kerning = new();
@@ -246,8 +244,6 @@ namespace OTK.LiteUI.UI.Rendering.Backend
             using Stream? fontStream = ResourceIO.GetLoadingStream(filePath);
             if (fontStream == null)
                 throw new FileNotFoundException($"Font file not found: {filePath}");
-
-
 
             var reader = new OpenFontReader();
             using var fs = ResourceIO.GetLoadingStream(filePath);

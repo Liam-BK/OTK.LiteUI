@@ -1,22 +1,35 @@
+using System.Reflection;
+
 namespace OTK.LiteUI.UI.Utilities
 {
     public static class ResourceIO
     {
-        internal static Stream? GetLoadingStream(string pathOrResource)
+        public static Stream? GetLoadingStream(string pathOrResource)
         {
             if (File.Exists(pathOrResource))
                 return File.OpenRead(pathOrResource);
 
-            // 2. Convert to embedded resource name
-            string resourceName = "OTK.LiteUI." + pathOrResource.Replace('\\', '.').Replace('/', '.');
+            string resourceName = pathOrResource
+                .Replace('\\', '.')
+                .Replace('/', '.');
 
-            // 3. Assembly lookup (no scanning)
-            return typeof(ResourceIO)
-                .Assembly
-                .GetManifestResourceStream(resourceName);
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (string manifestName in assembly.GetManifestResourceNames())
+                {
+                    // Console.WriteLine($"found file names: {manifestName}");
+                    if (manifestName.EndsWith(resourceName,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        return assembly.GetManifestResourceStream(manifestName);
+                    }
+                }
+            }
+
+            return null;
         }
 
-        internal static Stream? GetSavingStream(string filePath)
+        public static Stream? GetSavingStream(string filePath)
         {
             try
             {

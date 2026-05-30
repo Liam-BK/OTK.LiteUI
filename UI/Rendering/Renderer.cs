@@ -6,6 +6,8 @@ namespace OTK.LiteUI.UI.Rendering
     {
         Position2D,
         Position3D,
+        Size2D,
+        Size3D,
         TexCoords,
         Color3,
         Color4,
@@ -59,6 +61,8 @@ namespace OTK.LiteUI.UI.Rendering
         {
             InstanceAttribType.Position2D => 2,
             InstanceAttribType.Position3D => 3,
+            InstanceAttribType.Size2D => 2,
+            InstanceAttribType.Size3D => 3,
             InstanceAttribType.TexCoords => 2,
             InstanceAttribType.Color3 => 3,
             InstanceAttribType.Color4 => 4,
