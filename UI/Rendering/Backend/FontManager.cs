@@ -247,7 +247,7 @@ namespace OTK.LiteUI.UI.Rendering.Backend
 
             var reader = new OpenFontReader();
             using var fs = ResourceIO.GetLoadingStream(filePath);
-            // using var fs = File.OpenRead(filePath);
+
             Typeface typeface = reader.Read(fs);
             var gpos = typeface.GPOSTable;
             if (gpos is not null)

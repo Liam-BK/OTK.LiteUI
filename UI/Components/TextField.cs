@@ -94,7 +94,7 @@ namespace OTK.LiteUI.UI.Components
                 {
                     label.ClipBounds = ViewPort;
                     AutoScaleTextSize();
-                    caret.size = new Vector2(UIScene.InvDPIScaleX, TextSize + Label.LineSpacing);
+                    caret.size = new Vector2(UIScene.InvDPIScaleX * 5, TextSize + Label.LineSpacing);
                     UpdateLabelOrigin();
                 }
             }
@@ -186,6 +186,16 @@ namespace OTK.LiteUI.UI.Components
         private int SelectedRange
         {
             get => Math.Abs(GlobalAnchorIndex - GlobalCaretIndex);
+        }
+
+        public override bool IsVisible
+        {
+            get => base.IsVisible;
+            set
+            {
+                base.IsVisible = value;
+                label.IsVisible = value;
+            }
         }
 
         public event Action? OnEnterPressed;

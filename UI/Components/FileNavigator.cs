@@ -142,6 +142,7 @@ namespace OTK.LiteUI.UI.Components
             set
             {
                 base.IsVisible = value;
+                RefreshCurrentFolder();
                 foreach (var child in Children)
                 {
                     child.IsVisible = value;
@@ -272,6 +273,7 @@ namespace OTK.LiteUI.UI.Components
                         if (!string.IsNullOrEmpty(filter) && !Path.GetFileName(directory).Contains(filter, StringComparison.OrdinalIgnoreCase))
                             continue;
                         var directoryRef = FileReference.SetUpFileRef(directory);
+                        directoryRef.IsVisible = IsVisible;
                         directoryRef.Colour = directoryColour;
                         CurrentDirectory.AddChild(directoryRef);
                         directoryRef.DoubleClick += MouseButton =>
@@ -294,6 +296,7 @@ namespace OTK.LiteUI.UI.Components
                         if (!string.IsNullOrEmpty(filter) && !Path.GetFileName(file).Contains(filter, StringComparison.OrdinalIgnoreCase))
                             continue;
                         var fileRef = FileReference.SetUpFileRef(file);
+                        fileRef.IsVisible = IsVisible;
                         fileRef.Colour = fileColour;
                         CurrentDirectory.AddChild(fileRef);
 

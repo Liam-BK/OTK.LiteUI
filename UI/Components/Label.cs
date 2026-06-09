@@ -96,7 +96,7 @@ namespace OTK.LiteUI.UI.Components
             set
             {
                 _bounds = value;
-                Size = _bounds.W - _bounds.Y;
+                Size = (_bounds.W - _bounds.Y) * 0.5f;
                 var y = _bounds.W - Size;
                 float x;
                 if (Alignment == TextAlignment.Left) x = _bounds.X;

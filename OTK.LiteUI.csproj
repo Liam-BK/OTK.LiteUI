@@ -5,7 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
 
     <PackageId>OTK.LiteUI</PackageId>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <Authors>Liam Burr-Knight</Authors>
 
     <Description>A lightweight and performant UI library for use with OpenTK.</Description>
