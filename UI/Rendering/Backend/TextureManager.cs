@@ -28,6 +28,8 @@ namespace OTK.LiteUI.UI.Rendering.Backend
 
         private static readonly List<string> _textureNames = new();
 
+        public static IReadOnlyList<string> TextureNames => _textureNames;
+
         private static readonly TextureUnit[] _units =
             [.. Enumerable.Range(0, 32).Select(i => TextureUnit.Texture0 + i)];
 
@@ -74,8 +76,8 @@ namespace OTK.LiteUI.UI.Rendering.Backend
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
             _arrays[res] = handle;
             _nextLayer[res] = 0;
@@ -92,8 +94,10 @@ namespace OTK.LiteUI.UI.Rendering.Backend
                 UploadTexture(data, name);
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"[TextureManager] Failed to load texture at path: {path}");
+                Console.WriteLine(ex);
                 finalResolution = TextureResolution.INVALID;
                 return false;
             }
@@ -118,6 +122,8 @@ namespace OTK.LiteUI.UI.Rendering.Backend
 
         public static void UploadTexture(ImageData data, string name)
         {
+            GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
+
             TextureResolution res = InferResolution(data);
 
             if (!_arrays.ContainsKey(res))

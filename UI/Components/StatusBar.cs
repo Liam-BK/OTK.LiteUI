@@ -43,6 +43,16 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        public override bool IsVisible
+        {
+            get => base.IsVisible;
+            set
+            {
+                base.IsVisible = value;
+                Fill.IsVisible = value;
+            }
+        }
+
         public StatusBar(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
         {
             Fill = new NineSlice(bounds, inset, uvInset, colour);

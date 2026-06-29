@@ -6,8 +6,7 @@ namespace OTK.LiteUI.UI.Utilities
     {
         public static Stream? GetLoadingStream(string pathOrResource)
         {
-            if (File.Exists(pathOrResource))
-                return File.OpenRead(pathOrResource);
+            if (File.Exists(pathOrResource)) return File.OpenRead(pathOrResource);
 
             string resourceName = pathOrResource
                 .Replace('\\', '.')
@@ -17,7 +16,6 @@ namespace OTK.LiteUI.UI.Utilities
             {
                 foreach (string manifestName in assembly.GetManifestResourceNames())
                 {
-                    // Console.WriteLine($"found file names: {manifestName}");
                     if (manifestName.EndsWith(resourceName,
                         StringComparison.OrdinalIgnoreCase))
                     {

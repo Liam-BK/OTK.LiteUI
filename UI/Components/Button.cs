@@ -39,6 +39,7 @@ namespace OTK.LiteUI.UI.Components
             {
                 base.IsVisible = value;
                 label.IsVisible = value;
+                if (value == false) _rolloverValue = 0;
             }
         }
 

@@ -98,6 +98,16 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector2 _clickOffset = Vector2.Zero;
 
+        public override bool IsVisible
+        {
+            get => base.IsVisible;
+            set
+            {
+                base.IsVisible = value;
+                _thumb.IsVisible = value;
+            }
+        }
+
         public ScrollBar(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
         {
             Orientation = Width >= Height ? ComponentOrientation.Horizontal : ComponentOrientation.Vertical;

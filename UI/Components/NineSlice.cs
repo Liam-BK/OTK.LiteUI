@@ -9,7 +9,7 @@ namespace OTK.LiteUI.UI.Components
 {
     public class NineSlice : UIComponent, IRenderable
     {
-        public string Texture { private get; set; } = "";
+        public string Texture { get; set; } = "";
         private float _inset;
         public float Inset
         {

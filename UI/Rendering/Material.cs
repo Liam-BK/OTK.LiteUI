@@ -17,7 +17,7 @@ namespace OTK.LiteUI.UI.Rendering
         private Dictionary<string, Vector4> _vec4Uniforms = new Dictionary<string, Vector4>();
         private Dictionary<string, Matrix4> _matrix4Uniforms = new Dictionary<string, Matrix4>();
 
-        private Dictionary<TextureResolution, int> _textureArrays = new();
+        private Dictionary<TextureResolution, int> _textureArrayReferences = new();
 
         public bool DepthTest = true;
         public bool Blending = false;
@@ -70,6 +70,7 @@ namespace OTK.LiteUI.UI.Rendering
                     if (flipX) flags |= 1 << 2;
 
                     TextureManager.TryLoadTexture(pathAttr, name, out var result, null, EmptyPixelType.Transparent, grayscale);
+                    material.SetTextureArray(result, 0);
                 }
             }
             return material;
@@ -151,10 +152,10 @@ namespace OTK.LiteUI.UI.Rendering
 
         public void SetTextureArray(TextureResolution res, int unit)
         {
-            if (_textureArrays.Count >= MaxUnits && !_textureArrays.ContainsKey(res))
+            if (_textureArrayReferences.Count >= MaxUnits && !_textureArrayReferences.ContainsKey(res))
                 throw new InvalidOperationException("Too many texture arrays bound.");
 
-            _textureArrays[res] = unit;
+            _textureArrayReferences[res] = unit;
         }
 
         public void UpdateUniforms(bool transpose = false)
@@ -195,13 +196,15 @@ namespace OTK.LiteUI.UI.Rendering
 
             UpdateUniforms();
 
-            foreach (var pair in _textureArrays)
+            Console.WriteLine($"texture arrays: {_textureArrayReferences.Count}");
+
+            foreach (var pair in _textureArrayReferences)
             {
                 TextureResolution res = pair.Key;
                 int unit = pair.Value;
-
+                Console.WriteLine($"initial bound array: {GL.GetInteger(GetPName.TextureBinding2DArray)}");
                 TextureManager.Bind(res, unit);
-
+                Console.WriteLine($"new bound array: {GL.GetInteger(GetPName.TextureBinding2DArray)}");
                 string uniformName = $"uTexture";
                 int loc = GL.GetUniformLocation(Shader, uniformName);
 

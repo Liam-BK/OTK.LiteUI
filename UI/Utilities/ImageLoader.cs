@@ -276,6 +276,7 @@ namespace OTK.LiteUI.UI.Utilities
                 Channels = 4,
                 Pixels = image.Data
             };
+
             if (IsFlipVertical(flipFlag)) temp.FlipImageVertically();
             if (greyscale) temp.GreyScale();
             return temp;

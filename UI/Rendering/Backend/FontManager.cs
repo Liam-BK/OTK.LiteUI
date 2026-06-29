@@ -70,10 +70,11 @@ namespace OTK.LiteUI.UI.Rendering.Backend
             for (int i = 0; i < numChars; i++)
             {
                 var bc1 = bakedChars[i];
-                float UVLeft = bc1.x0 / (float)atlasWidth;
-                float UVTop = bc1.y0 / (float)atlasHeight;
-                float UVRight = bc1.x1 / (float)atlasWidth;
-                float UVBottom = bc1.y1 / (float)atlasHeight;
+                var inset = 0.05f;
+                float UVLeft = (bc1.x0 + inset) / (float)atlasWidth;
+                float UVTop = (bc1.y0 - inset) / (float)atlasHeight;
+                float UVRight = (bc1.x1 - inset) / (float)atlasWidth;
+                float UVBottom = (bc1.y1 + inset) / (float)atlasHeight;
                 Vector4 glyphUVs = new(UVLeft, UVTop, UVRight, UVBottom);
                 Vector4 glyphBounds = new(bc1.x0, bc1.y0, bc1.x1, bc1.y1);
                 glyphUVData.Add((char)(firstChar + i), glyphUVs);
