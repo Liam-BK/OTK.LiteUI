@@ -3,7 +3,6 @@ using OTK.LiteUI.UI.Interfaces;
 using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Rendering;
 using OTK.LiteUI.UI.Utilities;
-using OTK.LiteUI.UI.Rendering.Backend;
 
 namespace OTK.LiteUI.UI.Components
 {
@@ -86,7 +85,7 @@ namespace OTK.LiteUI.UI.Components
         {
             int textureLayer;
             if (Texture == "") textureLayer = -1;
-            else TextureManager.TryGetTexture(Texture, UIScene.Resolution, out textureLayer);
+            else TextureManager.TryGetTexture(Texture, out textureLayer);
 
             topLeft.position = new Vector2(Bounds.X + Inset * 0.5f, Bounds.W - Inset * 0.5f);
             topLeft.size = new Vector2(Inset, Inset);

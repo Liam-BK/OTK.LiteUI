@@ -3,7 +3,7 @@ using OTK.LiteUI.UI.Rendering;
 
 namespace OTK.LiteUI.UI.Utilities
 {
-    public static class Utils
+    internal static class Utils
     {
         public static UIQuad Clip(UIQuad quad, Vector4 clipBounds)
         {

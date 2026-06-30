@@ -130,10 +130,9 @@ namespace OTK.LiteUI.UI.Rendering
         {
             if (!IsVisible || Mesh == null || Material == null)
                 return;
-            Console.WriteLine($"Pre Bind: {GL.GetInteger(GetPName.TextureBinding2DArray)}");
+
             Material.Bind();
             Mesh.Bind();
-            Console.WriteLine($"Post Bind: {GL.GetInteger(GetPName.TextureBinding2DArray)}");
             UploadInstanceBuffer();
 
             GL.DrawElementsInstanced(primitives, Mesh.IndexCount, DrawElementsType.UnsignedInt, 0, _instanceCount);

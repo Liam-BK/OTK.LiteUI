@@ -2,7 +2,7 @@ using System.Reflection;
 
 namespace OTK.LiteUI.UI.Utilities
 {
-    public static class ResourceIO
+    internal static class ResourceIO
     {
         public static Stream? GetLoadingStream(string pathOrResource)
         {

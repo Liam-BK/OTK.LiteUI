@@ -2,13 +2,12 @@ using System.Xml.Linq;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OTK.LiteUI.UI.Utilities;
-using OTK.LiteUI.UI.Rendering.Backend;
 
 namespace OTK.LiteUI.UI.Rendering
 {
     public class Material
     {
-        public int Shader { private get; set; }
+        private Shader? shader = null;
 
         private Dictionary<string, float> _floatUniforms = new Dictionary<string, float>();
         private Dictionary<string, int> _intUniforms = new Dictionary<string, int>();
@@ -16,8 +15,6 @@ namespace OTK.LiteUI.UI.Rendering
         private Dictionary<string, Vector3> _vec3Uniforms = new Dictionary<string, Vector3>();
         private Dictionary<string, Vector4> _vec4Uniforms = new Dictionary<string, Vector4>();
         private Dictionary<string, Matrix4> _matrix4Uniforms = new Dictionary<string, Matrix4>();
-
-        private Dictionary<TextureResolution, int> _textureArrayReferences = new();
 
         public bool DepthTest = true;
         public bool Blending = false;
@@ -42,7 +39,7 @@ namespace OTK.LiteUI.UI.Rendering
             if (vStream is null) throw new Exception($"Vertex stream at {vertexPath} could not be created.");
             if (fStream is null) throw new Exception($"Fragment stream at {fragmentPath} could not be created.");
 
-            material.CompileShaderProgram(new StreamReader(vStream).ReadToEnd(), new StreamReader(fStream).ReadToEnd());
+            material.shader = new Shader(new StreamReader(vStream).ReadToEnd(), new StreamReader(fStream).ReadToEnd());
 
             XElement? renderState = root.Element("RenderState");
 
@@ -70,7 +67,6 @@ namespace OTK.LiteUI.UI.Rendering
                     if (flipX) flags |= 1 << 2;
 
                     TextureManager.TryLoadTexture(pathAttr, name, out var result, null, EmptyPixelType.Transparent, grayscale);
-                    material.SetTextureArray(result, 0);
                 }
             }
             return material;
@@ -106,83 +102,37 @@ namespace OTK.LiteUI.UI.Rendering
             _matrix4Uniforms[name] = value;
         }
 
-        public void CompileShaderProgram(string vertexShaderSource, string fragmentShaderSource)
-        {
-            int vertexShader = GL.CreateShader(ShaderType.VertexShader);
-            int fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
-            GL.ShaderSource(vertexShader, vertexShaderSource);
-            GL.ShaderSource(fragmentShader, fragmentShaderSource);
-            GL.CompileShader(vertexShader);
-            GL.CompileShader(fragmentShader);
-
-            GL.GetShader(vertexShader, ShaderParameter.CompileStatus, out int vertexStatus);
-            if (vertexStatus == 0)
-            {
-                string infoLog = GL.GetShaderInfoLog(vertexShader);
-                GL.DeleteShader(vertexShader);
-                throw new Exception($"{ShaderType.VertexShader} compilation failed:\n{infoLog}");
-            }
-
-            GL.GetShader(fragmentShader, ShaderParameter.CompileStatus, out int fragmentStatus);
-
-            if (fragmentStatus == 0)
-            {
-                string infoLog = GL.GetShaderInfoLog(fragmentShader);
-                GL.DeleteShader(fragmentShader);
-                throw new Exception($"{ShaderType.FragmentShader} compilation failed:\n{infoLog}");
-            }
-
-            Shader = GL.CreateProgram();
-
-            GL.AttachShader(Shader, vertexShader);
-            GL.AttachShader(Shader, fragmentShader);
-
-            GL.LinkProgram(Shader);
-
-            GL.DetachShader(Shader, vertexShader);
-            GL.DetachShader(Shader, fragmentShader);
-            GL.DeleteShader(vertexShader);
-            GL.DeleteShader(fragmentShader);
-        }
-
         public bool Matrix4Exists(string name)
         {
             return _matrix4Uniforms.ContainsKey(name);
         }
 
-        public void SetTextureArray(TextureResolution res, int unit)
-        {
-            if (_textureArrayReferences.Count >= MaxUnits && !_textureArrayReferences.ContainsKey(res))
-                throw new InvalidOperationException("Too many texture arrays bound.");
-
-            _textureArrayReferences[res] = unit;
-        }
-
         public void UpdateUniforms(bool transpose = false)
         {
-            if (Shader == 0) return;
-            GL.UseProgram(Shader);
+            if (shader is null) throw new MissingMemberException("Shader has not been initialized");
+            shader.Bind();
             foreach (var pair in _floatUniforms)
-                GL.Uniform1(GL.GetUniformLocation(Shader, pair.Key), pair.Value);
+                GL.Uniform1(GL.GetUniformLocation(shader.Handle, pair.Key), pair.Value);
             foreach (var pair in _intUniforms)
-                GL.Uniform1(GL.GetUniformLocation(Shader, pair.Key), pair.Value);
+                GL.Uniform1(GL.GetUniformLocation(shader.Handle, pair.Key), pair.Value);
             foreach (var pair in _vec2Uniforms)
-                GL.Uniform2(GL.GetUniformLocation(Shader, pair.Key), pair.Value);
+                GL.Uniform2(GL.GetUniformLocation(shader.Handle, pair.Key), pair.Value);
             foreach (var pair in _vec3Uniforms)
-                GL.Uniform3(GL.GetUniformLocation(Shader, pair.Key), pair.Value);
+                GL.Uniform3(GL.GetUniformLocation(shader.Handle, pair.Key), pair.Value);
             foreach (var pair in _vec4Uniforms)
-                GL.Uniform4(GL.GetUniformLocation(Shader, pair.Key), pair.Value);
+                GL.Uniform4(GL.GetUniformLocation(shader.Handle, pair.Key), pair.Value);
 
             foreach (var pair in _matrix4Uniforms)
             {
                 var mat = pair.Value;
-                GL.UniformMatrix4(GL.GetUniformLocation(Shader, pair.Key), transpose, ref mat);
+                GL.UniformMatrix4(GL.GetUniformLocation(shader.Handle, pair.Key), transpose, ref mat);
             }
         }
 
         public void Bind()
         {
-            GL.UseProgram(Shader);
+            if (shader is null) throw new MissingMemberException("Shader has not been initialized so it cannot be bound.");
+            shader.Bind();
             if (DepthTest) GL.Enable(EnableCap.DepthTest);
             else GL.Disable(EnableCap.DepthTest);
             if (Blending)
@@ -194,23 +144,12 @@ namespace OTK.LiteUI.UI.Rendering
             if (CullFace) GL.Enable(EnableCap.CullFace);
             else GL.Disable(EnableCap.CullFace);
 
-            UpdateUniforms();
+            TextureManager.Bind(0);
+            string uniformName = $"uTexture";
+            int loc = GL.GetUniformLocation(shader.Handle, uniformName);
 
-            Console.WriteLine($"texture arrays: {_textureArrayReferences.Count}");
-
-            foreach (var pair in _textureArrayReferences)
-            {
-                TextureResolution res = pair.Key;
-                int unit = pair.Value;
-                Console.WriteLine($"initial bound array: {GL.GetInteger(GetPName.TextureBinding2DArray)}");
-                TextureManager.Bind(res, unit);
-                Console.WriteLine($"new bound array: {GL.GetInteger(GetPName.TextureBinding2DArray)}");
-                string uniformName = $"uTexture";
-                int loc = GL.GetUniformLocation(Shader, uniformName);
-
-                if (loc != -1)
-                    GL.Uniform1(loc, unit);
-            }
+            if (loc != -1)
+                GL.Uniform1(loc, 0);
         }
     }
 }

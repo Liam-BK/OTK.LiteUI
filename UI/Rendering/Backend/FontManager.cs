@@ -8,7 +8,7 @@ using OTK.LiteUI.UI.Utilities;
 
 namespace OTK.LiteUI.UI.Rendering.Backend
 {
-    internal class FontData
+    public class FontData
     {
         public ImageData Bitmap { get; set; } = new();
 
@@ -70,7 +70,7 @@ namespace OTK.LiteUI.UI.Rendering.Backend
             for (int i = 0; i < numChars; i++)
             {
                 var bc1 = bakedChars[i];
-                var inset = 0.05f;
+                var inset = 0.00f;
                 float UVLeft = (bc1.x0 + inset) / (float)atlasWidth;
                 float UVTop = (bc1.y0 - inset) / (float)atlasHeight;
                 float UVRight = (bc1.x1 - inset) / (float)atlasWidth;
@@ -89,8 +89,6 @@ namespace OTK.LiteUI.UI.Rendering.Backend
                 Pixels = bitmap,
                 Channels = 1
             };
-
-            image.FlipImageVertically();
 
             image = ConvertFromAlphaToRGBA(image);
             image.ConvertToResolution(UIScene.Resolution, EmptyPixelType.Transparent);

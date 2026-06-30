@@ -256,7 +256,7 @@ namespace OTK.LiteUI.UI.Components
                 glyph.UVOffset = new Vector2(UVs.X, 1 - UVs.W);
                 glyph.UVRange = new Vector2(UVs.Z - UVs.X, UVs.W - UVs.Y);
                 glyph.colour = Colour;
-                TextureManager.TryGetTexture(FontKey, UIScene.Resolution, out var layer);
+                TextureManager.TryGetTexture(FontKey, out var layer);
                 glyph.textureLayer = layer;
                 _lines[currentLine].Add(glyph);
                 XCursor += glyphWidth * Size + kern * Size + offset.X * Size;
