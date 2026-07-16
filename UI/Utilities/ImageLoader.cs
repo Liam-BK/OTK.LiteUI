@@ -59,6 +59,35 @@ namespace OTK.LiteUI.UI.Utilities
         }
 
         /// <summary>
+        /// A method for flipping the bits of an image horizontally.
+        /// Useful for converting between coordinate systems.
+        /// </summary>
+        public void FlipImageHorizontally()
+        {
+            int width = Width;
+            int height = Height;
+            int channels = Channels;
+
+            int pixelStride = channels;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width / 2; x++)
+                {
+                    int left = (y * width + x) * pixelStride;
+                    int right = (y * width + (width - 1 - x)) * pixelStride;
+
+                    for (int c = 0; c < channels; c++)
+                    {
+                        byte temp = Pixels[left + c];
+                        Pixels[left + c] = Pixels[right + c];
+                        Pixels[right + c] = temp;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Converts a given bitmap to a greyscale representation.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if the image has less than 3 color channels.</exception>
@@ -83,7 +112,59 @@ namespace OTK.LiteUI.UI.Utilities
             }
         }
 
-        public void ConvertToResolution(TextureResolution resolution, EmptyPixelType emptyType)
+        public ImageData[,] Split(int tileWidth, int tileHeight)
+        {
+            if (Width % tileWidth != 0 || Height % tileHeight != 0)
+                throw new ArgumentException($"Image dimensions must be divisible by tile dimensions. image width: {Width}, image height: {Height}");
+            int columns = Width / tileWidth;
+            int rows = Height / tileHeight;
+            ImageData[,] result = new ImageData[rows, columns];
+            for (int y = rows - 1; y >= 0; y--)
+            {
+                for (int x = 0; x < columns; x++)
+                {
+                    result[x, y] = Extract(
+                        x * tileWidth,
+                        y * tileHeight,
+                        tileWidth,
+                        tileHeight
+                    );
+                }
+            }
+            return result;
+        }
+
+        public ImageData Extract(int x, int y, int subWidth, int subHeight)
+        {
+            byte[] pixels = new byte[subWidth * subHeight * Channels];
+
+            for (int row = 0; row < subHeight; row++)
+            {
+                int sourceIndex =
+                    ((y + row) * Width + x) * Channels;
+
+                int destinationIndex =
+                    row * subWidth * Channels;
+
+                Array.Copy(
+                    Pixels,
+                    sourceIndex,
+                    pixels,
+                    destinationIndex,
+                    subWidth * Channels
+                );
+            }
+
+            return new ImageData
+            {
+                Width = subWidth,
+                Height = subHeight,
+                Channels = Channels,
+                Pixels = pixels
+            };
+        }
+
+        public void ConvertToResolution(TextureResolution resolution)
         {
             int target = TextureManager.FindResolution(resolution);
 
@@ -99,7 +180,7 @@ namespace OTK.LiteUI.UI.Utilities
             // Step 2: if smaller → pad
             if (Width < target || Height < target)
             {
-                PadTo(target, target, emptyType);
+                UpscaleNearest(target, target);
             }
         }
 
@@ -125,6 +206,35 @@ namespace OTK.LiteUI.UI.Utilities
                 {
                     int srcIndex = (y * Width + x) * Channels;
                     int dstIndex = ((y + offsetY) * targetWidth + (x + offsetX)) * Channels;
+
+                    for (int c = 0; c < Channels; c++)
+                    {
+                        newPixels[dstIndex + c] = Pixels[srcIndex + c];
+                    }
+                }
+            }
+
+            Pixels = newPixels;
+            Width = targetWidth;
+            Height = targetHeight;
+        }
+
+        private void UpscaleNearest(int targetWidth, int targetHeight)
+        {
+            byte[] newPixels = new byte[targetWidth * targetHeight * Channels];
+
+            float scaleX = (float)Width / targetWidth;
+            float scaleY = (float)Height / targetHeight;
+
+            for (int y = 0; y < targetHeight; y++)
+            {
+                for (int x = 0; x < targetWidth; x++)
+                {
+                    int srcX = (int)(x * scaleX);
+                    int srcY = (int)(y * scaleY);
+
+                    int srcIndex = (srcY * Width + srcX) * Channels;
+                    int dstIndex = (y * targetWidth + x) * Channels;
 
                     for (int c = 0; c < Channels; c++)
                     {

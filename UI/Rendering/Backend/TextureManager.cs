@@ -78,7 +78,7 @@ public static class TextureManager
             var data = ImageLoader.LoadImage(path, ImageLoader.Flip.Vertical, greyScale);
             if (forceResolution is null) finalResolution = InferResolution(data);
             else finalResolution = (TextureResolution)forceResolution;
-            data.ConvertToResolution(finalResolution, type);
+            data.ConvertToResolution(finalResolution);
             if (textures is null) throw new InvalidOperationException("TextureArray must be created before loading textures.");
             textures.AddTexture(data, name);
             return true;

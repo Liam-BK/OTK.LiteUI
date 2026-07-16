@@ -91,7 +91,7 @@ namespace OTK.LiteUI.UI.Rendering.Backend
             };
 
             image = ConvertFromAlphaToRGBA(image);
-            image.ConvertToResolution(UIScene.Resolution, EmptyPixelType.Transparent);
+            image.ConvertToResolution(UIScene.Resolution);
             string fontKey = Path.GetFileNameWithoutExtension(filePath);
 
             if (DefaultFontKey is "") DefaultFontKey = fontKey;

@@ -59,7 +59,7 @@ namespace OTK.LiteUI.UI.Rendering
         {
             if (_textureIDs.ContainsKey(name)) throw new ArgumentException($"Texture with name \"{name}\" already exists in TextureArray.");
 
-            if (data.Width != TextureSize || data.Height != TextureSize) data.ConvertToResolution(Resolution, emptyPixelType);
+            if (data.Width != TextureSize || data.Height != TextureSize) data.ConvertToResolution(Resolution);
             data.FlipImageVertically();
 
             _textureIDs.Add(name, LastLayer);
