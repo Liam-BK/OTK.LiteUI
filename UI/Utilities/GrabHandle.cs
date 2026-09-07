@@ -19,7 +19,7 @@ namespace OTK.LiteUI.UI.Utilities
         public override bool OnClickDown(MouseState mouse)
         {
             Active = WithinBounds(mouse) && IsVisible;
-            var temp = UIScene.ConvertMouseScreenCoords(mouse.Position);
+            var temp = UICanvas.ConvertMouseScreenCoords(mouse.Position);
             clickOffset.X = Center.X - temp.X;
             clickOffset.Y = Center.Y - temp.Y;
             return Active;
@@ -29,7 +29,7 @@ namespace OTK.LiteUI.UI.Utilities
         {
             if (Active)
             {
-                var convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
+                var convertedMouse = UICanvas.ConvertMouseScreenCoords(mouse.Position);
                 var x = convertedMouse.X + clickOffset.X;
                 var y = convertedMouse.Y + clickOffset.Y;
                 var halfWidth = Width * 0.5f;

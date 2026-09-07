@@ -118,7 +118,7 @@ namespace OTK.LiteUI.UI.Components
             float y = w - _lines.Count * (Size + LineSpacing);
             _bounds = new Vector4(Origin.X, y, Origin.X, w);
             _lines.Add([]);
-            UIScene.Register(this);
+            UICanvas.Register(this);
         }
 
         public int FindInsertionOffset(int line)
@@ -167,7 +167,7 @@ namespace OTK.LiteUI.UI.Components
 
         public int FindLineFromPos(MouseState mouse)
         {
-            var convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
+            var convertedMouse = UICanvas.ConvertMouseScreenCoords(mouse.Position);
             return FindLineFromPos(convertedMouse);
         }
 
@@ -181,7 +181,7 @@ namespace OTK.LiteUI.UI.Components
 
         public int FindCaretIndexFromPos(MouseState mouse)
         {
-            var convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
+            var convertedMouse = UICanvas.ConvertMouseScreenCoords(mouse.Position);
             return FindCaretIndexFromPos(convertedMouse);
         }
 

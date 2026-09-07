@@ -106,7 +106,7 @@ namespace OTK.LiteUI.UI.Components
             label = new Label(new Vector2((bounds.X + bounds.Z) * 0.5f, bounds.Y + (bounds.W - bounds.Y) * 0.25f), (bounds.W - bounds.Y) * 0.5f, text);
             label.Alignment = TextAlignment.Center;
             label.Colour = new Vector4(0, 0, 0, 1);
-            UIScene.Deregister(label);
+            UICanvas.Deregister(label);
         }
 
         public override bool OnClickDown(MouseState mouse)

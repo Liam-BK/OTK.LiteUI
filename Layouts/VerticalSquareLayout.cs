@@ -11,18 +11,12 @@ namespace OTK.LiteUI.Layouts
             get;
             set;
         }
-        public Vector2 ElementSize
-        {
-            get;
-            set;
-        }
 
         private int _columns;
 
-        public VerticalSquareLayout(int columns, Vector2 elementSize, float padding)
+        public VerticalSquareLayout(int columns, float padding)
         {
             _columns = Math.Max(columns, 1);
-            ElementSize = elementSize;
             Padding = padding;
         }
 
@@ -30,7 +24,7 @@ namespace OTK.LiteUI.Layouts
         {
             float startLeft = viewport.X;
             float startTop = viewport.W;
-            float elementWidth = ((viewport.Z - viewport.X) - Padding * Math.Max(_columns - 1, 0)) / _columns;
+            float elementWidth = (viewport.Z - viewport.X - Padding * Math.Max(_columns - 1, 0)) / _columns;
             float elementHeight = elementWidth;
 
             for (int i = 0; i < elements.Count; i++)

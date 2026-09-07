@@ -87,7 +87,7 @@ namespace OTK.LiteUI.UI.Components
 
         public virtual void OnFocusLost() { }
 
-        public bool IsFocused => CanFocus && UIScene.FocusedComponent == this;
+        public bool IsFocused => CanFocus && UICanvas.FocusedComponent == this;
 
         public virtual void Deregister(List<UIComponent> registry)
         {
@@ -136,7 +136,7 @@ namespace OTK.LiteUI.UI.Components
 
         public virtual bool WithinBounds(MouseState mouse)
         {
-            return WithinBounds(UIScene.ConvertMouseScreenCoords(mouse.Position));
+            return WithinBounds(UICanvas.ConvertMouseScreenCoords(mouse.Position));
         }
 
         public bool WithinBounds(Vector2 position)

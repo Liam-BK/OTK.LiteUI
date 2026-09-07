@@ -94,7 +94,7 @@ namespace OTK.LiteUI.UI.Components
                 {
                     label.ClipBounds = ViewPort;
                     AutoScaleTextSize();
-                    caret.size = new Vector2(UIScene.InvDPIScaleX * 5, TextSize + Label.LineSpacing);
+                    caret.size = new Vector2(UICanvas.InvDPIScaleX * 5, TextSize + Label.LineSpacing);
                     UpdateLabelOrigin();
                 }
             }
@@ -211,10 +211,10 @@ namespace OTK.LiteUI.UI.Components
                 ClipBounds = ViewPort
             };
             // AutoScaleTextSize();
-            caret.size = new Vector2(UIScene.InvDPIScaleX, TextSize + Label.LineSpacing);
+            caret.size = new Vector2(UICanvas.InvDPIScaleX, TextSize + Label.LineSpacing);
             caret.colour = textColour;
             UpdateCaretPosition();
-            UIScene.Deregister(label);
+            UICanvas.Deregister(label);
         }
 
         private void UpdateLabelOrigin()
@@ -409,7 +409,7 @@ namespace OTK.LiteUI.UI.Components
 
         private void Copy()
         {
-            UIScene.ClipboardString = Text.Substring(SubstringStartIndex, Math.Max(0, SelectedRange));
+            UICanvas.ClipboardString = Text.Substring(SubstringStartIndex, Math.Max(0, SelectedRange));
         }
 
         private void Cut()
@@ -421,7 +421,7 @@ namespace OTK.LiteUI.UI.Components
 
         private void Paste()
         {
-            var inserted = UIScene.ClipboardString;
+            var inserted = UICanvas.ClipboardString;
             int caretShift = inserted.Length;
             RemoveCharacter(SelectedRange);
             CollapseSelectionLeft();
@@ -553,7 +553,7 @@ namespace OTK.LiteUI.UI.Components
                 }
                 else if (Mode == TextFieldMode.SingleLine)
                 {
-                    UIScene.FocusedComponent = null;
+                    UICanvas.FocusedComponent = null;
                     OnEnterPressed?.Invoke();
                     return;
                 }
@@ -644,12 +644,12 @@ namespace OTK.LiteUI.UI.Components
         {
             if (!WithinBounds(mouse) || !IsVisible)
             {
-                UIScene.FocusedComponent = null;
+                UICanvas.FocusedComponent = null;
                 return base.OnClickDown(mouse);
             }
             IsClicked = true;
-            Vector2 convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
-            UIScene.FocusedComponent = this;
+            Vector2 convertedMouse = UICanvas.ConvertMouseScreenCoords(mouse.Position);
+            UICanvas.FocusedComponent = this;
             caretLine = label.FindLineFromPos(mouse);
             caretIndex = convertedMouse.X <= label.Bounds.Z ? label.FindCaretIndexFromPos(mouse) : label.FindLineEndIndex(caretLine);
             desiredColumn = caretIndex;
@@ -663,10 +663,10 @@ namespace OTK.LiteUI.UI.Components
 
         public override bool OnMouseMove(MouseState mouse)
         {
-            if (WithinBounds(mouse)) UIScene.SetCursor(MouseCursor.IBeam);
+            if (WithinBounds(mouse)) UICanvas.SetCursor(MouseCursor.IBeam);
             if (IsClicked)
             {
-                Vector2 convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
+                Vector2 convertedMouse = UICanvas.ConvertMouseScreenCoords(mouse.Position);
                 caretLine = label.FindLineFromPos(mouse);
                 caretIndex = convertedMouse.X <= label.Bounds.Z ? label.FindCaretIndexFromPos(mouse) : label.FindLineEndIndex(caretLine);
                 desiredColumn = caretIndex;
@@ -686,7 +686,7 @@ namespace OTK.LiteUI.UI.Components
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
         {
             base.OnUpdate(deltaTime, mouse, keyboard);
-            var convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
+            var convertedMouse = UICanvas.ConvertMouseScreenCoords(mouse.Position);
             var view = ViewPort;
             if (IsClicked)
             {

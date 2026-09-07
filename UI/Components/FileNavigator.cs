@@ -226,7 +226,7 @@ namespace OTK.LiteUI.UI.Components
 
         public void AddChild(UIComponent child)
         {
-            UIScene.Deregister(child);
+            UICanvas.Deregister(child);
             child.ClipBounds = ViewPort;
             Children.Add(child);
         }
@@ -235,7 +235,7 @@ namespace OTK.LiteUI.UI.Components
         {
             Children.Remove(child);
             child.ClipBounds = null;
-            UIScene.Register(child);
+            UICanvas.Register(child);
         }
 
         private void PositionElements()
@@ -400,7 +400,7 @@ namespace OTK.LiteUI.UI.Components
         {
             if (!IsVisible || !WithinBounds(mouse))
             {
-                UIScene.FocusedComponent = null;
+                UICanvas.FocusedComponent = null;
                 ClearSelected();
                 return false;
             }

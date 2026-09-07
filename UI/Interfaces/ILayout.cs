@@ -11,12 +11,6 @@ namespace OTK.LiteUI.UI.Interfaces
             set;
         }
 
-        public Vector2 ElementSize
-        {
-            get;
-            set;
-        }
-
         public void Apply(Vector4 viewport, List<UIComponent> elements);
     }
 }

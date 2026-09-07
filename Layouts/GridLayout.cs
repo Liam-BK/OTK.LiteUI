@@ -7,7 +7,6 @@ namespace OTK.LiteUI.Layouts
     public class GridLayout : ILayout
     {
         public float Padding { get; set; }
-        public Vector2 ElementSize { get; set; }
 
         private int _rows;
 

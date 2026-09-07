@@ -9,7 +9,7 @@ using OTK.LiteUI.UI.Rendering;
 
 namespace OTK.LiteUI.Core
 {
-    public static class UIScene
+    public static class UICanvas
     {
         public static GameWindow? window = null;
         private static bool _initialized = false;
@@ -107,7 +107,7 @@ namespace OTK.LiteUI.Core
             /// <summary>
             /// Measurements are in absolute pixels.
             /// </summary>
-            Pixels,
+            PX,
             /// <summary>
             /// Measurements are scaled according to the display DPI.
             /// </summary>

@@ -113,9 +113,10 @@ namespace OTK.LiteUI.UI.Components
 
         public void AddChild(UIComponent child)
         {
-            UIScene.Deregister(child);
+            UICanvas.Deregister(child);
             child.Parent = this;
             child.ClipBounds = ViewPort;
+            child.IsVisible = IsVisible;
             Children.Add(child);
             ApplyLayout();
         }

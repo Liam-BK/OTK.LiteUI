@@ -11,18 +11,12 @@ namespace OTK.LiteUI.Layouts
             get;
             set;
         }
-        public Vector2 ElementSize
-        {
-            get;
-            set;
-        }
 
         private int _rows;
 
         public HorizontalSquareLayout(int rows, Vector2 elementSize, float padding)
         {
             _rows = Math.Max(rows, 1);
-            ElementSize = elementSize;
             Padding = padding;
         }
 
@@ -30,7 +24,7 @@ namespace OTK.LiteUI.Layouts
         {
             float startLeft = viewport.X;
             float startTop = viewport.W;
-            float elementHeight = ((viewport.W - viewport.Y) - Padding * Math.Max(_rows - 1, 0)) / _rows;
+            float elementHeight = (viewport.W - viewport.Y - Padding * Math.Max(_rows - 1, 0)) / _rows;
             float elementWidth = elementHeight;
 
             for (int i = 0; i < elements.Count; i++)

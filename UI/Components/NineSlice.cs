@@ -65,7 +65,7 @@ namespace OTK.LiteUI.UI.Components
             UVInset = uvInset;
             Colour = colour ?? Vector4.One;
             UpdateQuadrants();
-            UIScene.Register(this);
+            UICanvas.Register(this);
         }
 
         protected void ForceUpdateQuadrantColours(Vector4 colour)

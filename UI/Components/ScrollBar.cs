@@ -113,7 +113,7 @@ namespace OTK.LiteUI.UI.Components
             Orientation = Width >= Height ? ComponentOrientation.Horizontal : ComponentOrientation.Vertical;
             _thumb = new NineSlice(bounds);
             _thumbColour = colour ?? Vector4.One;
-            UIScene.Deregister(_thumb);
+            UICanvas.Deregister(_thumb);
         }
 
         private void UpdateThumbFromValue()
@@ -153,7 +153,7 @@ namespace OTK.LiteUI.UI.Components
         public override bool OnClickDown(MouseState mouse)
         {
             if (!IsVisible) return false;
-            var convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
+            var convertedMouse = UICanvas.ConvertMouseScreenCoords(mouse.Position);
             if (_thumb.WithinBounds(mouse))
             {
                 _isPressed = true;
@@ -184,7 +184,7 @@ namespace OTK.LiteUI.UI.Components
         {
             if (_isPressed)
             {
-                var convertedMouse = UIScene.ConvertMouseScreenCoords(mouse.Position);
+                var convertedMouse = UICanvas.ConvertMouseScreenCoords(mouse.Position);
                 if (Orientation == ComponentOrientation.Horizontal)
                 {
                     SetThumbPos(Math.Clamp(convertedMouse.X - _clickOffset.X, Bounds.X + _thumb.Width * 0.5f, Bounds.Z - _thumb.Width * 0.5f), Center.Y);
