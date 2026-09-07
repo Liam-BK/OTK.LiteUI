@@ -89,7 +89,7 @@ namespace OTK.LiteUI.UI.Rendering
         private void UploadInstanceBuffer()
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, _instanceVBO);
-            GL.BufferData(BufferTarget.ArrayBuffer, _instanceData.Count * sizeof(float), _instanceData.ToArray(), BufferUsageHint.DynamicDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, _instanceData.Count * sizeof(float), _instanceData.ToArray(), BufferUsageHint.StreamDraw);
         }
 
         private void SetUpInstanceAttributes()
