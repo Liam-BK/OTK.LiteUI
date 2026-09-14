@@ -150,26 +150,26 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
-        public FileNavigator(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
+        public FileNavigator(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
             var view = ViewPort;
-            Search = new TextField(new Vector4(view.Z - textFieldWidth, view.W - componentHeight, view.Z, view.W), inset, uvInset);
+            Search = new TextField(canvas, new Vector4(view.Z - textFieldWidth, view.W - componentHeight, view.Z, view.W), inset, uvInset);
             Search.TextSize = componentHeight * 0.4f;
             Search.Mode = TextFieldMode.SingleLine;
             Search.OnTextChanged += RefreshCurrentFolder;
-            Confirm = new Button(new Vector4(view.Z - buttonWidth, view.Y, view.Z, view.Y + componentHeight), "Confirm", inset, uvInset);
-            Cancel = new Button(new Vector4(Confirm.Bounds.X - padding - buttonWidth, view.Y, Confirm.Bounds.X - padding, view.Y + componentHeight), "Cancel", inset, uvInset);
-            Back = new Button(new Vector4(view.X, view.W - componentHeight, view.X + buttonWidth, view.W), "Back", inset, uvInset);
+            Confirm = new Button(canvas, new Vector4(view.Z - buttonWidth, view.Y, view.Z, view.Y + componentHeight), "Confirm", inset, uvInset);
+            Cancel = new Button(canvas, new Vector4(Confirm.Bounds.X - padding - buttonWidth, view.Y, Confirm.Bounds.X - padding, view.Y + componentHeight), "Cancel", inset, uvInset);
+            Back = new Button(canvas, new Vector4(view.X, view.W - componentHeight, view.X + buttonWidth, view.W), "Back", inset, uvInset);
             Back.OnClick += _ =>
             {
                 NavigateUp();
                 _refreshPending = true;
             };
-            NameInput = new TextField(new Vector4(view.X, view.Y, Cancel.Bounds.X - padding, view.Y + componentHeight), inset, uvInset);
+            NameInput = new TextField(canvas, new Vector4(view.X, view.Y, Cancel.Bounds.X - padding, view.Y + componentHeight), inset, uvInset);
             NameInput.TextSize = componentHeight * 0.4f;
             NameInput.Mode = TextFieldMode.SingleLine;
-            QuickAccess = new Panel(new Vector4(view.X, NameInput.Bounds.W + padding, NameInput.Bounds.Z, Back.Bounds.Y - padding), new VerticalLayout(new Vector2(100, 35), 0), inset, uvInset);
-            CurrentDirectory = new Panel(new Vector4(QuickAccess.Bounds.Z + padding, QuickAccess.Bounds.Y, view.Z, QuickAccess.Bounds.W), new VerticalLayout(new Vector2(100, 35), 0), inset, uvInset);
+            QuickAccess = new Panel(canvas, new Vector4(view.X, NameInput.Bounds.W + padding, NameInput.Bounds.Z, Back.Bounds.Y - padding), new VerticalLayout(new Vector2(100, 35), 0), inset, uvInset);
+            CurrentDirectory = new Panel(canvas, new Vector4(QuickAccess.Bounds.Z + padding, QuickAccess.Bounds.Y, view.Z, QuickAccess.Bounds.W), new VerticalLayout(new Vector2(100, 35), 0), inset, uvInset);
             AddChild(Search);
             AddChild(NameInput);
             AddChild(Confirm);
@@ -178,12 +178,12 @@ namespace OTK.LiteUI.UI.Components
             AddChild(QuickAccess);
             AddChild(CurrentDirectory);
             PositionElements();
-            var desktop = FileReference.SetUpFileRef(FileReference.Directories.Desktop);
-            var documents = FileReference.SetUpFileRef(FileReference.Directories.Documents);
-            var downloads = FileReference.SetUpFileRef(FileReference.Directories.Downloads);
-            var music = FileReference.SetUpFileRef(FileReference.Directories.Music);
-            var pictures = FileReference.SetUpFileRef(FileReference.Directories.Pictures);
-            var videos = FileReference.SetUpFileRef(FileReference.Directories.Videos);
+            var desktop = FileReference.SetUpFileRef(canvas, FileReference.Directories.Desktop);
+            var documents = FileReference.SetUpFileRef(canvas, FileReference.Directories.Documents);
+            var downloads = FileReference.SetUpFileRef(canvas, FileReference.Directories.Downloads);
+            var music = FileReference.SetUpFileRef(canvas, FileReference.Directories.Music);
+            var pictures = FileReference.SetUpFileRef(canvas, FileReference.Directories.Pictures);
+            var videos = FileReference.SetUpFileRef(canvas, FileReference.Directories.Videos);
             BindQuickAccess(desktop);
             BindQuickAccess(documents);
             BindQuickAccess(downloads);
@@ -226,7 +226,7 @@ namespace OTK.LiteUI.UI.Components
 
         public void AddChild(UIComponent child)
         {
-            UICanvas.Deregister(child);
+            canvas.Deregister(child);
             child.ClipBounds = ViewPort;
             Children.Add(child);
         }
@@ -235,7 +235,7 @@ namespace OTK.LiteUI.UI.Components
         {
             Children.Remove(child);
             child.ClipBounds = null;
-            UICanvas.Register(child);
+            canvas.Register(child);
         }
 
         private void PositionElements()
@@ -272,7 +272,7 @@ namespace OTK.LiteUI.UI.Components
                     {
                         if (!string.IsNullOrEmpty(filter) && !Path.GetFileName(directory).Contains(filter, StringComparison.OrdinalIgnoreCase))
                             continue;
-                        var directoryRef = FileReference.SetUpFileRef(directory);
+                        var directoryRef = FileReference.SetUpFileRef(canvas, directory);
                         directoryRef.IsVisible = IsVisible;
                         directoryRef.Colour = directoryColour;
                         CurrentDirectory.AddChild(directoryRef);
@@ -295,7 +295,7 @@ namespace OTK.LiteUI.UI.Components
                     {
                         if (!string.IsNullOrEmpty(filter) && !Path.GetFileName(file).Contains(filter, StringComparison.OrdinalIgnoreCase))
                             continue;
-                        var fileRef = FileReference.SetUpFileRef(file);
+                        var fileRef = FileReference.SetUpFileRef(canvas, file);
                         fileRef.IsVisible = IsVisible;
                         fileRef.Colour = fileColour;
                         CurrentDirectory.AddChild(fileRef);
@@ -539,8 +539,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
-        public FileReference(Vector4 bounds, string text = "", float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, text, inset, uvInset, colour)
+        public FileReference(UICanvas canvas, Vector4 bounds, string text = "", float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, text, inset, uvInset, colour)
         {
+            this.canvas = canvas;
             label.Alignment = TextAlignment.Left;
             label.Origin = new Vector2(Bounds.X + Inset, label.Origin.Y);
             label.ClipBounds = bounds;
@@ -589,18 +590,18 @@ namespace OTK.LiteUI.UI.Components
             get => File.Exists(ReferencePath);
         }
 
-        public static FileReference SetUpFileRef(Directories directory)
+        public static FileReference SetUpFileRef(UICanvas canvas, Directories directory)
         {
-            FileReference temp = new FileReference(new Vector4());
+            FileReference temp = new FileReference(canvas, new Vector4());
             temp.SetPath(directory);
             temp.Text = GetNameOfPath(temp.ReferencePath);
             temp.TimeToRollover = 0;
             return temp;
         }
 
-        public static FileReference SetUpFileRef(string path)
+        public static FileReference SetUpFileRef(UICanvas canvas, string path)
         {
-            FileReference temp = new FileReference(new Vector4());
+            FileReference temp = new FileReference(canvas, new Vector4());
             temp.ReferencePath = path;
             temp.Text = GetNameOfPath(temp.ReferencePath);
             temp.TimeToRollover = 0.0f;

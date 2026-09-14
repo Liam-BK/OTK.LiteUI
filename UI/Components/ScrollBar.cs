@@ -108,12 +108,13 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
-        public ScrollBar(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
+        public ScrollBar(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
+            this.canvas = canvas;
             Orientation = Width >= Height ? ComponentOrientation.Horizontal : ComponentOrientation.Vertical;
-            _thumb = new NineSlice(bounds);
+            _thumb = new NineSlice(canvas, bounds);
             _thumbColour = colour ?? Vector4.One;
-            UICanvas.Deregister(_thumb);
+            canvas.Deregister(_thumb);
         }
 
         private void UpdateThumbFromValue()
@@ -153,7 +154,7 @@ namespace OTK.LiteUI.UI.Components
         public override bool OnClickDown(MouseState mouse)
         {
             if (!IsVisible) return false;
-            var convertedMouse = UICanvas.ConvertMouseScreenCoords(mouse.Position);
+            var convertedMouse = canvas.ConvertMouseScreenCoords(mouse.Position);
             if (_thumb.WithinBounds(mouse))
             {
                 _isPressed = true;
@@ -184,7 +185,7 @@ namespace OTK.LiteUI.UI.Components
         {
             if (_isPressed)
             {
-                var convertedMouse = UICanvas.ConvertMouseScreenCoords(mouse.Position);
+                var convertedMouse = canvas.ConvertMouseScreenCoords(mouse.Position);
                 if (Orientation == ComponentOrientation.Horizontal)
                 {
                     SetThumbPos(Math.Clamp(convertedMouse.X - _clickOffset.X, Bounds.X + _thumb.Width * 0.5f, Bounds.Z - _thumb.Width * 0.5f), Center.Y);

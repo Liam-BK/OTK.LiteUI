@@ -16,15 +16,15 @@ public enum TextureResolution
     R4096
 }
 
-public static class TextureManager
+public class TextureManager
 {
-    private static TextureArray? textures = null;
+    private TextureArray? textures = null;
 
-    private static int _maxTextureUnits = -1;
+    private int _maxTextureUnits = -1;
 
-    public static int TextureCapacity => textures?.Capacity ?? throw new MissingMemberException("TextureArray must be initialized before accessing it.");
+    public int TextureCapacity => textures?.Capacity ?? throw new MissingMemberException("TextureArray must be initialized before accessing it.");
 
-    public static bool ContainsTexture(string name) => textures?.ContainsTexture(name) ?? throw new MissingMemberException("TextureArray must be initialized before accessing it.");
+    public TextureResolution GetTextureResolution => textures is not null ? textures.Resolution : TextureResolution.INVALID;
 
     public static int FindResolution(TextureResolution resolution)
     {
@@ -43,18 +43,6 @@ public static class TextureManager
         };
     }
 
-    public static void CreateTextureArray(int capacity, TextureResolution resolution)
-    {
-        if (textures is not null) throw new InvalidOperationException("TextureArray has already been created.");
-        textures = new TextureArray(capacity, resolution);
-    }
-
-    public static void CreateTextureArray(TextureResolution resolution, int capacity)
-    {
-        if (textures is not null) throw new InvalidOperationException("TextureArray has already been created.");
-        textures = new TextureArray(capacity, resolution);
-    }
-
     private static TextureResolution InferResolution(ImageData data)
     {
         int max = Math.Max(data.Width, data.Height);
@@ -71,7 +59,21 @@ public static class TextureManager
         return TextureResolution.R4096;
     }
 
-    public static bool TryLoadTexture(string path, string name, out TextureResolution finalResolution, TextureResolution? forceResolution = null, EmptyPixelType type = EmptyPixelType.Transparent, bool greyScale = false)
+    public bool ContainsTexture(string name) => textures?.ContainsTexture(name) ?? throw new MissingMemberException("TextureArray must be initialized before accessing it.");
+
+    public void CreateTextureArray(int capacity, TextureResolution resolution)
+    {
+        if (textures is not null) throw new InvalidOperationException("TextureArray has already been created.");
+        textures = new TextureArray(capacity, resolution);
+    }
+
+    public void CreateTextureArray(TextureResolution resolution, int capacity)
+    {
+        if (textures is not null) throw new InvalidOperationException("TextureArray has already been created.");
+        textures = new TextureArray(capacity, resolution);
+    }
+
+    public bool TryLoadTexture(string path, string name, out TextureResolution finalResolution, TextureResolution? forceResolution = null, EmptyPixelType type = EmptyPixelType.Transparent, bool greyScale = false)
     {
         try
         {
@@ -92,7 +94,7 @@ public static class TextureManager
         }
     }
 
-    public static bool LoadAllTextures(string directory, EmptyPixelType type, TextureResolution? forceResolution = null, bool greyScale = false)
+    public bool LoadAllTextures(string directory, EmptyPixelType type, TextureResolution? forceResolution = null, bool greyScale = false)
     {
         if (!Directory.Exists(directory))
             return false;
@@ -109,7 +111,7 @@ public static class TextureManager
         return true;
     }
 
-    public static void UploadTexture(ImageData data, string name)
+    public void UploadTexture(ImageData data, string name)
     {
         if (textures is null)
             throw new InvalidOperationException("TextureArray must be created before uploading textures.");
@@ -117,16 +119,16 @@ public static class TextureManager
         if (textures.LastLayer >= textures.Capacity)
             throw new InvalidOperationException("TextureArray capacity exceeded.");
 
-        textures?.AddTexture(data, name);
+        textures.AddTexture(data, name);
     }
 
-    public static bool TryGetTexture(string name, out int layer)
+    public bool TryGetTexture(string name, out int layer)
     {
         layer = textures?.GetTextureLayer(name) ?? -1;
         return layer >= 0;
     }
 
-    public static void Bind(int textureUnit)
+    public void Bind(int textureUnit)
     {
         if (_maxTextureUnits < 0) _maxTextureUnits = GL.GetInteger(GetPName.MaxTextureImageUnits);
         if (textureUnit < 0 || textureUnit >= _maxTextureUnits)
@@ -138,7 +140,7 @@ public static class TextureManager
         textures.Bind(textureUnit);
     }
 
-    public static bool TryDeleteTextures()
+    public bool TryDeleteTextures()
     {
         if (textures is null) return false;
         textures.Dispose();

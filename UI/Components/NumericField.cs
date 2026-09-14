@@ -2,6 +2,7 @@ using System.Text;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using OTK.LiteUI.Core;
 
 namespace OTK.LiteUI.UI.Components
 {
@@ -37,8 +38,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
-        public NumericField(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
+        public NumericField(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
+            this.canvas = canvas;
             Mode = TextFieldMode.SingleLine;
             LockMode = true;
         }

@@ -22,7 +22,7 @@ namespace OTK.LiteUI.UI.Rendering
 
         private readonly int MaxUnits = GL.GetInteger(GetPName.MaxTextureImageUnits);
 
-        public static Material Load(string path)
+        public static Material Load(string path, TextureManager manager)
         {
             XDocument doc = XDocument.Load(ResourceIO.GetLoadingStream(path) ?? throw new FileNotFoundException($"Path {path} not found. Make sure the name of the file is correct prior to loading."));
             XElement root = doc.Element("Material") ?? throw new Exception("Invalid material file. missing <Material> root.");
@@ -66,7 +66,7 @@ namespace OTK.LiteUI.UI.Rendering
                     if (flipY) flags |= 1 << 1;
                     if (flipX) flags |= 1 << 2;
 
-                    TextureManager.TryLoadTexture(pathAttr, name, out var result, null, EmptyPixelType.Transparent, grayscale);
+                    manager.TryLoadTexture(pathAttr, name, out var result, null, EmptyPixelType.Transparent, grayscale);
                 }
             }
             return material;
@@ -129,7 +129,7 @@ namespace OTK.LiteUI.UI.Rendering
             }
         }
 
-        public void Bind()
+        public void Bind(TextureManager textureManager)
         {
             if (shader is null) throw new MissingMemberException("Shader has not been initialized so it cannot be bound.");
             shader.Bind();
@@ -144,7 +144,7 @@ namespace OTK.LiteUI.UI.Rendering
             if (CullFace) GL.Enable(EnableCap.CullFace);
             else GL.Disable(EnableCap.CullFace);
 
-            TextureManager.Bind(0);
+            textureManager.Bind(0);
             string uniformName = $"uTexture";
             int loc = GL.GetUniformLocation(shader.Handle, uniformName);
 

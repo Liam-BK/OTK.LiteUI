@@ -11,15 +11,16 @@ namespace OTK.LiteUI.UI.Utilities
 
         private Vector2 clickOffset = new();
 
-        public GrabHandle(Vector4 bounds)
+        public GrabHandle(UICanvas canvas, Vector4 bounds)
         {
+            this.canvas = canvas;
             Bounds = bounds;
         }
 
         public override bool OnClickDown(MouseState mouse)
         {
             Active = WithinBounds(mouse) && IsVisible;
-            var temp = UICanvas.ConvertMouseScreenCoords(mouse.Position);
+            var temp = canvas.ConvertMouseScreenCoords(mouse.Position);
             clickOffset.X = Center.X - temp.X;
             clickOffset.Y = Center.Y - temp.Y;
             return Active;
@@ -29,7 +30,7 @@ namespace OTK.LiteUI.UI.Utilities
         {
             if (Active)
             {
-                var convertedMouse = UICanvas.ConvertMouseScreenCoords(mouse.Position);
+                var convertedMouse = canvas.ConvertMouseScreenCoords(mouse.Position);
                 var x = convertedMouse.X + clickOffset.X;
                 var y = convertedMouse.Y + clickOffset.Y;
                 var halfWidth = Width * 0.5f;

@@ -26,15 +26,15 @@ namespace OTK.LiteUI.UI.Rendering.Backend
 
 namespace OTK.LiteUI.UI.Rendering.Backend
 {
-    public static class FontManager
+    public class FontManager
     {
         private const float INF = 1e20f;
-        internal static Dictionary<string, FontData> Fonts = new();
+        internal Dictionary<string, FontData> Fonts = new();
 
         /// <summary>
         /// This is set whenever LoadFont is called for the first time. Used by Label as a way to avoid having to manually set its font every time. 
         /// </summary>
-        public static string DefaultFontKey { get; private set; } = "";
+        public string DefaultFontKey { get; private set; } = "";
 
         /// <summary>
         /// Generates relevant FontData based on the provided parameters and stores it for access by Label.
@@ -48,7 +48,7 @@ namespace OTK.LiteUI.UI.Rendering.Backend
         /// <param name="lastChar">The last Unicode character to include in the generated font atlas. 
         /// Only characters from firstChar to lastChar (inclusive) will be baked.</param>
         /// <exception cref="Exception">Thrown if baking the bitmap fails</exception>
-        public static void LoadFont(string filePath, int fontSize = 32, int atlasWidth = 512, int atlasHeight = 512, char firstChar = ' ', char lastChar = '~')
+        public void LoadFont(TextureManager manager, string filePath, int fontSize = 32, TextureResolution resolution = TextureResolution.R512, char firstChar = ' ', char lastChar = '~')
         {
             var bytes = ResourceIO.GetBytes(filePath);
             if (bytes is null)
@@ -58,9 +58,10 @@ namespace OTK.LiteUI.UI.Rendering.Backend
             byte[] ttf = bytes;
             int numChars = lastChar - firstChar + 1;
             stbtt_bakedchar[] bakedChars = new stbtt_bakedchar[lastChar - firstChar + 1];
-            byte[] bitmap = new byte[atlasWidth * atlasHeight];
+            int atlasSize = TextureManager.FindResolution(resolution);
+            byte[] bitmap = new byte[atlasSize * atlasSize];
 
-            var result = stbtt_BakeFontBitmap(ttf, 0, fontSize, bitmap, atlasWidth, atlasHeight, firstChar, numChars, bakedChars);
+            var result = stbtt_BakeFontBitmap(ttf, 0, fontSize, bitmap, atlasSize, atlasSize, firstChar, numChars, bakedChars);
             if (!result)
                 throw new Exception("Font Baking failed");
 
@@ -71,10 +72,10 @@ namespace OTK.LiteUI.UI.Rendering.Backend
             {
                 var bc1 = bakedChars[i];
                 var inset = 0.00f;
-                float UVLeft = (bc1.x0 + inset) / (float)atlasWidth;
-                float UVTop = (bc1.y0 - inset) / (float)atlasHeight;
-                float UVRight = (bc1.x1 - inset) / (float)atlasWidth;
-                float UVBottom = (bc1.y1 + inset) / (float)atlasHeight;
+                float UVLeft = (bc1.x0 + inset) / (float)atlasSize;
+                float UVTop = (bc1.y0 - inset) / (float)atlasSize;
+                float UVRight = (bc1.x1 - inset) / (float)atlasSize;
+                float UVBottom = (bc1.y1 + inset) / (float)atlasSize;
                 Vector4 glyphUVs = new(UVLeft, UVTop, UVRight, UVBottom);
                 Vector4 glyphBounds = new(bc1.x0, bc1.y0, bc1.x1, bc1.y1);
                 glyphUVData.Add((char)(firstChar + i), glyphUVs);
@@ -84,14 +85,14 @@ namespace OTK.LiteUI.UI.Rendering.Backend
 
             var image = new ImageData()
             {
-                Width = atlasWidth,
-                Height = atlasHeight,
+                Width = atlasSize,
+                Height = atlasSize,
                 Pixels = bitmap,
                 Channels = 1
             };
 
             image = ConvertFromAlphaToRGBA(image);
-            image.ConvertToResolution(UICanvas.Resolution);
+            image.ConvertToResolution(manager.GetTextureResolution);
             string fontKey = Path.GetFileNameWithoutExtension(filePath);
 
             if (DefaultFontKey is "") DefaultFontKey = fontKey;
@@ -107,7 +108,7 @@ namespace OTK.LiteUI.UI.Rendering.Backend
             };
 
             Fonts.Add(fontKey, fontData);
-            TextureManager.UploadTexture(image, fontKey);
+            manager.UploadTexture(image, fontKey);
         }
 
         private static ImageData ConvertFromAlphaToRGBA(ImageData data)

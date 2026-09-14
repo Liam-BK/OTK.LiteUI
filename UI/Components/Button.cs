@@ -100,13 +100,13 @@ namespace OTK.LiteUI.UI.Components
 
         public event Action? OnHoverExit;
 
-        public Button(Vector4 bounds, string text = "", float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
+        public Button(UICanvas canvas, Vector4 bounds, string text = "", float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
             _baseColour = colour ?? Vector4.One;
-            label = new Label(new Vector2((bounds.X + bounds.Z) * 0.5f, bounds.Y + (bounds.W - bounds.Y) * 0.25f), (bounds.W - bounds.Y) * 0.5f, text);
+            label = new Label(canvas, new Vector2((bounds.X + bounds.Z) * 0.5f, bounds.Y + (bounds.W - bounds.Y) * 0.25f), (bounds.W - bounds.Y) * 0.5f, text);
             label.Alignment = TextAlignment.Center;
             label.Colour = new Vector4(0, 0, 0, 1);
-            UICanvas.Deregister(label);
+            canvas.Deregister(label);
         }
 
         public override bool OnClickDown(MouseState mouse)

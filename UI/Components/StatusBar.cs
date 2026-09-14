@@ -53,10 +53,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
-        public StatusBar(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(bounds, inset, uvInset, colour)
+        public StatusBar(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
-            Fill = new NineSlice(bounds, inset, uvInset, colour);
-            UICanvas.Deregister(Fill);
+            Fill = new NineSlice(canvas, bounds, inset, uvInset, colour);
+            canvas.Deregister(Fill);
         }
 
         public override void SubmitData(Renderer renderer)

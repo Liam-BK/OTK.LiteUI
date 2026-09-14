@@ -126,12 +126,12 @@ namespace OTK.LiteUI.UI.Rendering
             }
         }
 
-        public void DrawInstances(PrimitiveType primitives = PrimitiveType.Triangles)
+        public void DrawInstances(TextureManager manager, PrimitiveType primitives = PrimitiveType.Triangles)
         {
             if (!IsVisible || Mesh == null || Material == null)
                 return;
 
-            Material.Bind();
+            Material.Bind(manager);
             Mesh.Bind();
             UploadInstanceBuffer();
 
@@ -141,12 +141,12 @@ namespace OTK.LiteUI.UI.Rendering
             _instanceCount = 0;
         }
 
-        public void DrawSingle(PrimitiveType primitives = PrimitiveType.Triangles)
+        public void DrawSingle(TextureManager textureManager, PrimitiveType primitives = PrimitiveType.Triangles)
         {
             if (!IsVisible || Mesh == null || Material == null)
                 return;
 
-            Material.Bind();
+            Material.Bind(textureManager);
             Mesh.Bind();
 
             GL.DrawElements(primitives, Mesh.IndexCount, DrawElementsType.UnsignedInt, 0);

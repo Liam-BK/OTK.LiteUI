@@ -1,3 +1,4 @@
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Common.Input;
@@ -6,38 +7,54 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 using OTK.LiteUI.UI.Components;
 using OTK.LiteUI.UI.Interfaces;
 using OTK.LiteUI.UI.Rendering;
+using OTK.LiteUI.UI.Rendering.Backend;
+using OTK.LiteUI.UI.Utilities;
 
 namespace OTK.LiteUI.Core
 {
-    public static class UICanvas
+    public enum DisplayUnitType
     {
-        public static GameWindow? window = null;
-        private static bool _initialized = false;
-        public static bool Initialized => _initialized;
-        private static Renderer? renderer;
-        private static Material? material;
-        public static Matrix4 projection;
-        public static TextureResolution Resolution = TextureResolution.R256;
+        /// <summary>
+        /// Measurements are in absolute pixels.
+        /// </summary>
+        PX,
+        /// <summary>
+        /// Measurements are scaled according to the display DPI.
+        /// </summary>
+        DPI
+    }
+
+    public class UICanvas
+    {
+        private readonly GameWindow window;
+        public static UICanvas? Default { get; set; } = null;
+        private readonly TextureManager textureManager = new TextureManager();
+        private readonly FontManager fontManager = new FontManager();
+        private Renderer renderer;
+        private Material material;
+        public Matrix4 projection;
+        public List<UIComponent> components = new List<UIComponent>();
+        private List<UIComponent> pendingRemovals = new List<UIComponent>();
+        internal Dictionary<string, FontData> Fonts => fontManager.Fonts;
+        public static UIComponent? FocusedComponent = null;
+        private bool cursorUpdated = false;
         private const float referenceDPI = 96.0f;
-        public static string ClipboardString
+
+        public string DefaultFontKey => fontManager.DefaultFontKey;
+
+        public string ClipboardString
         {
             get
             {
-                return window?.ClipboardString ?? "";
+                return window.ClipboardString;
             }
             set
             {
-                if (window is not null) window.ClipboardString = value;
+                window.ClipboardString = value;
             }
         }
-        public static List<UIComponent> components = new List<UIComponent>();
-        public static List<UIComponent> pendingRemovals = new List<UIComponent>();
-        private static bool cursorUpdated = false;
 
-        /// <summary>
-        /// A Vector2 that can be multiplied with a position to multiply it by the inverse DPI scale.
-        /// </summary>
-        public static Vector2 InvDPIScaleVec2
+        public Vector2 InvDPIScaleVec2
         {
             get => new Vector2(InvDPIScaleX, InvDPIScaleY);
         }
@@ -45,7 +62,7 @@ namespace OTK.LiteUI.Core
         /// <summary>
         /// The inverse DPI scale value for the X axis.
         /// </summary>
-        public static float InvDPIScaleX
+        public float InvDPIScaleX
         {
             get
             {
@@ -56,7 +73,7 @@ namespace OTK.LiteUI.Core
         /// <summary>
         /// The inverse DPI scale value for the Y axis.
         /// </summary>
-        public static float InvDPIScaleY
+        public float InvDPIScaleY
         {
             get => 1.0f / DPIScaleY;
         }
@@ -64,29 +81,31 @@ namespace OTK.LiteUI.Core
         /// <summary>
         /// The DPI scale value for the X axis.
         /// </summary>
-        public static float DPIScaleX
+        public float DPIScaleX
         {
             get
             {
-                return window is not null && DisplayUnits == DisplayUnitType.DPI ? (window.CurrentMonitor.HorizontalDpi / referenceDPI) : 1;
+                return DisplayUnits == DisplayUnitType.DPI ? (window.CurrentMonitor.HorizontalDpi / referenceDPI) : 1;
             }
         }
 
         /// <summary>
         /// The DPI scale value for the X axis.
         /// </summary>
-        public static float DPIScaleY
+        public float DPIScaleY
         {
-            get => window is not null && DisplayUnits == DisplayUnitType.DPI ? (window.CurrentMonitor.VerticalDpi / referenceDPI) : 1;
+            get => DisplayUnits == DisplayUnitType.DPI ? (window.CurrentMonitor.VerticalDpi / referenceDPI) : 1;
         }
 
-        private static DisplayUnitType _displayUnits = DisplayUnitType.DPI;
+        public TextureResolution GetTextureResolution => textureManager.GetTextureResolution;
+
+        private DisplayUnitType _displayUnits = DisplayUnitType.DPI;
 
         /// <summary>
         /// The current unit type used for measuring UI elements.
         /// Changing this will update the orthographic projection accordingly.
         /// </summary>
-        public static DisplayUnitType DisplayUnits
+        public DisplayUnitType DisplayUnits
         {
             get
             {
@@ -99,30 +118,11 @@ namespace OTK.LiteUI.Core
             }
         }
 
-        /// <summary>
-        /// Represents the unit type used for UI element measurements.
-        /// </summary>
-        public enum DisplayUnitType
+        public UICanvas(GameWindow newWindow)
         {
-            /// <summary>
-            /// Measurements are in absolute pixels.
-            /// </summary>
-            PX,
-            /// <summary>
-            /// Measurements are scaled according to the display DPI.
-            /// </summary>
-            DPI
-        }
-
-        public static UIComponent? FocusedComponent = null;
-
-        public static void Initialize(GameWindow newWindow)
-        {
-            if (_initialized) return;
-            _initialized = true;
             window = newWindow;
             var mesh = Mesh.Load("OTK.LiteUI.Assets.Meshes.Quad.obj");
-            material = Material.Load("OTK.LiteUI.Assets.Materials.UIMaterial.mat");
+            material = Material.Load("OTK.LiteUI.Assets.Materials.UIMaterial.mat", textureManager);
             InstanceAttribType[] attribTypes = [InstanceAttribType.Position2D, InstanceAttribType.Vec2, InstanceAttribType.TexCoords, InstanceAttribType.Vec2, InstanceAttribType.Color4, InstanceAttribType.Single];
             renderer = new Renderer(mesh, material, attribTypes);
             window.KeyDown += OnKeyDown;
@@ -134,29 +134,76 @@ namespace OTK.LiteUI.Core
             window.TextInput += OnTextInput;
             window.UpdateFrame += args => OnUpdate((float)args.Time, window.MouseState, window.KeyboardState);
             UpdateProjection();
+            Default ??= this;
         }
 
-        private static void UpdateProjection()
+        public bool ContainsTexture(string textureName)
         {
-            if (!_initialized || window is null) throw new InvalidOperationException("UIScene has not been initialized. Make sure to call 'Initialize' before doing any operations.");
+            return textureManager.ContainsTexture(textureName);
+        }
+
+        public void CreateTextureArray(int capacity, TextureResolution resolution)
+        {
+            textureManager.CreateTextureArray(capacity, resolution);
+        }
+
+        public void CreateTextureArray(TextureResolution resolution, int capacity)
+        {
+            textureManager.CreateTextureArray(capacity, resolution);
+        }
+
+        public bool TryLoadTexture(string path, string name, out TextureResolution finalResolution, TextureResolution? forceResolution = null, EmptyPixelType type = EmptyPixelType.Transparent, bool greyScale = false)
+        {
+            return textureManager.TryLoadTexture(path, name, out finalResolution, forceResolution, type, greyScale);
+        }
+
+        public bool LoadAllTextures(string directory, EmptyPixelType type, TextureResolution? forceResolution = null, bool greyScale = false)
+        {
+            return textureManager.LoadAllTextures(directory, type, forceResolution, greyScale);
+        }
+
+        public void UploadTexture(ImageData data, string name)
+        {
+            textureManager.UploadTexture(data, name);
+        }
+
+        public bool TryGetTexture(string name, out int layer)
+        {
+            return textureManager.TryGetTexture(name, out layer);
+        }
+
+        public void BindTextures(int textureUnit)
+        {
+            textureManager.Bind(textureUnit);
+        }
+
+        public bool TryDeleteTextures()
+        {
+            return textureManager.TryDeleteTextures();
+        }
+
+        public void LoadFont(string filePath, int fontSize = 32, TextureResolution resolution = TextureResolution.R512, char firstChar = ' ', char lastChar = '~')
+        {
+            fontManager.LoadFont(textureManager, filePath, fontSize, resolution, firstChar, lastChar);
+        }
+
+        private void UpdateProjection()
+        {
             projection = Matrix4.CreateOrthographicOffCenter(0, window.Size.X * InvDPIScaleX, 0, window.Size.Y * InvDPIScaleY, 0.01f, 1.0f);
         }
 
-        public static void Register(UIComponent component)
+        public void Register(UIComponent component)
         {
-            if (!_initialized) throw new InvalidOperationException("UIScene has not been initialized. Make sure to call 'Initialize' before doing any operations.");
             components.Add(component);
         }
 
-        public static void Deregister(UIComponent component)
+        public void Deregister(UIComponent component)
         {
-            if (!_initialized) throw new InvalidOperationException("UIScene has not been initialized. Make sure to call 'Initialize' before doing any operations.");
             pendingRemovals.Add(component);
         }
 
-        private static void OnClickDown(MouseState mouse)
+        private void OnClickDown(MouseState mouse)
         {
-            if (!_initialized) return;
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 var c = components[i];
@@ -164,7 +211,7 @@ namespace OTK.LiteUI.Core
             }
         }
 
-        public static void SetFocus(UIComponent? component)
+        public void SetFocus(UIComponent? component)
         {
             if (FocusedComponent == component)
                 return;
@@ -174,9 +221,8 @@ namespace OTK.LiteUI.Core
             FocusedComponent?.OnFocusGained();
         }
 
-        private static void OnClickUp(MouseState mouse)
+        private void OnClickUp(MouseState mouse)
         {
-            if (!_initialized) return;
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 var c = components[i];
@@ -195,33 +241,29 @@ namespace OTK.LiteUI.Core
             }
         }
 
-        private static void OnKeyDown(KeyboardKeyEventArgs args)
+        private void OnKeyDown(KeyboardKeyEventArgs args)
         {
-            if (!_initialized) return;
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 components[i].OnKeyDown(args);
             }
         }
 
-        private static void OnKeyUp(KeyboardKeyEventArgs args)
+        private void OnKeyUp(KeyboardKeyEventArgs args)
         {
-            if (!_initialized) return;
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 components[i].OnKeyUp(args);
             }
         }
 
-        private static void OnTextInput(TextInputEventArgs args)
+        private void OnTextInput(TextInputEventArgs args)
         {
-            if (!_initialized) return;
             FocusedComponent?.OnTextInput(args);
         }
 
-        private static void OnMouseMove(MouseState mouse)
+        private void OnMouseMove(MouseState mouse)
         {
-            if (!_initialized || window is null) return;
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 var c = components[i];
@@ -231,9 +273,8 @@ namespace OTK.LiteUI.Core
             cursorUpdated = false;
         }
 
-        private static void OnMouseWheel(MouseState mouse)
+        private void OnMouseWheel(MouseState mouse)
         {
-            if (!_initialized) return;
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 var c = components[i];
@@ -241,9 +282,8 @@ namespace OTK.LiteUI.Core
             }
         }
 
-        private static void OnUpdate(float delta, MouseState mouse, KeyboardState keys)
+        private void OnUpdate(float delta, MouseState mouse, KeyboardState keys)
         {
-            if (!_initialized || window is null) return;
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 components[i].OnUpdate(delta, mouse, keys);
@@ -264,21 +304,23 @@ namespace OTK.LiteUI.Core
             if (pendingRemovals.Count > 0) pendingRemovals.Clear();
         }
 
-        public static void SetCursor(MouseCursor cursor)
+        public void SetCursor(MouseCursor cursor)
         {
-            if (!_initialized || window is null) return;
             cursorUpdated = true;
             window.Cursor = cursor;
         }
 
-        public static Vector2 ConvertMouseScreenCoords(Vector2 position)
+        public Vector2 ConvertMouseScreenCoords(Vector2 position)
         {
-            return new Vector2(position.X, window is not null ? (window.Size.Y - position.Y) : position.Y) * InvDPIScaleVec2;
+            return new Vector2(position.X, window.Size.Y - position.Y) * InvDPIScaleVec2;
         }
 
-        public static void DrawElements()
+        public void DrawElements()
         {
-            renderer?.DrawInstances();
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Disable(EnableCap.DepthTest);
+            renderer?.DrawInstances(textureManager);
         }
     }
 }

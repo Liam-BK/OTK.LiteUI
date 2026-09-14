@@ -16,7 +16,7 @@ namespace OTK.LiteUI.UI.Components
 {
     public abstract class UIComponent
     {
-        public static GameWindow? window = null;
+        public UICanvas canvas = null!;
 
         public virtual bool IsVisible { get; set; } = false;
 
@@ -87,7 +87,7 @@ namespace OTK.LiteUI.UI.Components
 
         public virtual void OnFocusLost() { }
 
-        public bool IsFocused => CanFocus && UICanvas.FocusedComponent == this;
+        public bool IsFocused => CanFocus && UICanvas.FocusedComponent is not null;
 
         public virtual void Deregister(List<UIComponent> registry)
         {
@@ -136,7 +136,7 @@ namespace OTK.LiteUI.UI.Components
 
         public virtual bool WithinBounds(MouseState mouse)
         {
-            return WithinBounds(UICanvas.ConvertMouseScreenCoords(mouse.Position));
+            return WithinBounds(canvas.ConvertMouseScreenCoords(mouse.Position));
         }
 
         public bool WithinBounds(Vector2 position)

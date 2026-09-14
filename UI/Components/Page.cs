@@ -5,29 +5,31 @@ using OTK.LiteUI.UI.Rendering;
 public class Page : IRenderable, IUIContainer
 {
     public List<UIComponent> Children { get; set; } = new List<UIComponent>();
+    public bool IsVisible { get; set; } = false;
 
     public void AddChild(UIComponent child)
     {
-        throw new NotImplementedException();
+        Children.Add(child);
     }
 
     public void Clear()
     {
-        throw new NotImplementedException();
+        Children.Clear();
     }
 
     public void RemoveChild(UIComponent child)
     {
-        throw new NotImplementedException();
+        Children.Remove(child);
     }
 
-    public void SetLayout(ILayout layout)
-    {
-        throw new NotImplementedException();
-    }
+    public void SetLayout(ILayout layout) { }
 
     public void SubmitData(Renderer renderer)
     {
-        throw new NotImplementedException();
+        if (!IsVisible) return;
+        foreach (var child in Children)
+        {
+            if (child is IRenderable renderable) renderable.SubmitData(renderer);
+        }
     }
 }
