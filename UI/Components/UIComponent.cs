@@ -12,11 +12,27 @@ public enum ComponentOrientation
     Vertical
 }
 
+public enum AnchorType
+{
+    BottomLeft = 0,
+    BottomCenter = 1,
+    BottomRight = 2,
+    MiddleLeft = 3,
+    Center = 4,
+    MiddleRight = 5,
+    TopLeft = 6,
+    TopCenter = 7,
+    TopRight = 8,
+    FullWindow = 9
+}
+
 namespace OTK.LiteUI.UI.Components
 {
     public abstract class UIComponent
     {
-        public UICanvas canvas = null!;
+        public UICanvas Canvas = null!;
+
+        public AnchorType Anchor = AnchorType.BottomLeft;
 
         public virtual bool IsVisible { get; set; } = false;
 
@@ -59,7 +75,15 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector4 _bounds = Vector4.Zero;
 
-        public virtual Vector4 Bounds { get => _bounds; set => _bounds = value; }
+        public virtual Vector4 Bounds
+        {
+            get
+            {
+                var offset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+                return _bounds + new Vector4(offset.X, offset.Y, offset.X, offset.Y);
+            }
+            set => _bounds = value;
+        }
 
         public Vector2 Center => new Vector2((Bounds.X + Bounds.Z) * 0.5f, (Bounds.Y + Bounds.W) * 0.5f);
 
@@ -136,7 +160,7 @@ namespace OTK.LiteUI.UI.Components
 
         public virtual bool WithinBounds(MouseState mouse)
         {
-            return WithinBounds(canvas.ConvertMouseScreenCoords(mouse.Position));
+            return WithinBounds(Canvas.ConvertMouseScreenCoords(mouse.Position));
         }
 
         public bool WithinBounds(Vector2 position)

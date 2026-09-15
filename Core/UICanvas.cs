@@ -26,6 +26,48 @@ namespace OTK.LiteUI.Core
 
     public class UICanvas
     {
+        public delegate Vector2 AnchorOffset(Vector2 canvasSize, UIComponent component);
+        public AnchorOffset[] AnchorTypeOffsets = [
+            //bottom left
+            (_, _) => Vector2.Zero,
+            //bottom center
+            (canvas, component) => new Vector2(
+                canvas.X * 0.5f, 0.0f
+            ),
+            //bottom right
+            (canvas, component) => new Vector2(
+                canvas.X, 0.0f
+            ),
+            //middle left
+            (canvas, component) => new Vector2(
+                0.0f, canvas.Y * 0.5f
+            ),
+            //center
+            (canvas, component) => new Vector2(
+                canvas.X, canvas.Y
+            ) * 0.5f,
+            //middle right
+            (canvas, component) => new Vector2(
+                canvas.X, canvas.Y * 0.5f
+            ),
+            //top left
+            (canvas, component) => new Vector2(
+                0.0f, canvas.Y
+            ),
+            //top center
+            (canvas, component) => new Vector2(
+                canvas.X * 0.5f, canvas.Y
+            ),
+            //top right
+            (canvas, component) => new Vector2(
+                canvas.X, canvas.Y
+            ),
+            //WholeWindow
+            (canvas, component) => {
+                component.Bounds = new Vector4(0, 0, canvas.X, canvas.Y);
+                return Vector2.Zero;
+            },
+        ];
         private readonly GameWindow window;
         public static UICanvas? Default { get; set; } = null;
         private readonly TextureManager textureManager = new TextureManager();
@@ -39,6 +81,8 @@ namespace OTK.LiteUI.Core
         public static UIComponent? FocusedComponent = null;
         private bool cursorUpdated = false;
         private const float referenceDPI = 96.0f;
+
+        public Vector2 CanvasSize => window.Size.ToVector2() * InvDPIScaleVec2;
 
         public string DefaultFontKey => fontManager.DefaultFontKey;
 
@@ -133,6 +177,8 @@ namespace OTK.LiteUI.Core
             window.MouseWheel += _ => OnMouseWheel(window.MouseState);
             window.TextInput += OnTextInput;
             window.UpdateFrame += args => OnUpdate((float)args.Time, window.MouseState, window.KeyboardState);
+            window.Resize += args => OnResize();
+            window.Move += args => OnWindowMove();
             UpdateProjection();
             Default ??= this;
         }
@@ -204,6 +250,7 @@ namespace OTK.LiteUI.Core
 
         private void OnClickDown(MouseState mouse)
         {
+            window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 var c = components[i];
@@ -223,6 +270,7 @@ namespace OTK.LiteUI.Core
 
         private void OnClickUp(MouseState mouse)
         {
+            window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 var c = components[i];
@@ -243,6 +291,7 @@ namespace OTK.LiteUI.Core
 
         private void OnKeyDown(KeyboardKeyEventArgs args)
         {
+            window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 components[i].OnKeyDown(args);
@@ -251,6 +300,7 @@ namespace OTK.LiteUI.Core
 
         private void OnKeyUp(KeyboardKeyEventArgs args)
         {
+            window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 components[i].OnKeyUp(args);
@@ -259,11 +309,13 @@ namespace OTK.LiteUI.Core
 
         private void OnTextInput(TextInputEventArgs args)
         {
+            window.MakeCurrent();
             FocusedComponent?.OnTextInput(args);
         }
 
         private void OnMouseMove(MouseState mouse)
         {
+            window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 var c = components[i];
@@ -275,6 +327,7 @@ namespace OTK.LiteUI.Core
 
         private void OnMouseWheel(MouseState mouse)
         {
+            window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 var c = components[i];
@@ -284,6 +337,7 @@ namespace OTK.LiteUI.Core
 
         private void OnUpdate(float delta, MouseState mouse, KeyboardState keys)
         {
+            window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 components[i].OnUpdate(delta, mouse, keys);
@@ -304,8 +358,22 @@ namespace OTK.LiteUI.Core
             if (pendingRemovals.Count > 0) pendingRemovals.Clear();
         }
 
+        public void OnResize()
+        {
+            window.MakeCurrent();
+            UpdateProjection();
+            GL.Viewport(0, 0, window.FramebufferSize.X, window.FramebufferSize.Y);
+            DrawElements();
+        }
+
+        public void OnWindowMove()
+        {
+
+        }
+
         public void SetCursor(MouseCursor cursor)
         {
+            window.MakeCurrent();
             cursorUpdated = true;
             window.Cursor = cursor;
         }

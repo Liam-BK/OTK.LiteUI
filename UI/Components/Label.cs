@@ -109,7 +109,7 @@ namespace OTK.LiteUI.UI.Components
 
         public Label(UICanvas canvas, Vector2 origin, float size, string text = "", Vector4? colour = null)
         {
-            this.canvas = canvas;
+            this.Canvas = canvas;
             Origin = origin;
             Size = size;
             Colour = colour ?? Vector4.One;
@@ -168,7 +168,7 @@ namespace OTK.LiteUI.UI.Components
 
         public int FindLineFromPos(MouseState mouse)
         {
-            var convertedMouse = canvas.ConvertMouseScreenCoords(mouse.Position);
+            var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
             return FindLineFromPos(convertedMouse);
         }
 
@@ -182,7 +182,7 @@ namespace OTK.LiteUI.UI.Components
 
         public int FindCaretIndexFromPos(MouseState mouse)
         {
-            var convertedMouse = canvas.ConvertMouseScreenCoords(mouse.Position);
+            var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
             return FindCaretIndexFromPos(convertedMouse);
         }
 
@@ -204,14 +204,14 @@ namespace OTK.LiteUI.UI.Components
 
         public void ForceUpdateGlyphs()
         {
-            if (canvas.DefaultFontKey == "") return;
+            if (Canvas.DefaultFontKey == "") return;
             _lines.Clear();
             _lines.Add([]);
             _bounds = new Vector4(Origin.X, Origin.Y, Origin.X, Origin.Y);
             int currentLine = 0;
             float XCursor = Origin.X;
             float YCursor = Origin.Y;
-            if (!canvas.Fonts.TryGetValue(FontKey, out var fontData))
+            if (!Canvas.Fonts.TryGetValue(FontKey, out var fontData))
             {
                 Console.WriteLine("No FontData");
                 return;
@@ -257,7 +257,7 @@ namespace OTK.LiteUI.UI.Components
                 glyph.UVOffset = new Vector2(UVs.X, 1 - UVs.W);
                 glyph.UVRange = new Vector2(UVs.Z - UVs.X, UVs.W - UVs.Y);
                 glyph.colour = Colour;
-                canvas.TryGetTexture(FontKey, out var layer);
+                Canvas.TryGetTexture(FontKey, out var layer);
                 glyph.textureLayer = layer;
                 _lines[currentLine].Add(glyph);
                 XCursor += glyphWidth * Size + kern * Size + offset.X * Size;

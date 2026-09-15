@@ -60,7 +60,7 @@ namespace OTK.LiteUI.UI.Components
 
         public NineSlice(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25f, Vector4? colour = null)
         {
-            this.canvas = canvas;
+            this.Canvas = canvas;
             Bounds = bounds;
             Inset = inset;
             UVInset = uvInset;
@@ -86,7 +86,7 @@ namespace OTK.LiteUI.UI.Components
         {
             int textureLayer;
             if (Texture == "") textureLayer = -1;
-            else canvas.TryGetTexture(Texture, out textureLayer);
+            else Canvas.TryGetTexture(Texture, out textureLayer);
 
             topLeft.position = new Vector2(Bounds.X + Inset * 0.5f, Bounds.W - Inset * 0.5f);
             topLeft.size = new Vector2(Inset, Inset);

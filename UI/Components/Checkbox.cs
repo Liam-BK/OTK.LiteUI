@@ -36,7 +36,7 @@ namespace OTK.LiteUI.UI.Components
 
         public Checkbox(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
-            this.canvas = canvas;
+            this.Canvas = canvas;
             UncheckedColour = colour ?? Vector4.One;
             CheckedColour = colour ?? Vector4.One;
         }

@@ -40,7 +40,7 @@ namespace OTK.LiteUI.UI.Components
 
         public NumericField(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
-            this.canvas = canvas;
+            this.Canvas = canvas;
             Mode = TextFieldMode.SingleLine;
             LockMode = true;
         }

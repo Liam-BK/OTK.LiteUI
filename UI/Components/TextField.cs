@@ -94,7 +94,7 @@ namespace OTK.LiteUI.UI.Components
                 {
                     label.ClipBounds = ViewPort;
                     AutoScaleTextSize();
-                    caret.size = new Vector2(canvas.InvDPIScaleX * 5, TextSize + Label.LineSpacing);
+                    caret.size = new Vector2(Canvas.InvDPIScaleX * 5, TextSize + Label.LineSpacing);
                     UpdateLabelOrigin();
                 }
             }
@@ -203,7 +203,7 @@ namespace OTK.LiteUI.UI.Components
 
         public TextField(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
-            this.canvas = canvas;
+            this.Canvas = canvas;
             TextSize = Math.Min(Math.Max(1, Height * 0.5f), defaultTextSize);
             var textColour = new Vector4(0, 0, 0, 1);
             label = new Label(canvas, LabelPosition, TextSize)
@@ -410,7 +410,7 @@ namespace OTK.LiteUI.UI.Components
 
         private void Copy()
         {
-            canvas.ClipboardString = Text.Substring(SubstringStartIndex, Math.Max(0, SelectedRange));
+            Canvas.ClipboardString = Text.Substring(SubstringStartIndex, Math.Max(0, SelectedRange));
         }
 
         private void Cut()
@@ -422,7 +422,7 @@ namespace OTK.LiteUI.UI.Components
 
         private void Paste()
         {
-            var inserted = canvas.ClipboardString;
+            var inserted = Canvas.ClipboardString;
             int caretShift = inserted.Length;
             RemoveCharacter(SelectedRange);
             CollapseSelectionLeft();
@@ -649,7 +649,7 @@ namespace OTK.LiteUI.UI.Components
                 return base.OnClickDown(mouse);
             }
             IsClicked = true;
-            Vector2 convertedMouse = canvas.ConvertMouseScreenCoords(mouse.Position);
+            Vector2 convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
             UICanvas.FocusedComponent = this;
             caretLine = label.FindLineFromPos(mouse);
             caretIndex = convertedMouse.X <= label.Bounds.Z ? label.FindCaretIndexFromPos(mouse) : label.FindLineEndIndex(caretLine);
@@ -664,10 +664,10 @@ namespace OTK.LiteUI.UI.Components
 
         public override bool OnMouseMove(MouseState mouse)
         {
-            if (WithinBounds(mouse)) canvas.SetCursor(MouseCursor.IBeam);
+            if (WithinBounds(mouse)) Canvas.SetCursor(MouseCursor.IBeam);
             if (IsClicked)
             {
-                Vector2 convertedMouse = canvas.ConvertMouseScreenCoords(mouse.Position);
+                Vector2 convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
                 caretLine = label.FindLineFromPos(mouse);
                 caretIndex = convertedMouse.X <= label.Bounds.Z ? label.FindCaretIndexFromPos(mouse) : label.FindLineEndIndex(caretLine);
                 desiredColumn = caretIndex;
@@ -687,7 +687,7 @@ namespace OTK.LiteUI.UI.Components
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
         {
             base.OnUpdate(deltaTime, mouse, keyboard);
-            var convertedMouse = canvas.ConvertMouseScreenCoords(mouse.Position);
+            var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
             var view = ViewPort;
             if (IsClicked)
             {

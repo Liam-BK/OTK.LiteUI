@@ -65,7 +65,7 @@ namespace OTK.LiteUI.UI.Components
 
         public Slider(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
-            this.canvas = canvas;
+            this.Canvas = canvas;
             Orientation = Width >= Height ? ComponentOrientation.Horizontal : ComponentOrientation.Vertical;
             float halfThumbSize = HalfThumbSize;
             float x = (Orientation == ComponentOrientation.Horizontal) ? Bounds.X + halfThumbSize : Bounds.X + Width * 0.5f;
@@ -107,7 +107,7 @@ namespace OTK.LiteUI.UI.Components
         public override bool OnClickDown(MouseState mouse)
         {
             if (!IsVisible) return false;
-            var convertedMouse = canvas.ConvertMouseScreenCoords(mouse.Position);
+            var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
             if (_thumb.WithinBounds(mouse))
             {
                 _thumbPressed = true;
@@ -141,7 +141,7 @@ namespace OTK.LiteUI.UI.Components
         public override bool OnMouseMove(MouseState mouse)
         {
             if (!IsVisible) return false;
-            var convertedMouse = canvas.ConvertMouseScreenCoords(mouse.Position);
+            var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
             if (_thumbPressed)
             {
                 var halfThumbSize = HalfThumbSize;

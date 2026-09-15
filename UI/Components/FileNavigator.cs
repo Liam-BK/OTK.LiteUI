@@ -226,7 +226,7 @@ namespace OTK.LiteUI.UI.Components
 
         public void AddChild(UIComponent child)
         {
-            canvas.Deregister(child);
+            Canvas.Deregister(child);
             child.ClipBounds = ViewPort;
             Children.Add(child);
         }
@@ -235,7 +235,7 @@ namespace OTK.LiteUI.UI.Components
         {
             Children.Remove(child);
             child.ClipBounds = null;
-            canvas.Register(child);
+            Canvas.Register(child);
         }
 
         private void PositionElements()
@@ -272,7 +272,7 @@ namespace OTK.LiteUI.UI.Components
                     {
                         if (!string.IsNullOrEmpty(filter) && !Path.GetFileName(directory).Contains(filter, StringComparison.OrdinalIgnoreCase))
                             continue;
-                        var directoryRef = FileReference.SetUpFileRef(canvas, directory);
+                        var directoryRef = FileReference.SetUpFileRef(Canvas, directory);
                         directoryRef.IsVisible = IsVisible;
                         directoryRef.Colour = directoryColour;
                         CurrentDirectory.AddChild(directoryRef);
@@ -295,7 +295,7 @@ namespace OTK.LiteUI.UI.Components
                     {
                         if (!string.IsNullOrEmpty(filter) && !Path.GetFileName(file).Contains(filter, StringComparison.OrdinalIgnoreCase))
                             continue;
-                        var fileRef = FileReference.SetUpFileRef(canvas, file);
+                        var fileRef = FileReference.SetUpFileRef(Canvas, file);
                         fileRef.IsVisible = IsVisible;
                         fileRef.Colour = fileColour;
                         CurrentDirectory.AddChild(fileRef);
@@ -541,7 +541,7 @@ namespace OTK.LiteUI.UI.Components
 
         public FileReference(UICanvas canvas, Vector4 bounds, string text = "", float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, text, inset, uvInset, colour)
         {
-            this.canvas = canvas;
+            this.Canvas = canvas;
             label.Alignment = TextAlignment.Left;
             label.Origin = new Vector2(Bounds.X + Inset, label.Origin.Y);
             label.ClipBounds = bounds;

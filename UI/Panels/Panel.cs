@@ -96,7 +96,7 @@ namespace OTK.LiteUI.UI.Components
 
         public Panel(UICanvas canvas, Vector4 bounds, ILayout layout, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
-            this.canvas = canvas;
+            this.Canvas = canvas;
             Layout = layout;
         }
 
@@ -114,7 +114,7 @@ namespace OTK.LiteUI.UI.Components
 
         public void AddChild(UIComponent child)
         {
-            canvas.Deregister(child);
+            Canvas.Deregister(child);
             child.Parent = this;
             child.ClipBounds = ViewPort;
             child.IsVisible = IsVisible;
