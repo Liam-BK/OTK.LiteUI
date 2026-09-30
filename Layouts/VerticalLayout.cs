@@ -28,7 +28,7 @@ namespace OTK.LiteUI.Layouts
         {
             float left = viewport.X;
             float top = viewport.W;
-            float elementWidth = viewport.Z - viewport.X;
+            float elementWidth = Math.Max(viewport.Z - viewport.X, 0);
             foreach (var element in elements)
             {
                 element.Bounds = new Vector4(left, top - ElementSize.Y, left + elementWidth, top);

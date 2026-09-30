@@ -7,6 +7,14 @@ namespace OTK.LiteUI.UI.Components
 {
     public class ScrollBar : NineSlice
     {
+        public override AnchorType Anchor
+        {
+            get => base.Anchor; set
+            {
+                base.Anchor = value;
+                _thumb.Anchor = value;
+            }
+        }
         public ComponentOrientation Orientation;
 
         private NineSlice _thumb;
@@ -155,6 +163,8 @@ namespace OTK.LiteUI.UI.Components
         {
             if (!IsVisible) return false;
             var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
+            var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+            convertedMouse -= visualOffset;
             if (_thumb.WithinBounds(mouse))
             {
                 _isPressed = true;
@@ -186,6 +196,8 @@ namespace OTK.LiteUI.UI.Components
             if (_isPressed)
             {
                 var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
+                var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+                convertedMouse -= visualOffset;
                 if (Orientation == ComponentOrientation.Horizontal)
                 {
                     SetThumbPos(Math.Clamp(convertedMouse.X - _clickOffset.X, Bounds.X + _thumb.Width * 0.5f, Bounds.Z - _thumb.Width * 0.5f), Center.Y);

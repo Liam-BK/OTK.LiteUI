@@ -21,6 +21,15 @@ namespace OTK.LiteUI.UI.Components
     {
         protected readonly Label label;
 
+        public override AnchorType Anchor
+        {
+            get => base.Anchor; set
+            {
+                base.Anchor = value;
+                label.Anchor = value;
+            }
+        }
+
         public string Text
         {
             get => label.Text ?? "";
@@ -32,6 +41,22 @@ namespace OTK.LiteUI.UI.Components
                     label.Text = value;
                     if (textChanged) OnTextChanged?.Invoke();
                 }
+            }
+        }
+
+        public Vector4 TextBounds
+        {
+            get
+            {
+                return label.Bounds;
+            }
+        }
+
+        public Vector4 LabelClipBounds
+        {
+            get
+            {
+                return label.ClipBounds ?? Vector4.Zero;
             }
         }
 
@@ -50,6 +75,22 @@ namespace OTK.LiteUI.UI.Components
             set
             {
                 if (!LockMode) _mode = value;
+            }
+        }
+
+        public Vector2 CaretSize
+        {
+            get
+            {
+                return caret.size;
+            }
+        }
+
+        public Vector4 CaretColour
+        {
+            get
+            {
+                return caret.colour;
             }
         }
 
@@ -94,7 +135,7 @@ namespace OTK.LiteUI.UI.Components
                 {
                     label.ClipBounds = ViewPort;
                     AutoScaleTextSize();
-                    caret.size = new Vector2(Canvas.InvDPIScaleX * 5, TextSize + Label.LineSpacing);
+                    caret.size = new Vector2(Canvas.InvDPIScaleX, TextSize + Label.LineSpacing);
                     UpdateLabelOrigin();
                 }
             }
@@ -156,14 +197,14 @@ namespace OTK.LiteUI.UI.Components
 
         private bool _caretVisible = false;
 
-        private bool CaretVisible
+        public bool CaretVisible
         {
             get
             {
                 float halfWidth = caret.size.X * 0.5f;
                 float halfHeight = caret.size.Y * 0.5f;
                 var view = ViewPort;
-                return _caretVisible && IsFocused && !(caret.position.X - halfWidth > view.Z || caret.position.X + halfWidth < view.X || caret.position.Y - halfHeight > view.W || caret.position.Y + halfHeight < view.Y);
+                return IsVisible && _caretVisible && IsFocused && !(caret.position.X - halfWidth > view.Z || caret.position.X + halfWidth < view.X || caret.position.Y - halfHeight > view.W || caret.position.Y + halfHeight < view.Y);
             }
         }
 
@@ -204,16 +245,17 @@ namespace OTK.LiteUI.UI.Components
         public TextField(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
             this.Canvas = canvas;
-            TextSize = Math.Min(Math.Max(1, Height * 0.5f), defaultTextSize);
             var textColour = new Vector4(0, 0, 0, 1);
             label = new Label(canvas, LabelPosition, TextSize)
             {
                 Colour = textColour,
                 ClipBounds = ViewPort
             };
-            // AutoScaleTextSize();
+            float viewPortHeight = (ViewPort.W + Bounds.W) * 0.5f - (ViewPort.Y + Bounds.Y) * 0.5f;
+            TextSize = Math.Min(Math.Max(1, viewPortHeight * 0.5f), defaultTextSize);
             caret.size = new Vector2(canvas.InvDPIScaleX, TextSize + Label.LineSpacing);
             caret.colour = textColour;
+            caret.textureLayer = -1;
             UpdateCaretPosition();
             canvas.Deregister(label);
         }
@@ -245,18 +287,15 @@ namespace OTK.LiteUI.UI.Components
 
             Vector2 scroll = ScrollOffset;
 
-            if (right > view.Z)
-                scroll.X += right - view.Z;
+            if (right > view.Z) scroll.X += right - view.Z;
 
-            else if (left < view.X)
-                scroll.X -= view.X - left;
+            else if (left < view.X) scroll.X -= view.X - left;
 
             if (top > view.W)
             {
                 float diff = top - view.W;
                 scroll.Y -= diff;
             }
-
             else if (bottom < view.Y)
             {
                 float diff = view.Y - bottom;
@@ -439,6 +478,7 @@ namespace OTK.LiteUI.UI.Components
             var globalIndex = GlobalCaretIndex;
             var globalAnchor = GlobalAnchorIndex;
             if (globalIndex == globalAnchor) return;
+            var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
             if (caretLine == selectionAnchorLine)
             {
                 var left = label.FindCaretPosFromIndex(globalIndex < globalAnchor ? caretIndex : selectionAnchorIndex, globalIndex < globalAnchor ? caretLine : selectionAnchorLine);
@@ -450,7 +490,9 @@ namespace OTK.LiteUI.UI.Components
                     colour = new Vector4(0, 0, 1, 0.25f),
                     textureLayer = -1
                 };
-                renderer.AddInstance(Utils.Clip(highlightQuad, ViewPort));
+                var temp = Utils.Clip(highlightQuad, ViewPort);
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
             }
             else
             {
@@ -471,7 +513,9 @@ namespace OTK.LiteUI.UI.Components
                             colour = new Vector4(0, 0, 1, 0.25f),
                             textureLayer = -1
                         };
-                        renderer.AddInstance(result);
+                        var temp = Utils.Clip(result, ViewPort);
+                        temp.position += visualOffset;
+                        renderer.AddInstance(temp);
                     }
                     else if (i == endLine)
                     {
@@ -484,7 +528,9 @@ namespace OTK.LiteUI.UI.Components
                             colour = new Vector4(0, 0, 1, 0.25f),
                             textureLayer = -1
                         };
-                        renderer.AddInstance(result);
+                        var temp = Utils.Clip(result, ViewPort);
+                        temp.position += visualOffset;
+                        renderer.AddInstance(temp);
                     }
                     else
                     {
@@ -498,6 +544,7 @@ namespace OTK.LiteUI.UI.Components
         {
             var left = label.FindCaretPosFromIndex(0, line);
             var right = label.FindCaretPosFromIndex(label.FindLineEndIndex(line), line);
+            var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
             var result = new UIQuad
             {
                 position = new Vector2((left.X + right.X) * 0.5f, (left.Y + right.Y) * 0.5f),
@@ -505,7 +552,9 @@ namespace OTK.LiteUI.UI.Components
                 colour = new Vector4(0, 0, 1, 0.25f),
                 textureLayer = -1
             };
-            return result;
+            var temp = Utils.Clip(result, ViewPort);
+            temp.position += visualOffset;
+            return temp;
         }
 
         public override void OnTextInput(TextInputEventArgs e)
@@ -688,6 +737,8 @@ namespace OTK.LiteUI.UI.Components
         {
             base.OnUpdate(deltaTime, mouse, keyboard);
             var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
+            var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+            convertedMouse -= visualOffset;
             var view = ViewPort;
             if (IsClicked)
             {
@@ -723,13 +774,16 @@ namespace OTK.LiteUI.UI.Components
         {
             if (!IsVisible) return;
             base.SubmitData(renderer);
+            var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
             if (ClipBounds.HasValue)
             {
-                label.ClipBounds = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(Bounds.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(Bounds.W, ClipBounds.Value.W));
+                // label.ClipBounds = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(Bounds.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(Bounds.W, ClipBounds.Value.W));
+                label.ClipBounds = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(ViewPort.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(ViewPort.W, ClipBounds.Value.W));
             }
             else
             {
-                label.ClipBounds = new Vector4(ViewPort.X, Bounds.Y, ViewPort.Z, Bounds.W);
+                // label.ClipBounds = new Vector4(ViewPort.X, Bounds.Y, ViewPort.Z, Bounds.W);
+                label.ClipBounds = ViewPort;
             }
             label.SubmitData(renderer);
             SubmitHighlightData(renderer);
@@ -737,12 +791,18 @@ namespace OTK.LiteUI.UI.Components
             {
                 if (ClipBounds.HasValue)
                 {
-                    var clip = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(Bounds.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(Bounds.W, ClipBounds.Value.W));
-                    renderer.AddInstance(Utils.Clip(caret, clip));
+                    // var clip = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(Bounds.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(Bounds.W, ClipBounds.Value.W));
+                    var clip = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(ViewPort.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(ViewPort.W, ClipBounds.Value.W));
+                    var temp = Utils.Clip(caret, clip);
+                    temp.position += visualOffset;
+                    renderer.AddInstance(temp);
                 }
                 else
                 {
-                    renderer.AddInstance(Utils.Clip(caret, new Vector4(ViewPort.X, Bounds.Y, ViewPort.Z, Bounds.W)));
+                    // var temp = Utils.Clip(caret, new Vector4(ViewPort.X, Bounds.Y, ViewPort.Z, Bounds.W));
+                    var temp = Utils.Clip(caret, ViewPort);
+                    temp.position += visualOffset;
+                    renderer.AddInstance(temp);
                 }
             }
         }

@@ -11,6 +11,18 @@ namespace OTK.LiteUI.UI.Components
     {
         private List<UIComponent> _children = new List<UIComponent>();
 
+        public override AnchorType Anchor
+        {
+            get => base.Anchor; set
+            {
+                base.Anchor = value;
+                foreach (var child in Children)
+                {
+                    child.Anchor = value;
+                }
+            }
+        }
+
         public List<UIComponent> Children => _children;
 
         public Vector2 MaxScroll
@@ -115,6 +127,7 @@ namespace OTK.LiteUI.UI.Components
         public void AddChild(UIComponent child)
         {
             Canvas.Deregister(child);
+            child.Anchor = Anchor;
             child.Parent = this;
             child.ClipBounds = ViewPort;
             child.IsVisible = IsVisible;

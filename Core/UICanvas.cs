@@ -62,11 +62,6 @@ namespace OTK.LiteUI.Core
             (canvas, component) => new Vector2(
                 canvas.X, canvas.Y
             ),
-            //WholeWindow
-            (canvas, component) => {
-                component.Bounds = new Vector4(0, 0, canvas.X, canvas.Y);
-                return Vector2.Zero;
-            },
         ];
         private readonly GameWindow window;
         public static UICanvas? Default { get; set; } = null;
@@ -81,6 +76,7 @@ namespace OTK.LiteUI.Core
         public static UIComponent? FocusedComponent = null;
         private bool cursorUpdated = false;
         private const float referenceDPI = 96.0f;
+        private bool firstFrame = true;
 
         public Vector2 CanvasSize => window.Size.ToVector2() * InvDPIScaleVec2;
 
@@ -250,7 +246,7 @@ namespace OTK.LiteUI.Core
 
         private void OnClickDown(MouseState mouse)
         {
-            window.MakeCurrent();
+            // window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 var c = components[i];
@@ -270,7 +266,7 @@ namespace OTK.LiteUI.Core
 
         private void OnClickUp(MouseState mouse)
         {
-            window.MakeCurrent();
+            // window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 var c = components[i];
@@ -291,7 +287,7 @@ namespace OTK.LiteUI.Core
 
         private void OnKeyDown(KeyboardKeyEventArgs args)
         {
-            window.MakeCurrent();
+            // window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 components[i].OnKeyDown(args);
@@ -300,7 +296,7 @@ namespace OTK.LiteUI.Core
 
         private void OnKeyUp(KeyboardKeyEventArgs args)
         {
-            window.MakeCurrent();
+            // window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 components[i].OnKeyUp(args);
@@ -309,13 +305,13 @@ namespace OTK.LiteUI.Core
 
         private void OnTextInput(TextInputEventArgs args)
         {
-            window.MakeCurrent();
+            // window.MakeCurrent();
             FocusedComponent?.OnTextInput(args);
         }
 
         private void OnMouseMove(MouseState mouse)
         {
-            window.MakeCurrent();
+            // window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 var c = components[i];
@@ -327,7 +323,7 @@ namespace OTK.LiteUI.Core
 
         private void OnMouseWheel(MouseState mouse)
         {
-            window.MakeCurrent();
+            // window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 var c = components[i];
@@ -337,7 +333,7 @@ namespace OTK.LiteUI.Core
 
         private void OnUpdate(float delta, MouseState mouse, KeyboardState keys)
         {
-            window.MakeCurrent();
+            // window.MakeCurrent();
             for (int i = components.Count - 1; i >= 0; i--)
             {
                 components[i].OnUpdate(delta, mouse, keys);
@@ -363,7 +359,7 @@ namespace OTK.LiteUI.Core
             window.MakeCurrent();
             UpdateProjection();
             GL.Viewport(0, 0, window.FramebufferSize.X, window.FramebufferSize.Y);
-            DrawElements();
+            // DrawElements();
         }
 
         public void OnWindowMove()
@@ -373,7 +369,6 @@ namespace OTK.LiteUI.Core
 
         public void SetCursor(MouseCursor cursor)
         {
-            window.MakeCurrent();
             cursorUpdated = true;
             window.Cursor = cursor;
         }
@@ -385,6 +380,12 @@ namespace OTK.LiteUI.Core
 
         public void DrawElements()
         {
+            if (firstFrame)
+            {
+                firstFrame = false;
+                return;
+            }
+
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Disable(EnableCap.DepthTest);

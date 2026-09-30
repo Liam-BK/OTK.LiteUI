@@ -21,6 +21,15 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        public override AnchorType Anchor
+        {
+            get => base.Anchor; set
+            {
+                base.Anchor = value;
+                Fill.Anchor = value;
+            }
+        }
+
         public float FillAmount
         {
             get;

@@ -22,8 +22,7 @@ public enum AnchorType
     MiddleRight = 5,
     TopLeft = 6,
     TopCenter = 7,
-    TopRight = 8,
-    FullWindow = 9
+    TopRight = 8
 }
 
 namespace OTK.LiteUI.UI.Components
@@ -32,9 +31,9 @@ namespace OTK.LiteUI.UI.Components
     {
         public UICanvas Canvas = null!;
 
-        public AnchorType Anchor = AnchorType.BottomLeft;
+        public virtual AnchorType Anchor { get; set; } = AnchorType.BottomLeft;
 
-        public virtual bool IsVisible { get; set; } = false;
+        public virtual bool IsVisible { get; set; } = true;
 
         private IUIContainer? _parent = null;
 
@@ -79,8 +78,7 @@ namespace OTK.LiteUI.UI.Components
         {
             get
             {
-                var offset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
-                return _bounds + new Vector4(offset.X, offset.Y, offset.X, offset.Y);
+                return _bounds;
             }
             set => _bounds = value;
         }
@@ -165,7 +163,8 @@ namespace OTK.LiteUI.UI.Components
 
         public bool WithinBounds(Vector2 position)
         {
-            return position.X > Bounds.X && position.X <= Bounds.Z && position.Y > Bounds.Y && position.Y <= Bounds.W;
+            var anchorPos = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+            return position.X > Bounds.X + anchorPos.X && position.X <= Bounds.Z + anchorPos.X && position.Y > Bounds.Y + anchorPos.Y && position.Y <= Bounds.W + anchorPos.Y;
         }
 
         public static float MapValue(float value, float inputMin, float inputMax, float outputMin, float outputMax)

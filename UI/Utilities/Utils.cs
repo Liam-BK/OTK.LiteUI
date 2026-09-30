@@ -67,5 +67,10 @@ namespace OTK.LiteUI.UI.Utilities
             float top = bottom + quad.size.Y;
             return !(left > clip.Z || bottom > clip.W || right < clip.X || top < clip.Y);
         }
+
+        public static float GetMidPoint(float a, float b)
+        {
+            return (a + b) * 0.5f;
+        }
     }
 }

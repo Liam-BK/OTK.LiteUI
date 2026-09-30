@@ -4,7 +4,6 @@ using OTK.LiteUI.UI.Interfaces;
 using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Rendering;
 using OTK.LiteUI.UI.Utilities;
-using OTK.LiteUI.UI.Rendering.Backend;
 
 namespace OTK.LiteUI.UI.Components
 {
@@ -96,7 +95,7 @@ namespace OTK.LiteUI.UI.Components
             set
             {
                 _bounds = value;
-                Size = (_bounds.W - _bounds.Y) * 0.5f;
+                Size = _bounds.W - _bounds.Y;
                 var y = _bounds.W - Size;
                 float x;
                 if (Alignment == TextAlignment.Left) x = _bounds.X;
@@ -174,6 +173,8 @@ namespace OTK.LiteUI.UI.Components
 
         public int FindLineFromPos(Vector2 pos)
         {
+            var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+            pos -= visualOffset;
             float lineHeight = Size + LineSpacing;
             float localY = Origin.Y + lineHeight - pos.Y;
             int line = (int)Math.Floor(localY / lineHeight);
@@ -190,6 +191,8 @@ namespace OTK.LiteUI.UI.Components
         {
             if (!WithinBounds(pos)) return -1;
             int line = FindLineFromPos(pos);
+            var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+            pos -= visualOffset;
             for (int i = 0; i < _lines[line].Count; i++)
             {
                 if (_lines[line][i].position.X > pos.X) return i;
@@ -316,6 +319,7 @@ namespace OTK.LiteUI.UI.Components
             {
                 ForceUpdateGlyphs();
             }
+            var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
             for (int i = 0; i < _lines.Count; i++)
             {
                 for (int j = 0; j < _lines[i].Count; j++)
@@ -329,11 +333,15 @@ namespace OTK.LiteUI.UI.Components
                     float top = glyph.position.Y + halfHeight;
                     if (ClipBounds is Vector4 clip && !(right < clip.X || left > clip.Z || top < clip.Y || bottom > clip.W))
                     {
-                        renderer.AddInstance(Utils.Clip(glyph, clip));
+                        var temp = Utils.Clip(glyph, clip);
+                        temp.position += visualOffset;
+                        renderer.AddInstance(temp);
                     }
                     else if (ClipBounds is null)
                     {
-                        renderer.AddInstance(glyph);
+                        var temp = glyph;
+                        temp.position += visualOffset;
+                        renderer.AddInstance(temp);
                     }
                 }
             }

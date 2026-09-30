@@ -16,10 +16,32 @@ namespace OTK.LiteUI.UI.Components
                 _thumb.IsVisible = value;
             }
         }
+
+        public override AnchorType Anchor
+        {
+            get => base.Anchor; set
+            {
+                base.Anchor = value;
+                _thumb.Anchor = value;
+            }
+        }
+
         public ComponentOrientation Orientation;
         private NineSlice _thumb;
         private Vector2 _clickOffset = Vector2.Zero;
         private Vector4 _thumbColour;
+        public Vector4 ThumbColour
+        {
+            get
+            {
+                return _thumbColour;
+            }
+            set
+            {
+                _thumbColour = value;
+            }
+        }
+
         private bool _thumbPressed = false;
         public string ThumbTexture
         {
@@ -108,6 +130,8 @@ namespace OTK.LiteUI.UI.Components
         {
             if (!IsVisible) return false;
             var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
+            var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+            convertedMouse -= visualOffset;
             if (_thumb.WithinBounds(mouse))
             {
                 _thumbPressed = true;
@@ -142,6 +166,8 @@ namespace OTK.LiteUI.UI.Components
         {
             if (!IsVisible) return false;
             var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
+            var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+            convertedMouse -= visualOffset;
             if (_thumbPressed)
             {
                 var halfThumbSize = HalfThumbSize;

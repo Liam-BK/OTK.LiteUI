@@ -88,56 +88,79 @@ namespace OTK.LiteUI.UI.Components
             if (Texture == "") textureLayer = -1;
             else Canvas.TryGetTexture(Texture, out textureLayer);
 
-            topLeft.position = new Vector2(Bounds.X + Inset * 0.5f, Bounds.W - Inset * 0.5f);
-            topLeft.size = new Vector2(Inset, Inset);
+            float left = Bounds.X;
+            float innerLeft = Bounds.X + Inset;
+            float innerRight = Bounds.Z - Inset;
+            float right = Bounds.Z;
+
+            float top = Bounds.W;
+            float innerTop = Bounds.W - Inset;
+            float innerBottom = Bounds.Y + Inset;
+            float bottom = Bounds.Y;
+
+            float edgeThickness = Inset;
+            float innerWidth = Width - edgeThickness * 2;
+            float innerHeight = Height - edgeThickness * 2;
+
+            float leftEdge = Utils.GetMidPoint(left, innerLeft);
+            float rightEdge = Utils.GetMidPoint(innerRight, right);
+
+            float topEdge = Utils.GetMidPoint(top, innerTop);
+            float bottomEdge = Utils.GetMidPoint(innerBottom, bottom);
+
+            float middleX = Utils.GetMidPoint(innerLeft, innerRight);
+            float middleY = Utils.GetMidPoint(innerTop, innerBottom);
+
+            topLeft.position = new Vector2(leftEdge, topEdge);
+            topLeft.size = new Vector2(edgeThickness, edgeThickness);
             topLeft.UVOffset = new Vector2(0, 1 - UVInset);
             topLeft.UVRange = new Vector2(UVInset, UVInset);
             topLeft.textureLayer = textureLayer;
 
-            topCenter.position = new Vector2(Center.X, Bounds.W - Inset * 0.5f);
-            topCenter.size = new Vector2(Width - (Inset * 2), Inset);
+            topCenter.position = new Vector2(middleX, topEdge);
+            topCenter.size = new Vector2(innerWidth, edgeThickness);
             topCenter.UVOffset = new Vector2(UVInset, 1 - UVInset);
             topCenter.UVRange = new Vector2(1 - (UVInset * 2), UVInset);
             topCenter.textureLayer = textureLayer;
 
-            topRight.position = new Vector2(Bounds.Z - Inset * 0.5f, Bounds.W - Inset * 0.5f);
-            topRight.size = new Vector2(Inset, Inset);
+            topRight.position = new Vector2(rightEdge, topEdge);
+            topRight.size = new Vector2(edgeThickness, edgeThickness);
             topRight.UVOffset = new Vector2(1 - UVInset, 1 - UVInset);
             topRight.UVRange = new Vector2(UVInset, UVInset);
             topRight.textureLayer = textureLayer;
 
-            centerLeft.position = new Vector2(Bounds.X + Inset * 0.5f, Center.Y);
-            centerLeft.size = new Vector2(Inset, Height - Inset * 2);
+            centerLeft.position = new Vector2(leftEdge, middleY);
+            centerLeft.size = new Vector2(edgeThickness, innerHeight);
             centerLeft.UVOffset = new Vector2(0, UVInset);
             centerLeft.UVRange = new Vector2(UVInset, 1 - UVInset * 2);
             centerLeft.textureLayer = textureLayer;
 
-            center.position = new Vector2(Center.X, Center.Y);
-            center.size = new Vector2(Width - (Inset * 2), Height - Inset * 2);
+            center.position = new Vector2(middleX, middleY);
+            center.size = new Vector2(innerWidth, innerHeight);
             center.UVOffset = new Vector2(UVInset, UVInset);
             center.UVRange = new Vector2(1 - (UVInset * 2), 1 - UVInset * 2);
             center.textureLayer = textureLayer;
 
-            centerRight.position = new Vector2(Bounds.Z - Inset * 0.5f, Center.Y);
-            centerRight.size = new Vector2(Inset, Height - Inset * 2);
+            centerRight.position = new Vector2(rightEdge, middleY);
+            centerRight.size = new Vector2(edgeThickness, innerHeight);
             centerRight.UVOffset = new Vector2(1 - UVInset, UVInset);
             centerRight.UVRange = new Vector2(UVInset, 1 - UVInset * 2);
             centerRight.textureLayer = textureLayer;
 
-            bottomLeft.position = new Vector2(Bounds.X + Inset * 0.5f, Bounds.Y + Inset * 0.5f);
-            bottomLeft.size = new Vector2(Inset, Inset);
+            bottomLeft.position = new Vector2(leftEdge, bottomEdge);
+            bottomLeft.size = new Vector2(edgeThickness, edgeThickness);
             bottomLeft.UVOffset = new Vector2(0, 0);
             bottomLeft.UVRange = new Vector2(UVInset, UVInset);
             bottomLeft.textureLayer = textureLayer;
 
-            bottomCenter.position = new Vector2(Center.X, Bounds.Y + Inset * 0.5f);
-            bottomCenter.size = new Vector2(Width - (Inset * 2), Inset);
+            bottomCenter.position = new Vector2(middleX, bottomEdge);
+            bottomCenter.size = new Vector2(innerWidth, edgeThickness);
             bottomCenter.UVOffset = new Vector2(UVInset, 0);
             bottomCenter.UVRange = new Vector2(1 - (UVInset * 2), UVInset);
             bottomCenter.textureLayer = textureLayer;
 
-            bottomRight.position = new Vector2(Bounds.Z - Inset * 0.5f, Bounds.Y + Inset * 0.5f);
-            bottomRight.size = new Vector2(Inset, Inset);
+            bottomRight.position = new Vector2(rightEdge, bottomEdge);
+            bottomRight.size = new Vector2(edgeThickness, edgeThickness);
             bottomRight.UVOffset = new Vector2(1 - UVInset, 0);
             bottomRight.UVRange = new Vector2(UVInset, UVInset);
             bottomRight.textureLayer = textureLayer;
@@ -147,29 +170,66 @@ namespace OTK.LiteUI.UI.Components
         {
             if (!IsVisible) return;
             UpdateQuadrants();
+            var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
             if (ClipBounds.HasValue)
             {
-                renderer.AddInstance(Utils.Clip(topLeft, ClipBounds.Value));
-                renderer.AddInstance(Utils.Clip(topCenter, ClipBounds.Value));
-                renderer.AddInstance(Utils.Clip(topRight, ClipBounds.Value));
-                renderer.AddInstance(Utils.Clip(centerLeft, ClipBounds.Value));
-                renderer.AddInstance(Utils.Clip(center, ClipBounds.Value));
-                renderer.AddInstance(Utils.Clip(centerRight, ClipBounds.Value));
-                renderer.AddInstance(Utils.Clip(bottomLeft, ClipBounds.Value));
-                renderer.AddInstance(Utils.Clip(bottomCenter, ClipBounds.Value));
-                renderer.AddInstance(Utils.Clip(bottomRight, ClipBounds.Value));
+                var temp = Utils.Clip(topLeft, ClipBounds.Value);
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = Utils.Clip(topCenter, ClipBounds.Value);
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = Utils.Clip(topRight, ClipBounds.Value);
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = Utils.Clip(centerLeft, ClipBounds.Value);
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = Utils.Clip(center, ClipBounds.Value);
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = Utils.Clip(centerRight, ClipBounds.Value);
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = Utils.Clip(bottomLeft, ClipBounds.Value);
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = Utils.Clip(bottomCenter, ClipBounds.Value);
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = Utils.Clip(bottomRight, ClipBounds.Value);
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
             }
             else
             {
-                renderer.AddInstance(topLeft);
-                renderer.AddInstance(topCenter);
-                renderer.AddInstance(topRight);
-                renderer.AddInstance(centerLeft);
-                renderer.AddInstance(center);
-                renderer.AddInstance(centerRight);
-                renderer.AddInstance(bottomLeft);
-                renderer.AddInstance(bottomCenter);
-                renderer.AddInstance(bottomRight);
+                var temp = topLeft;
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = topCenter;
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = topRight;
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = centerLeft;
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = center;
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = centerRight;
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = bottomLeft;
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = bottomCenter;
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
+                temp = bottomRight;
+                temp.position += visualOffset;
+                renderer.AddInstance(temp);
             }
         }
     }

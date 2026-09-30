@@ -20,6 +20,14 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        public Vector4 TextBounds
+        {
+            get
+            {
+                return label.Bounds;
+            }
+        }
+
         public float TimeToRollover = 0.2f;
 
         private float _rolloverValue = 0;
@@ -40,6 +48,15 @@ namespace OTK.LiteUI.UI.Components
                 base.IsVisible = value;
                 label.IsVisible = value;
                 if (value == false) _rolloverValue = 0;
+            }
+        }
+
+        public override AnchorType Anchor
+        {
+            get => base.Anchor; set
+            {
+                base.Anchor = value;
+                label.Anchor = value;
             }
         }
 
