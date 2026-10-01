@@ -61,9 +61,6 @@ namespace OTK.LiteUI.UI.Components
                 float right = Math.Min(parentClip.Value.Z, _clipBounds.Value.Z);
                 float top = Math.Min(parentClip.Value.W, _clipBounds.Value.W);
 
-                if (left >= right || bottom >= top)
-                    return null;
-
                 return new Vector4(left, bottom, right, top);
             }
             set

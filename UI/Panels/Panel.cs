@@ -124,8 +124,13 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
-        public void AddChild(UIComponent child)
+        public void AddChild(UIComponent? child)
         {
+            if (child is null)
+            {
+                AddChild(new Blank(Canvas));
+                return;
+            }
             Canvas.Deregister(child);
             child.Anchor = Anchor;
             child.Parent = this;
@@ -244,6 +249,7 @@ namespace OTK.LiteUI.UI.Components
             base.SubmitData(renderer);
             foreach (var element in Children)
             {
+                if (element.Bounds.X > Bounds.Z || element.Bounds.Z < Bounds.X || element.Bounds.Y > Bounds.W || element.Bounds.W < Bounds.Y) continue;
                 if (element is IRenderable renderable)
                 {
                     renderable.SubmitData(renderer);
