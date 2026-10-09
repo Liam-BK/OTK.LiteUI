@@ -73,6 +73,7 @@ namespace OTK.LiteUI.Core
         public List<UIComponent> components = new List<UIComponent>();
         private List<UIComponent> pendingRemovals = new List<UIComponent>();
         internal Dictionary<string, FontData> Fonts => fontManager.Fonts;
+        internal Dictionary<Type, int> ComponentCounts = new Dictionary<Type, int>();
         public static UIComponent? FocusedComponent = null;
         private bool cursorUpdated = false;
         private const float referenceDPI = 96.0f;
@@ -244,6 +245,79 @@ namespace OTK.LiteUI.Core
             pendingRemovals.Add(component);
         }
 
+        internal string GetNextIdentifier(Type type)
+        {
+            if (ComponentCounts.ContainsKey(type)) ComponentCounts[type] = ComponentCounts[type] + 1;
+            else ComponentCounts.Add(type, 0);
+            var result = $"{type.Name}_{ComponentCounts[type]}";
+            Console.WriteLine($"{type.Name}_{ComponentCounts[type]}");
+            return result;
+        }
+
+        public T? Get<T>(string name, string delimiter = ".") where T : UIComponent
+        {
+            var identifiers = name.Split(delimiter);
+            foreach (var component in components)
+            {
+                if (component.Identifier != identifiers[0]) continue;
+                if (identifiers.Length == 1) return component as T;
+                if (component is IUIContainer container) return Get<T>(identifiers, 1, container);
+                return null;
+            }
+            return null;
+        }
+
+        private T? Get<T>(string[] identifiers, int index, IUIContainer container) where T : UIComponent
+        {
+            foreach (var component in container.Children)
+            {
+                if (component.Identifier != identifiers[index]) continue;
+                if (index == identifiers.Length - 1) return component as T;
+                if (component is IUIContainer next) return Get<T>(identifiers, index + 1, next);
+                return null;
+            }
+            return null;
+        }
+
+        public T GetStrict<T>(string name, string delimiter = ".") where T : UIComponent
+        {
+            var identifiers = name.Split(delimiter);
+            var failPoint = identifiers[0];
+            foreach (var component in components)
+            {
+                if (component.Identifier != identifiers[0]) continue;
+                if (identifiers.Length == 1)
+                {
+                    var result = component as T;
+                    var resultType = component.GetType();
+                    if (result == null) throw new UIComponentNotFoundException(failPoint, resultType, typeof(T));
+                    return result;
+                }
+                if (component is IUIContainer container) return GetStrict<T>(identifiers, 1, failPoint, delimiter, container);
+                throw new UIComponentNotFoundException(failPoint);
+            }
+            throw new UIComponentNotFoundException(failPoint);
+        }
+
+        private T GetStrict<T>(string[] identifiers, int index, string resolvedPath, string delimiter, IUIContainer container) where T : UIComponent
+        {
+            var failPoint = identifiers[index];
+            foreach (var component in container.Children)
+            {
+                if (component.Identifier != identifiers[index]) continue;
+                if (index == identifiers.Length - 1)
+                {
+                    var result = component as T;
+                    var resultType = component.GetType();
+                    if (result == null) throw new UIComponentNotFoundException(failPoint, resultType, typeof(T));
+                    return result;
+                }
+                if (component is IUIContainer next) return GetStrict<T>(identifiers, index + 1, $"{resolvedPath}{delimiter}{failPoint}", delimiter, next);
+                throw new UIComponentNotFoundException($"{resolvedPath}{delimiter}{failPoint}");
+            }
+            throw new UIComponentNotFoundException($"{resolvedPath}{delimiter}{failPoint}");
+        }
+
         private void OnClickDown(MouseState mouse)
         {
             // window.MakeCurrent();
@@ -391,5 +465,12 @@ namespace OTK.LiteUI.Core
             GL.Disable(EnableCap.DepthTest);
             renderer?.DrawInstances(textureManager);
         }
+    }
+
+    public class UIComponentNotFoundException : Exception
+    {
+        public UIComponentNotFoundException(string path, Type found, Type expected) : base($"UI component '{path}' was found with wrong Type. Found Type: {found}, Expected Type: {expected}") { }
+
+        public UIComponentNotFoundException(string pathFailPoint) : base($"Could not find UI Component matching path at: {pathFailPoint}") { }
     }
 }

@@ -39,6 +39,7 @@ namespace OTK.LiteUI.UI.Components
             this.Canvas = canvas;
             UncheckedColour = colour ?? Vector4.One;
             CheckedColour = colour ?? Vector4.One;
+            if (GetType() == typeof(Checkbox)) Identifier = Canvas.GetNextIdentifier(typeof(Checkbox));
         }
 
         public override bool OnClickDown(MouseState mouse)

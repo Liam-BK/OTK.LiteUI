@@ -95,6 +95,7 @@ namespace OTK.LiteUI.UI.Components
             _thumb = new NineSlice(canvas, new Vector4(x - halfThumbSize, y - halfThumbSize, x + halfThumbSize, y + halfThumbSize));
             _thumbColour = colour ?? Vector4.One;
             canvas.Deregister(_thumb);
+            if (GetType() == typeof(Slider)) Identifier = Canvas.GetNextIdentifier(typeof(Slider));
         }
 
         private void SetValueFromThumbPosition()

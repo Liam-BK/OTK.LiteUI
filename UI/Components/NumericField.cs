@@ -43,6 +43,7 @@ namespace OTK.LiteUI.UI.Components
             this.Canvas = canvas;
             Mode = TextFieldMode.SingleLine;
             LockMode = true;
+            if (GetType() == typeof(NumericField)) Identifier = Canvas.GetNextIdentifier(typeof(NumericField));
         }
 
         private bool HasDecimalAtCaretGroup()

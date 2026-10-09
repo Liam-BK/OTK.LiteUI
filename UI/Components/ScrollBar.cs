@@ -123,6 +123,7 @@ namespace OTK.LiteUI.UI.Components
             _thumb = new NineSlice(canvas, bounds);
             _thumbColour = colour ?? Vector4.One;
             canvas.Deregister(_thumb);
+            if (GetType() == typeof(ScrollBar)) Identifier = Canvas.GetNextIdentifier(typeof(ScrollBar));
         }
 
         private void UpdateThumbFromValue()

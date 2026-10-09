@@ -258,6 +258,7 @@ namespace OTK.LiteUI.UI.Components
             caret.textureLayer = -1;
             UpdateCaretPosition();
             canvas.Deregister(label);
+            if (GetType() == typeof(TextField)) Identifier = Canvas.GetNextIdentifier(typeof(TextField));
         }
 
         private void UpdateLabelOrigin()

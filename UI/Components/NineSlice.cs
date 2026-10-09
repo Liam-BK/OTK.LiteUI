@@ -67,6 +67,7 @@ namespace OTK.LiteUI.UI.Components
             Colour = colour ?? Vector4.One;
             UpdateQuadrants();
             canvas.Register(this);
+            if (GetType() == typeof(NineSlice)) Identifier = Canvas.GetNextIdentifier(typeof(NineSlice));
         }
 
         protected void ForceUpdateQuadrantColours(Vector4 colour)

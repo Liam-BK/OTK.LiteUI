@@ -1,6 +1,5 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using OTK.LiteUI.UI.Interfaces;
 using OTK.LiteUI.Core;
@@ -40,6 +39,11 @@ namespace OTK.LiteUI.UI.Components
         public IUIContainer? Parent { get => _parent; set => _parent = value; }
 
         private Vector4? _clipBounds = null;
+        public string Identifier
+        {
+            get;
+            set;
+        } = "";
 
         public virtual Vector4? ClipBounds
         {

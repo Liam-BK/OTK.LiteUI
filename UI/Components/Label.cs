@@ -119,6 +119,7 @@ namespace OTK.LiteUI.UI.Components
             _bounds = new Vector4(Origin.X, y, Origin.X, w);
             _lines.Add([]);
             canvas.Register(this);
+            if (GetType() == typeof(Label)) Identifier = Canvas.GetNextIdentifier(typeof(Label));
         }
 
         public int FindInsertionOffset(int line)

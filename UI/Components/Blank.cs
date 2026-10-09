@@ -9,6 +9,7 @@ namespace OTK.LiteUI.UI.Components
         {
             Canvas = canvas;
             canvas.Register(this);
+            if (GetType() == typeof(Blank)) Identifier = Canvas.GetNextIdentifier(typeof(Blank));
         }
     }
 }

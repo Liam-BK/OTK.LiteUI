@@ -66,6 +66,7 @@ namespace OTK.LiteUI.UI.Components
         {
             Fill = new NineSlice(canvas, bounds, inset, uvInset, colour);
             canvas.Deregister(Fill);
+            if (GetType() == typeof(StatusBar)) Identifier = Canvas.GetNextIdentifier(typeof(StatusBar));
         }
 
         public override void SubmitData(Renderer renderer)

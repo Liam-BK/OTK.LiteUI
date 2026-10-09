@@ -124,6 +124,7 @@ namespace OTK.LiteUI.UI.Components
             label.Alignment = TextAlignment.Center;
             label.Colour = new Vector4(0, 0, 0, 1);
             canvas.Deregister(label);
+            if (GetType() == typeof(Button)) Identifier = Canvas.GetNextIdentifier(typeof(Button));
         }
 
         public override bool OnClickDown(MouseState mouse)

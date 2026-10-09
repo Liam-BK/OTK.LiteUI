@@ -110,6 +110,7 @@ namespace OTK.LiteUI.UI.Components
         {
             this.Canvas = canvas;
             Layout = layout;
+            if (GetType() == typeof(Panel)) Identifier = Canvas.GetNextIdentifier(typeof(Panel));
         }
 
         private void ApplyLayout()

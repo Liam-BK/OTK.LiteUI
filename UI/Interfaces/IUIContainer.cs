@@ -4,7 +4,7 @@ namespace OTK.LiteUI.UI.Interfaces
 {
     public interface IUIContainer
     {
-        List<UIComponent> Children { get; }
+        internal List<UIComponent> Children { get; }
 
         void AddChild(UIComponent child);
 
