@@ -33,6 +33,18 @@ namespace OTK.LiteUI.UI.Components
 
         public IUIContainer? Parent { get => _parent; set => _parent = value; }
 
+        public override bool IsVisible
+        {
+            get
+            {
+                return (Parent is not null && Parent is UIElement element) ? base.IsVisible && element.IsVisible : base.IsVisible;
+            }
+            set
+            {
+                base.IsVisible = value;
+            }
+        }
+
         private Vector4? _clipBounds = null;
 
         public virtual Vector4? ClipBounds

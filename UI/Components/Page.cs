@@ -1,4 +1,7 @@
 using System.ComponentModel;
+using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Common.Input;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Components;
 using OTK.LiteUI.UI.Interfaces;
@@ -54,6 +57,89 @@ public class Page : UIElement, IRenderable, IUIContainer
         foreach (var child in Children)
         {
             if (child is IRenderable renderable) renderable.SubmitData(renderer);
+        }
+    }
+
+    public override bool OnClickDown(MouseState mouse)
+    {
+        if (!IsVisible) return false;
+        foreach (var element in Children)
+        {
+            bool result = element.OnClickDown(mouse);
+            if (result) return true;
+        }
+        return base.OnClickDown(mouse);
+    }
+
+    public override bool OnClickUp(MouseState mouse)
+    {
+        if (!IsVisible) return false;
+        foreach (var element in Children)
+        {
+            bool result = element.OnClickUp(mouse);
+            if (result) return true;
+        }
+        return base.OnClickUp(mouse);
+    }
+
+    public override void OnKeyDown(KeyboardKeyEventArgs e)
+    {
+        if (!IsVisible) return;
+        foreach (var element in Children)
+        {
+            element.OnKeyDown(e);
+        }
+    }
+
+    public override void OnKeyUp(KeyboardKeyEventArgs e)
+    {
+        if (!IsVisible) return;
+        foreach (var element in Children)
+        {
+            element.OnKeyUp(e);
+        }
+    }
+
+    public override void OnTextInput(TextInputEventArgs e)
+    {
+        if (!IsVisible) return;
+        foreach (var element in Children)
+        {
+            element.OnTextInput(e);
+        }
+    }
+
+    public override bool OnMouseMove(MouseState mouse)
+    {
+        if (!IsVisible) return false;
+        foreach (var element in Children)
+        {
+            bool result = element.OnMouseMove(mouse);
+            if (result) return true;
+        }
+        return base.OnMouseMove(mouse);
+    }
+
+    public override bool OnMouseWheel(MouseState mouse)
+    {
+        if (!IsVisible) return false;
+        foreach (var element in Children)
+        {
+            bool result = element.OnMouseWheel(mouse);
+            if (result)
+            {
+                return true;
+            }
+        }
+        return base.OnMouseWheel(mouse);
+    }
+
+    public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
+    {
+        if (!IsVisible) return;
+        foreach (var element in Children)
+        {
+            element.OnUpdate(deltaTime, mouse, keyboard);
         }
     }
 }

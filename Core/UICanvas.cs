@@ -63,7 +63,7 @@ namespace OTK.LiteUI.Core
                 canvas.X, canvas.Y
             ),
         ];
-        private readonly GameWindow window;
+        public readonly GameWindow window;
         public static UICanvas? Default { get; set; } = null;
         private readonly TextureManager textureManager = new TextureManager();
         private readonly FontManager fontManager = new FontManager();
@@ -75,7 +75,7 @@ namespace OTK.LiteUI.Core
         internal Dictionary<string, FontData> Fonts => fontManager.Fonts;
         internal Dictionary<Type, int> ComponentCounts = new Dictionary<Type, int>();
         public static UIComponent? FocusedComponent = null;
-        private bool cursorUpdated = false;
+        internal bool cursorUpdated = false;
         private const float referenceDPI = 96.0f;
         private bool firstFrame = true;
 
@@ -320,7 +320,6 @@ namespace OTK.LiteUI.Core
 
         private void OnClickDown(MouseState mouse)
         {
-            // window.MakeCurrent();
             for (int i = elements.Count - 1; i >= 0; i--)
             {
                 var c = elements[i];
@@ -340,7 +339,6 @@ namespace OTK.LiteUI.Core
 
         private void OnClickUp(MouseState mouse)
         {
-            // window.MakeCurrent();
             for (int i = elements.Count - 1; i >= 0; i--)
             {
                 var c = elements[i];
@@ -364,7 +362,6 @@ namespace OTK.LiteUI.Core
 
         private void OnKeyDown(KeyboardKeyEventArgs args)
         {
-            // window.MakeCurrent();
             for (int i = elements.Count - 1; i >= 0; i--)
             {
                 elements[i].OnKeyDown(args);
@@ -373,7 +370,6 @@ namespace OTK.LiteUI.Core
 
         private void OnKeyUp(KeyboardKeyEventArgs args)
         {
-            // window.MakeCurrent();
             for (int i = elements.Count - 1; i >= 0; i--)
             {
                 elements[i].OnKeyUp(args);
@@ -382,13 +378,11 @@ namespace OTK.LiteUI.Core
 
         private void OnTextInput(TextInputEventArgs args)
         {
-            // window.MakeCurrent();
             FocusedComponent?.OnTextInput(args);
         }
 
         private void OnMouseMove(MouseState mouse)
         {
-            // window.MakeCurrent();
             for (int i = elements.Count - 1; i >= 0; i--)
             {
                 var c = elements[i];

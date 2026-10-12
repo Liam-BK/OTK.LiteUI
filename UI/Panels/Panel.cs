@@ -136,7 +136,6 @@ namespace OTK.LiteUI.UI.Components
             child.Anchor = Anchor;
             child.Parent = this;
             child.ClipBounds = ViewPort;
-            child.IsVisible = IsVisible;
             Children.Add(child);
             ApplyLayout();
         }
