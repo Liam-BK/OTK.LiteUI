@@ -72,5 +72,11 @@ namespace OTK.LiteUI.UI.Utilities
         {
             return (a + b) * 0.5f;
         }
+
+        public static float MapValue(float value, float inputMin, float inputMax, float outputMin, float outputMax)
+        {
+            if (Math.Abs(inputMax - inputMin) < 0.0005f) return inputMin;
+            return outputMin + (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin);
+        }
     }
 }

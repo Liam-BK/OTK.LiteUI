@@ -1,14 +1,38 @@
+using System.ComponentModel;
+using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Components;
 using OTK.LiteUI.UI.Interfaces;
 using OTK.LiteUI.UI.Rendering;
 
-public class Page : IRenderable, IUIContainer
+public class Page : UIElement, IRenderable, IUIContainer
 {
     public List<UIComponent> Children { get; set; } = new List<UIComponent>();
-    public bool IsVisible { get; set; } = false;
+    private bool _isVisible = true;
+    public override bool IsVisible
+    {
+        get => _isVisible;
+        set
+        {
+            _isVisible = value;
+            foreach (var child in Children)
+            {
+                child.IsVisible = value;
+            }
+        }
+    }
+
+    public Page(UICanvas canvas)
+    {
+        Canvas = canvas;
+        Canvas.Register(this);
+        if (GetType() == typeof(Page)) Identifier = Canvas.GetNextIdentifier(typeof(Page));
+    }
 
     public void AddChild(UIComponent child)
     {
+        Canvas.Deregister(child);
+        child.Parent = this;
+        child.IsVisible = IsVisible;
         Children.Add(child);
     }
 

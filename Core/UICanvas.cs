@@ -70,8 +70,8 @@ namespace OTK.LiteUI.Core
         private Renderer renderer;
         private Material material;
         public Matrix4 projection;
-        public List<UIComponent> components = new List<UIComponent>();
-        private List<UIComponent> pendingRemovals = new List<UIComponent>();
+        public List<UIElement> elements = new List<UIElement>();
+        private List<UIElement> pendingRemovals = new List<UIElement>();
         internal Dictionary<string, FontData> Fonts => fontManager.Fonts;
         internal Dictionary<Type, int> ComponentCounts = new Dictionary<Type, int>();
         public static UIComponent? FocusedComponent = null;
@@ -235,12 +235,12 @@ namespace OTK.LiteUI.Core
             projection = Matrix4.CreateOrthographicOffCenter(0, window.Size.X * InvDPIScaleX, 0, window.Size.Y * InvDPIScaleY, 0.01f, 1.0f);
         }
 
-        public void Register(UIComponent component)
+        public void Register(UIElement component)
         {
-            components.Add(component);
+            elements.Add(component);
         }
 
-        public void Deregister(UIComponent component)
+        public void Deregister(UIElement component)
         {
             pendingRemovals.Add(component);
         }
@@ -257,7 +257,7 @@ namespace OTK.LiteUI.Core
         public T? Get<T>(string name, string delimiter = ".") where T : UIComponent
         {
             var identifiers = name.Split(delimiter);
-            foreach (var component in components)
+            foreach (var component in elements)
             {
                 if (component.Identifier != identifiers[0]) continue;
                 if (identifiers.Length == 1) return component as T;
@@ -283,7 +283,7 @@ namespace OTK.LiteUI.Core
         {
             var identifiers = name.Split(delimiter);
             var failPoint = identifiers[0];
-            foreach (var component in components)
+            foreach (var component in elements)
             {
                 if (component.Identifier != identifiers[0]) continue;
                 if (identifiers.Length == 1)
@@ -321,9 +321,9 @@ namespace OTK.LiteUI.Core
         private void OnClickDown(MouseState mouse)
         {
             // window.MakeCurrent();
-            for (int i = components.Count - 1; i >= 0; i--)
+            for (int i = elements.Count - 1; i >= 0; i--)
             {
-                var c = components[i];
+                var c = elements[i];
                 if (c.OnClickDown(mouse)) break;
             }
         }
@@ -341,20 +341,23 @@ namespace OTK.LiteUI.Core
         private void OnClickUp(MouseState mouse)
         {
             // window.MakeCurrent();
-            for (int i = components.Count - 1; i >= 0; i--)
+            for (int i = elements.Count - 1; i >= 0; i--)
             {
-                var c = components[i];
+                var c = elements[i];
                 if (c.OnClickUp(mouse))
                 {
-                    if (c.CanFocus && c.IsVisible)
+                    if (c is UIComponent component)
                     {
-                        SetFocus(c);
+                        if (component.CanFocus && c.IsVisible)
+                        {
+                            SetFocus(component);
+                        }
+                        else
+                        {
+                            SetFocus(null);
+                        }
+                        break;
                     }
-                    else
-                    {
-                        SetFocus(null);
-                    }
-                    break;
                 }
             }
         }
@@ -362,18 +365,18 @@ namespace OTK.LiteUI.Core
         private void OnKeyDown(KeyboardKeyEventArgs args)
         {
             // window.MakeCurrent();
-            for (int i = components.Count - 1; i >= 0; i--)
+            for (int i = elements.Count - 1; i >= 0; i--)
             {
-                components[i].OnKeyDown(args);
+                elements[i].OnKeyDown(args);
             }
         }
 
         private void OnKeyUp(KeyboardKeyEventArgs args)
         {
             // window.MakeCurrent();
-            for (int i = components.Count - 1; i >= 0; i--)
+            for (int i = elements.Count - 1; i >= 0; i--)
             {
-                components[i].OnKeyUp(args);
+                elements[i].OnKeyUp(args);
             }
         }
 
@@ -386,9 +389,9 @@ namespace OTK.LiteUI.Core
         private void OnMouseMove(MouseState mouse)
         {
             // window.MakeCurrent();
-            for (int i = components.Count - 1; i >= 0; i--)
+            for (int i = elements.Count - 1; i >= 0; i--)
             {
-                var c = components[i];
+                var c = elements[i];
                 if (c.OnMouseMove(mouse)) break;
             }
             if (!cursorUpdated) window.Cursor = MouseCursor.Default;
@@ -398,9 +401,9 @@ namespace OTK.LiteUI.Core
         private void OnMouseWheel(MouseState mouse)
         {
             // window.MakeCurrent();
-            for (int i = components.Count - 1; i >= 0; i--)
+            for (int i = elements.Count - 1; i >= 0; i--)
             {
-                var c = components[i];
+                var c = elements[i];
                 if (c.OnMouseWheel(mouse)) break;
             }
         }
@@ -408,22 +411,22 @@ namespace OTK.LiteUI.Core
         private void OnUpdate(float delta, MouseState mouse, KeyboardState keys)
         {
             // window.MakeCurrent();
-            for (int i = components.Count - 1; i >= 0; i--)
+            for (int i = elements.Count - 1; i >= 0; i--)
             {
-                components[i].OnUpdate(delta, mouse, keys);
+                elements[i].OnUpdate(delta, mouse, keys);
             }
             material?.SetMatrix4("vpMatrix", projection);
             material?.UpdateUniforms();
             if (renderer is not null)
             {
-                foreach (var component in components)
+                foreach (var component in elements)
                 {
                     if (component is IRenderable renderable) renderable.SubmitData(renderer);
                 }
             }
             foreach (var component in pendingRemovals)
             {
-                component.Deregister(components);
+                component.Deregister(elements);
             }
             if (pendingRemovals.Count > 0) pendingRemovals.Clear();
         }
