@@ -245,7 +245,7 @@ namespace OTK.LiteUI.Core
             pendingRemovals.Add(component);
         }
 
-        internal string GetNextIdentifier(Type type)
+        public string GetNextIdentifier(Type type)
         {
             if (ComponentCounts.ContainsKey(type)) ComponentCounts[type] = ComponentCounts[type] + 1;
             else ComponentCounts.Add(type, 0);
@@ -394,7 +394,6 @@ namespace OTK.LiteUI.Core
 
         private void OnMouseWheel(MouseState mouse)
         {
-            // window.MakeCurrent();
             for (int i = elements.Count - 1; i >= 0; i--)
             {
                 var c = elements[i];
@@ -404,7 +403,6 @@ namespace OTK.LiteUI.Core
 
         private void OnUpdate(float delta, MouseState mouse, KeyboardState keys)
         {
-            // window.MakeCurrent();
             for (int i = elements.Count - 1; i >= 0; i--)
             {
                 elements[i].OnUpdate(delta, mouse, keys);
@@ -430,7 +428,6 @@ namespace OTK.LiteUI.Core
             window.MakeCurrent();
             UpdateProjection();
             GL.Viewport(0, 0, window.FramebufferSize.X, window.FramebufferSize.Y);
-            // DrawElements();
         }
 
         public void OnWindowMove()
