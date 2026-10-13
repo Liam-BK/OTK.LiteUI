@@ -1,11 +1,12 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using OTK.LiteUI.Core;
+using OTK.LiteUI.UI.Interfaces;
 using OTK.LiteUI.UI.Rendering;
 
 namespace OTK.LiteUI.UI.Components
 {
-    public class Button : NineSlice
+    public class Button : NineSlice, ILinkable
     {
         protected Label label;
         public string Text
@@ -109,6 +110,21 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        private string _pageLink = "";
+        public string PageLink
+        {
+            get
+            {
+                return _pageLink;
+            }
+            set
+            {
+                _pageLink = value;
+            }
+        }
+
+        public bool HideParentPageOnClick { get; set; } = true;
+
         public event Action<MouseButton>? OnPointerDown;
 
         public event Action<MouseButton>? OnClick;
@@ -171,6 +187,19 @@ namespace OTK.LiteUI.UI.Components
                 if (mouse.IsButtonReleased(MouseButton.Left))
                 {
                     OnClick?.Invoke(MouseButton.Left);
+                    var page = Canvas.Get<Page>(PageLink);
+                    if (page is not null)
+                    {
+                        page.IsVisible = true;
+                        if (HideParentPageOnClick)
+                        {
+                            var parentPage = TopLevelPage;
+                            if (parentPage is not null && parentPage != page)
+                            {
+                                parentPage.IsVisible = false;
+                            }
+                        }
+                    }
                 }
                 else if (mouse.IsButtonReleased(MouseButton.Right))
                 {

@@ -45,6 +45,24 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        public Page? TopLevelPage
+        {
+            get
+            {
+                var current = Parent;
+
+                while (current is not null)
+                {
+                    if (current is Page page)
+                        return page;
+
+                    current = (current as UIComponent)?.Parent;
+                }
+
+                return null;
+            }
+        }
+
         private Vector4? _clipBounds = null;
 
         public virtual Vector4? ClipBounds

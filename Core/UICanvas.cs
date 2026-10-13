@@ -254,7 +254,7 @@ namespace OTK.LiteUI.Core
             return result;
         }
 
-        public T? Get<T>(string name, string delimiter = ".") where T : UIComponent
+        public T? Get<T>(string name, string delimiter = ".") where T : UIElement
         {
             var identifiers = name.Split(delimiter);
             foreach (var component in elements)
@@ -267,7 +267,7 @@ namespace OTK.LiteUI.Core
             return null;
         }
 
-        private T? Get<T>(string[] identifiers, int index, IUIContainer container) where T : UIComponent
+        private T? Get<T>(string[] identifiers, int index, IUIContainer container) where T : UIElement
         {
             foreach (var component in container.Children)
             {
@@ -279,7 +279,7 @@ namespace OTK.LiteUI.Core
             return null;
         }
 
-        public T GetStrict<T>(string name, string delimiter = ".") where T : UIComponent
+        public T GetStrict<T>(string name, string delimiter = ".") where T : UIElement
         {
             var identifiers = name.Split(delimiter);
             var failPoint = identifiers[0];
@@ -299,7 +299,7 @@ namespace OTK.LiteUI.Core
             throw new UIComponentNotFoundException(failPoint);
         }
 
-        private T GetStrict<T>(string[] identifiers, int index, string resolvedPath, string delimiter, IUIContainer container) where T : UIComponent
+        private T GetStrict<T>(string[] identifiers, int index, string resolvedPath, string delimiter, IUIContainer container) where T : UIElement
         {
             var failPoint = identifiers[index];
             foreach (var component in container.Children)

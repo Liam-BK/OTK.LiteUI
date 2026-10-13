@@ -14,7 +14,7 @@ namespace OTK.LiteUI.UI.Components
         Right
     }
 
-    public class Label : UIComponent, IRenderable
+    public class Label : UIComponent, IRenderable, ILinkable
     {
         private Vector2 _origin = Vector2.Zero;
 
@@ -105,6 +105,23 @@ namespace OTK.LiteUI.UI.Components
                 _isDirty = true;
             }
         }
+
+        private string _pageLink = "";
+        public string PageLink
+        {
+            get
+            {
+                return _pageLink;
+            }
+            set
+            {
+                _pageLink = value;
+            }
+        }
+
+        public bool HideParentPageOnClick { get; set; } = true;
+
+        private bool isClicked = false;
 
         public Label(UICanvas canvas, Vector2 origin, float size, string text = "", Vector4? colour = null)
         {
@@ -311,6 +328,37 @@ namespace OTK.LiteUI.UI.Components
                 glyph.position = new Vector2(x - shiftAmount, y);
                 _lines[line][i] = glyph;
             }
+        }
+
+        public override bool OnClickDown(MouseState mouse)
+        {
+            if (!IsVisible || !WithinBounds(mouse)) return false;
+            isClicked = true;
+            return true;
+        }
+
+        public override bool OnClickUp(MouseState mouse)
+        {
+            if (!IsVisible || !WithinBounds(mouse))
+            {
+                isClicked = false;
+                return false;
+            }
+            if (isClicked)
+            {
+                var page = Canvas.Get<Page>(PageLink);
+                if (page is not null)
+                {
+                    page.IsVisible = true;
+                    if (HideParentPageOnClick)
+                    {
+                        var parentPage = TopLevelPage;
+                        if (parentPage is not null && parentPage != page) parentPage.IsVisible = false;
+                    }
+                }
+                return true;
+            }
+            return false;
         }
 
         public void SubmitData(Renderer renderer)
