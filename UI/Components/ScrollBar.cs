@@ -7,6 +7,7 @@ namespace OTK.LiteUI.UI.Components
 {
     public class ScrollBar : NineSlice
     {
+        [UIProperty]
         public override AnchorType Anchor
         {
             get => base.Anchor; set
@@ -15,12 +16,15 @@ namespace OTK.LiteUI.UI.Components
                 _thumb.Anchor = value;
             }
         }
-        public ComponentOrientation Orientation;
+
+        [UIProperty]
+        public ComponentOrientation Orientation { get; set; }
 
         private NineSlice _thumb;
 
         private Vector2 _contentSize = Vector2.One;
 
+        [UIProperty]
         public Vector2 ContentSize
         {
             get
@@ -36,6 +40,7 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector2 _viewSize = Vector2.One;
 
+        [UIProperty]
         public Vector2 ViewSize
         {
             get
@@ -51,6 +56,7 @@ namespace OTK.LiteUI.UI.Components
 
         private float _value = 0.0f;
 
+        [UIProperty]
         public float Value
         {
             get
@@ -64,6 +70,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public string ThumbTexture
         {
             set
@@ -74,6 +81,7 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector4 _thumbColour;
 
+        [UIProperty]
         public Vector4 ThumbColour
         {
             get
@@ -86,6 +94,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public override Vector4 Bounds
         {
             get
@@ -106,6 +115,7 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector2 _clickOffset = Vector2.Zero;
 
+        [UIProperty]
         public override bool IsVisible
         {
             get => base.IsVisible;
@@ -250,7 +260,7 @@ namespace OTK.LiteUI.UI.Components
 
         public override void SubmitData(Renderer renderer)
         {
-            if (!IsVisible) return;
+            if (!IsVisible || Colour.W <= 0) return;
             base.SubmitData(renderer);
             _thumb.ClipBounds = ClipBounds;
             _thumb.SubmitData(renderer);

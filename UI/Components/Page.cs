@@ -10,17 +10,16 @@ using OTK.LiteUI.UI.Rendering;
 public class Page : UIElement, IRenderable, IUIContainer
 {
     public List<UIComponent> Children { get; set; } = new List<UIComponent>();
+
     private bool _isVisible = true;
+
+    [UIProperty]
     public override bool IsVisible
     {
         get => _isVisible;
         set
         {
             _isVisible = value;
-            foreach (var child in Children)
-            {
-                child.IsVisible = value;
-            }
         }
     }
 

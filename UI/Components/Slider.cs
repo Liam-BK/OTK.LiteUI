@@ -7,6 +7,7 @@ namespace OTK.LiteUI.UI.Components
 {
     public class Slider : NineSlice
     {
+        [UIProperty]
         public override bool IsVisible
         {
             get => base.IsVisible;
@@ -17,6 +18,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public override AnchorType Anchor
         {
             get => base.Anchor; set
@@ -26,10 +28,13 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
-        public ComponentOrientation Orientation;
+        [UIProperty]
+        public ComponentOrientation Orientation { get; set; }
         private NineSlice _thumb;
         private Vector2 _clickOffset = Vector2.Zero;
         private Vector4 _thumbColour;
+
+        [UIProperty]
         public Vector4 ThumbColour
         {
             get
@@ -43,6 +48,8 @@ namespace OTK.LiteUI.UI.Components
         }
 
         private bool _thumbPressed = false;
+
+        [UIProperty]
         public string ThumbTexture
         {
             set
@@ -54,6 +61,7 @@ namespace OTK.LiteUI.UI.Components
 
         private float HalfThumbSize => Orientation == ComponentOrientation.Horizontal ? Height * 0.5f : Width * 0.5f;
 
+        [UIProperty]
         public float Value
         {
             get => _value;
@@ -65,6 +73,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public override Vector4 Bounds
         {
             get
@@ -79,11 +88,6 @@ namespace OTK.LiteUI.UI.Components
         }
 
         public event Action<float>? OnValueChanged;
-
-        public override bool WithinBounds(MouseState mouse)
-        {
-            return base.WithinBounds(mouse) || _thumb.WithinBounds(mouse);
-        }
 
         public Slider(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
@@ -125,6 +129,11 @@ namespace OTK.LiteUI.UI.Components
         {
             var halfThumbSize = HalfThumbSize;
             _thumb.Bounds = new Vector4(x - halfThumbSize, y - halfThumbSize, x + halfThumbSize, y + halfThumbSize);
+        }
+
+        public override bool WithinBounds(MouseState mouse)
+        {
+            return base.WithinBounds(mouse) || _thumb.WithinBounds(mouse);
         }
 
         public override bool OnClickDown(MouseState mouse)
@@ -208,7 +217,7 @@ namespace OTK.LiteUI.UI.Components
 
         public override void SubmitData(Renderer renderer)
         {
-            if (!IsVisible) return;
+            if (!IsVisible || Colour.W <= 0) return;
             base.SubmitData(renderer);
             _thumb.ClipBounds = ClipBounds;
             _thumb.SubmitData(renderer);

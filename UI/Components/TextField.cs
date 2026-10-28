@@ -21,6 +21,7 @@ namespace OTK.LiteUI.UI.Components
     {
         protected readonly Label label;
 
+        [UIProperty]
         public override AnchorType Anchor
         {
             get => base.Anchor; set
@@ -30,6 +31,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public string Text
         {
             get => label.Text ?? "";
@@ -66,6 +68,7 @@ namespace OTK.LiteUI.UI.Components
 
         private TextFieldMode _mode = TextFieldMode.MultiLine;
 
+        [UIProperty]
         public TextFieldMode Mode
         {
             get
@@ -86,11 +89,16 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public Vector4 CaretColour
         {
             get
             {
                 return caret.colour;
+            }
+            set
+            {
+                caret.colour = value;
             }
         }
 
@@ -125,6 +133,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public override Vector4 Bounds
         {
             get => base.Bounds;
@@ -151,6 +160,7 @@ namespace OTK.LiteUI.UI.Components
 
         private const float defaultTextSize = 25.0f;
 
+        [UIProperty]
         public float TextSize
         {
             get
@@ -229,18 +239,24 @@ namespace OTK.LiteUI.UI.Components
             get => Math.Abs(GlobalAnchorIndex - GlobalCaretIndex);
         }
 
+        public Vector2 GetTextPos { get => label.Origin; }
+
+        [UIProperty]
         public override bool IsVisible
         {
             get => base.IsVisible;
             set
             {
                 base.IsVisible = value;
-                label.IsVisible = value;
+                label.IsVisible = base.IsVisible;
             }
         }
 
         public event Action? OnEnterPressed;
         public event Action? OnTextChanged;
+
+        [UIProperty]
+        public bool AutoScaleTextByBounds { get; set; } = false;
 
         public TextField(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
@@ -268,10 +284,11 @@ namespace OTK.LiteUI.UI.Components
             UpdateCaretPosition();
         }
 
-        private void AutoScaleTextSize()
+        private void AutoScaleTextSize(bool force = false)
         {
+            if (!AutoScaleTextByBounds && !force) return;
             var textSizeMultiplier = 0.85f;
-            label.Size = Math.Min((ViewPort.W - ViewPort.Y) * textSizeMultiplier, defaultTextSize);
+            label.Size = Math.Max(Math.Min((ViewPort.W - ViewPort.Y) * textSizeMultiplier, defaultTextSize), 5);
         }
 
         private void ApplyAutoScroll()
@@ -700,7 +717,7 @@ namespace OTK.LiteUI.UI.Components
             }
             IsClicked = true;
             Vector2 convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
-            UICanvas.FocusedComponent = this;
+            Canvas.SetFocus(this);
             caretLine = label.FindLineFromPos(mouse);
             caretIndex = convertedMouse.X <= label.Bounds.Z ? label.FindCaretIndexFromPos(mouse) : label.FindLineEndIndex(caretLine);
             desiredColumn = caretIndex;
@@ -714,7 +731,10 @@ namespace OTK.LiteUI.UI.Components
 
         public override bool OnMouseMove(MouseState mouse)
         {
-            if (WithinBounds(mouse)) Canvas.SetCursor(MouseCursor.IBeam);
+            if (IsVisible && WithinBounds(mouse))
+            {
+                Canvas.SetCursor(MouseCursor.IBeam);
+            }
             if (IsClicked)
             {
                 Vector2 convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
@@ -731,7 +751,7 @@ namespace OTK.LiteUI.UI.Components
         public override bool OnClickUp(MouseState mouse)
         {
             IsClicked = false;
-            return base.OnClickUp(mouse);
+            return WithinBounds(mouse) && IsVisible;
         }
 
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
@@ -774,16 +794,16 @@ namespace OTK.LiteUI.UI.Components
         public override void SubmitData(Renderer renderer)
         {
             if (!IsVisible) return;
-            base.SubmitData(renderer);
+            if (Colour.W > 0) base.SubmitData(renderer);
+            if (label.Colour.W <= 0) return;
             var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
             if (ClipBounds.HasValue)
             {
-                // label.ClipBounds = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(Bounds.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(Bounds.W, ClipBounds.Value.W));
-                label.ClipBounds = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(ViewPort.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(ViewPort.W, ClipBounds.Value.W));
+                var clippingArea = ClipBounds.Value;
+                label.ClipBounds = new Vector4(Math.Max(ViewPort.X, clippingArea.X), Math.Max(ViewPort.Y, clippingArea.Y), Math.Min(ViewPort.Z, clippingArea.Z), Math.Min(ViewPort.W, clippingArea.W));
             }
             else
             {
-                // label.ClipBounds = new Vector4(ViewPort.X, Bounds.Y, ViewPort.Z, Bounds.W);
                 label.ClipBounds = ViewPort;
             }
             label.SubmitData(renderer);
@@ -792,15 +812,14 @@ namespace OTK.LiteUI.UI.Components
             {
                 if (ClipBounds.HasValue)
                 {
-                    // var clip = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(Bounds.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(Bounds.W, ClipBounds.Value.W));
-                    var clip = new Vector4(Math.Max(ViewPort.X, ClipBounds.Value.X), Math.Max(ViewPort.Y, ClipBounds.Value.Y), Math.Min(ViewPort.Z, ClipBounds.Value.Z), Math.Min(ViewPort.W, ClipBounds.Value.W));
+                    var clippingArea = ClipBounds.Value;
+                    var clip = new Vector4(Math.Max(ViewPort.X, clippingArea.X), Math.Max(ViewPort.Y, clippingArea.Y), Math.Min(ViewPort.Z, clippingArea.Z), Math.Min(ViewPort.W, clippingArea.W));
                     var temp = Utils.Clip(caret, clip);
                     temp.position += visualOffset;
                     renderer.AddInstance(temp);
                 }
                 else
                 {
-                    // var temp = Utils.Clip(caret, new Vector4(ViewPort.X, Bounds.Y, ViewPort.Z, Bounds.W));
                     var temp = Utils.Clip(caret, ViewPort);
                     temp.position += visualOffset;
                     renderer.AddInstance(temp);

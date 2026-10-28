@@ -18,6 +18,7 @@ namespace OTK.LiteUI.UI.Components
     {
         private Vector2 _origin = Vector2.Zero;
 
+        [UIProperty]
         public Vector2 Origin
         {
             get => _origin;
@@ -30,6 +31,7 @@ namespace OTK.LiteUI.UI.Components
 
         private float _size = 0;
 
+        [UIProperty]
         public float Size
         {
             get => _size;
@@ -40,7 +42,8 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
-        public TextAlignment Alignment = TextAlignment.Left;
+        [UIProperty]
+        public TextAlignment Alignment { get; set; } = TextAlignment.Left;
 
         public int GlyphCount
         {
@@ -69,6 +72,7 @@ namespace OTK.LiteUI.UI.Components
 
         private string _text = "";
 
+        [UIProperty]
         public string Text
         {
             get => _text;
@@ -86,6 +90,7 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector4 _bounds;
 
+        [UIProperty]
         public override Vector4 Bounds
         {
             get
@@ -95,8 +100,8 @@ namespace OTK.LiteUI.UI.Components
             set
             {
                 _bounds = value;
-                Size = _bounds.W - _bounds.Y;
-                var y = _bounds.W - Size;
+                Size = (value.W - value.Y) * 0.5f;
+                var y = value.Y + (value.W - value.Y) * 0.25f;
                 float x;
                 if (Alignment == TextAlignment.Left) x = _bounds.X;
                 else if (Alignment == TextAlignment.Center) x = (_bounds.X + _bounds.Z) * 0.5f;
@@ -107,6 +112,8 @@ namespace OTK.LiteUI.UI.Components
         }
 
         private string _pageLink = "";
+
+        [UIProperty]
         public string PageLink
         {
             get
@@ -119,6 +126,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public bool HideParentPageOnClick { get; set; } = true;
 
         private bool isClicked = false;
@@ -363,12 +371,13 @@ namespace OTK.LiteUI.UI.Components
 
         public void SubmitData(Renderer renderer)
         {
-            if (!IsVisible || string.IsNullOrEmpty(Text)) return;
+            if (!IsVisible || string.IsNullOrEmpty(Text) || Colour.W <= 0) return;
             if (_isDirty)
             {
                 ForceUpdateGlyphs();
             }
             var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+            var clippingArea = ClipBounds;
             for (int i = 0; i < _lines.Count; i++)
             {
                 for (int j = 0; j < _lines[i].Count; j++)
@@ -380,13 +389,13 @@ namespace OTK.LiteUI.UI.Components
                     float bottom = glyph.position.Y - halfHeight;
                     float right = glyph.position.X + halfWidth;
                     float top = glyph.position.Y + halfHeight;
-                    if (ClipBounds is Vector4 clip && !(right < clip.X || left > clip.Z || top < clip.Y || bottom > clip.W))
+                    if (clippingArea is not null && !(right < clippingArea.Value.X || left > clippingArea.Value.Z || top < clippingArea.Value.Y || bottom > clippingArea.Value.W))
                     {
-                        var temp = Utils.Clip(glyph, clip);
+                        var temp = Utils.Clip(glyph, clippingArea.Value);
                         temp.position += visualOffset;
                         renderer.AddInstance(temp);
                     }
-                    else if (ClipBounds is null)
+                    else if (clippingArea is null)
                     {
                         var temp = glyph;
                         temp.position += visualOffset;

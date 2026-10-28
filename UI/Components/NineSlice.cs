@@ -8,8 +8,12 @@ namespace OTK.LiteUI.UI.Components
 {
     public class NineSlice : UIComponent, IRenderable
     {
+        [UIProperty]
         public string Texture { get; set; } = "";
+
         private float _inset;
+
+        [UIProperty]
         public float Inset
         {
             get => _inset;
@@ -26,7 +30,10 @@ namespace OTK.LiteUI.UI.Components
                 }
             }
         }
+
         private float _uvInset;
+
+        [UIProperty]
         public float UVInset
         {
             get
@@ -48,6 +55,7 @@ namespace OTK.LiteUI.UI.Components
         private UIQuad bottomCenter = new UIQuad();
         private UIQuad bottomRight = new UIQuad();
 
+        [UIProperty]
         public override Vector4 Colour
         {
             get => base.Colour;
@@ -169,36 +177,38 @@ namespace OTK.LiteUI.UI.Components
 
         public virtual void SubmitData(Renderer renderer)
         {
-            if (!IsVisible) return;
+            if (!IsVisible || Colour.W <= 0) return;
             UpdateQuadrants();
             var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
-            if (ClipBounds.HasValue)
+            var clippingArea = ClipBounds;
+            if (clippingArea is not null)
             {
-                var temp = Utils.Clip(topLeft, ClipBounds.Value);
+
+                var temp = Utils.Clip(topLeft, clippingArea.Value);
                 temp.position += visualOffset;
                 renderer.AddInstance(temp);
-                temp = Utils.Clip(topCenter, ClipBounds.Value);
+                temp = Utils.Clip(topCenter, clippingArea.Value);
                 temp.position += visualOffset;
                 renderer.AddInstance(temp);
-                temp = Utils.Clip(topRight, ClipBounds.Value);
+                temp = Utils.Clip(topRight, clippingArea.Value);
                 temp.position += visualOffset;
                 renderer.AddInstance(temp);
-                temp = Utils.Clip(centerLeft, ClipBounds.Value);
+                temp = Utils.Clip(centerLeft, clippingArea.Value);
                 temp.position += visualOffset;
                 renderer.AddInstance(temp);
-                temp = Utils.Clip(center, ClipBounds.Value);
+                temp = Utils.Clip(center, clippingArea.Value);
                 temp.position += visualOffset;
                 renderer.AddInstance(temp);
-                temp = Utils.Clip(centerRight, ClipBounds.Value);
+                temp = Utils.Clip(centerRight, clippingArea.Value);
                 temp.position += visualOffset;
                 renderer.AddInstance(temp);
-                temp = Utils.Clip(bottomLeft, ClipBounds.Value);
+                temp = Utils.Clip(bottomLeft, clippingArea.Value);
                 temp.position += visualOffset;
                 renderer.AddInstance(temp);
-                temp = Utils.Clip(bottomCenter, ClipBounds.Value);
+                temp = Utils.Clip(bottomCenter, clippingArea.Value);
                 temp.position += visualOffset;
                 renderer.AddInstance(temp);
-                temp = Utils.Clip(bottomRight, ClipBounds.Value);
+                temp = Utils.Clip(bottomRight, clippingArea.Value);
                 temp.position += visualOffset;
                 renderer.AddInstance(temp);
             }

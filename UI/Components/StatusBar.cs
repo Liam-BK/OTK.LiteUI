@@ -8,6 +8,7 @@ namespace OTK.LiteUI.UI.Components
     {
         private NineSlice Fill;
 
+        [UIProperty]
         public override Vector4 Bounds
         {
             get
@@ -21,6 +22,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public override AnchorType Anchor
         {
             get => base.Anchor; set
@@ -30,12 +32,14 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public float FillAmount
         {
             get;
             set;
         }
 
+        [UIProperty]
         public Vector4 FillColour
         {
             set
@@ -44,6 +48,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public string FillTexture
         {
             set
@@ -52,6 +57,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public override bool IsVisible
         {
             get => base.IsVisible;
@@ -71,9 +77,15 @@ namespace OTK.LiteUI.UI.Components
 
         public override void SubmitData(Renderer renderer)
         {
-            base.SubmitData(renderer);
+            if (!IsVisible) return;
+            if (Colour.W > 0) base.SubmitData(renderer);
+            if (Fill.Colour.W <= 0) return;
             var fillClipBounds = new Vector4(Bounds.X, Bounds.Y, Bounds.X + FillAmount * Width, Bounds.W);
-            if (ClipBounds.HasValue) fillClipBounds = new Vector4(Math.Max(fillClipBounds.X, ClipBounds.Value.X), Math.Max(fillClipBounds.Y, ClipBounds.Value.Y), Math.Min(fillClipBounds.Z, ClipBounds.Value.Z), Math.Min(fillClipBounds.W, ClipBounds.Value.W));
+            if (ClipBounds.HasValue)
+            {
+                var clippingArea = ClipBounds.Value;
+                fillClipBounds = new Vector4(Math.Max(fillClipBounds.X, clippingArea.X), Math.Max(fillClipBounds.Y, clippingArea.Y), Math.Min(fillClipBounds.Z, clippingArea.Z), Math.Min(fillClipBounds.W, clippingArea.W));
+            }
             Fill.ClipBounds = fillClipBounds;
             Fill.SubmitData(renderer);
         }

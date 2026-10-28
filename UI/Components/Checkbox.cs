@@ -6,22 +6,28 @@ namespace OTK.LiteUI.UI.Components
 {
     public class Checkbox : NineSlice
     {
-        public bool _isPressed = false;
+        private bool _isPressed = false;
 
-        public string UncheckedTexture = "";
+        [UIProperty]
+        public string UncheckedTexture { get; set; } = "";
 
-        public string CheckedTexture = "";
+        [UIProperty]
+        public string CheckedTexture { get; set; } = "";
 
-        public Vector4 UncheckedColour;
+        [UIProperty]
+        public Vector4 UncheckedColour { get; set; }
 
-        public Vector4 CheckedColour;
+        [UIProperty]
+        public Vector4 CheckedColour { get; set; }
 
+        [UIProperty]
         public bool Checked
         {
             get;
             set;
         }
 
+        [UIProperty]
         public override Vector4 Bounds
         {
             get => base.Bounds;
@@ -82,7 +88,7 @@ namespace OTK.LiteUI.UI.Components
 
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
         {
-            if (!IsVisible) return;
+            if (!IsVisible || Colour.W <= 0) return;
             var multiplier = new Vector4(_isPressed ? 0.5f : 1.0f, _isPressed ? 0.5f : 1.0f, _isPressed ? 0.5f : 1.0f, 1);
             Texture = Checked ? CheckedTexture : UncheckedTexture;
             Colour = (Checked ? CheckedColour : UncheckedColour) * multiplier;

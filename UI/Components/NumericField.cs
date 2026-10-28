@@ -24,6 +24,7 @@ namespace OTK.LiteUI.UI.Components
             private set;
         } = false;
 
+        [UIProperty]
         public double Value
         {
             get

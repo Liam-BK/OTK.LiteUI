@@ -9,6 +9,7 @@ namespace OTK.LiteUI.UI.Components
     public class Button : NineSlice, ILinkable
     {
         protected Label label;
+        [UIProperty]
         public string Text
         {
             get
@@ -41,20 +42,23 @@ namespace OTK.LiteUI.UI.Components
             set => _rolloverValue = value;
         }
 
+        [UIProperty]
         public override bool IsVisible
         {
             get => base.IsVisible;
             set
             {
                 base.IsVisible = value;
-                label.IsVisible = value;
+                label.IsVisible = IsVisible;
                 if (value == false) _rolloverValue = 0;
             }
         }
 
+        [UIProperty]
         public override AnchorType Anchor
         {
-            get => base.Anchor; set
+            get => base.Anchor;
+            set
             {
                 base.Anchor = value;
                 label.Anchor = value;
@@ -63,7 +67,7 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector4 _rolloverColour = new Vector4(0.75f, 0.75f, 0.75f, 1);
 
-        public Vector4 RolloverColour
+        private Vector4 RolloverColour
         {
             set
             {
@@ -71,8 +75,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
-        private Vector4 _baseColour;
-
+        [UIProperty]
         public Vector4 TextColour
         {
             set
@@ -83,6 +86,9 @@ namespace OTK.LiteUI.UI.Components
 
         public bool isPressed = false;
 
+        private Vector4 _baseColour;
+
+        [UIProperty]
         public override Vector4 Colour
         {
             get => _baseColour;
@@ -92,6 +98,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public override Vector4 Bounds
         {
             get
@@ -111,6 +118,8 @@ namespace OTK.LiteUI.UI.Components
         }
 
         private string _pageLink = "";
+
+        [UIProperty]
         public string PageLink
         {
             get
@@ -123,6 +132,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public bool HideParentPageOnClick { get; set; } = true;
 
         public event Action<MouseButton>? OnPointerDown;
@@ -224,9 +234,11 @@ namespace OTK.LiteUI.UI.Components
 
         public override void SubmitData(Renderer renderer)
         {
+            if (!IsVisible || Colour.W <= 0) return;
             base.SubmitData(renderer);
-            if (!ClipBounds.HasValue) label.ClipBounds = Bounds;
-            else label.ClipBounds = new Vector4(Math.Max(ClipBounds.Value.X, Bounds.X), Math.Max(ClipBounds.Value.Y, Bounds.Y), Math.Min(ClipBounds.Value.Z, Bounds.Z), Math.Min(ClipBounds.Value.W, Bounds.W));
+            var clippingArea = ClipBounds;
+            if (!(clippingArea is not null)) label.ClipBounds = Bounds;
+            else label.ClipBounds = new Vector4(Math.Max(clippingArea.Value.X, Bounds.X), Math.Max(clippingArea.Value.Y, Bounds.Y), Math.Min(clippingArea.Value.Z, Bounds.Z), Math.Min(clippingArea.Value.W, Bounds.W));
             label.SubmitData(renderer);
         }
     }

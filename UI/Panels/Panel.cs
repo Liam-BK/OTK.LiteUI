@@ -11,6 +11,8 @@ namespace OTK.LiteUI.UI.Components
     {
         private List<UIComponent> _children = new List<UIComponent>();
 
+        public static float ScrollMultiplier = 5.0f;
+
         public override AnchorType Anchor
         {
             get => base.Anchor; set
@@ -201,7 +203,7 @@ namespace OTK.LiteUI.UI.Components
                     return true;
                 }
             }
-            ScrollOffset = new Vector2(ScrollOffset.X - mouse.ScrollDelta.X, ScrollOffset.Y - mouse.ScrollDelta.Y);
+            ScrollOffset = new Vector2(ScrollOffset.X - mouse.ScrollDelta.X * ScrollMultiplier, ScrollOffset.Y - mouse.ScrollDelta.Y * ScrollMultiplier);
             ApplyLayout();
             return base.OnMouseWheel(mouse);
         }
@@ -239,6 +241,7 @@ namespace OTK.LiteUI.UI.Components
             if (Layout is not null) ApplyLayout();
             foreach (var element in Children)
             {
+                if (element.Bounds.X > Bounds.Z || element.Bounds.Z < Bounds.X || element.Bounds.Y > Bounds.W || element.Bounds.W < Bounds.Y) continue;
                 element.OnUpdate(deltaTime, mouse, keyboard);
             }
         }
@@ -246,7 +249,7 @@ namespace OTK.LiteUI.UI.Components
         public override void SubmitData(Renderer renderer)
         {
             if (!IsVisible) return;
-            base.SubmitData(renderer);
+            if (Colour.W > 0) base.SubmitData(renderer);
             foreach (var element in Children)
             {
                 if (element.Bounds.X > Bounds.Z || element.Bounds.Z < Bounds.X || element.Bounds.Y > Bounds.W || element.Bounds.W < Bounds.Y) continue;

@@ -8,8 +8,10 @@ namespace OTK.LiteUI.UI.Components
     {
         public UICanvas Canvas = null!;
 
+        [UIProperty]
         public virtual bool IsVisible { get; set; } = true;
 
+        [UIProperty]
         public string Identifier
         {
             get;

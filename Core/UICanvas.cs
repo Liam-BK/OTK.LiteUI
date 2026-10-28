@@ -79,6 +79,8 @@ namespace OTK.LiteUI.Core
         private const float referenceDPI = 96.0f;
         private bool firstFrame = true;
 
+        public int RegisteredElements => elements.Count;
+
         public Vector2 CanvasSize => window.Size.ToVector2() * InvDPIScaleVec2;
 
         public string DefaultFontKey => fontManager.DefaultFontKey;
@@ -119,6 +121,8 @@ namespace OTK.LiteUI.Core
             get => 1.0f / DPIScaleY;
         }
 
+        private float _windowDPIX;
+
         /// <summary>
         /// The DPI scale value for the X axis.
         /// </summary>
@@ -126,16 +130,28 @@ namespace OTK.LiteUI.Core
         {
             get
             {
-                return DisplayUnits == DisplayUnitType.DPI ? (window.CurrentMonitor.HorizontalDpi / referenceDPI) : 1;
+                return DisplayUnits == DisplayUnitType.DPI ? (_windowDPIX / referenceDPI) : 1;
             }
         }
+
+        private float _windowDPIY;
 
         /// <summary>
         /// The DPI scale value for the X axis.
         /// </summary>
         public float DPIScaleY
         {
-            get => DisplayUnits == DisplayUnitType.DPI ? (window.CurrentMonitor.VerticalDpi / referenceDPI) : 1;
+            get => DisplayUnits == DisplayUnitType.DPI ? (_windowDPIY / referenceDPI) : 1;
+        }
+
+        public int DirectElementCount<T>() where T : UIElement
+        {
+            int result = 0;
+            foreach (var element in elements)
+            {
+                if (element.GetType() == typeof(T)) result++;
+            }
+            return result;
         }
 
         public TextureResolution GetTextureResolution => textureManager.GetTextureResolution;
@@ -177,6 +193,8 @@ namespace OTK.LiteUI.Core
             window.Resize += args => OnResize();
             window.Move += args => OnWindowMove();
             UpdateProjection();
+            _windowDPIY = window.CurrentMonitor.VerticalDpi;
+            _windowDPIX = window.CurrentMonitor.HorizontalDpi;
             Default ??= this;
         }
 
@@ -344,18 +362,7 @@ namespace OTK.LiteUI.Core
                 var c = elements[i];
                 if (c.OnClickUp(mouse))
                 {
-                    if (c is UIComponent component)
-                    {
-                        if (component.CanFocus && c.IsVisible)
-                        {
-                            SetFocus(component);
-                        }
-                        else
-                        {
-                            SetFocus(null);
-                        }
-                        break;
-                    }
+                    break;
                 }
             }
         }
@@ -416,11 +423,12 @@ namespace OTK.LiteUI.Core
                     if (component is IRenderable renderable) renderable.SubmitData(renderer);
                 }
             }
-            foreach (var component in pendingRemovals)
+            for (int i = pendingRemovals.Count - 1; i >= 0; i--)
             {
-                component.Deregister(elements);
+                elements.Remove(pendingRemovals[i]);
             }
-            if (pendingRemovals.Count > 0) pendingRemovals.Clear();
+
+            pendingRemovals.Clear();
         }
 
         public void OnResize()

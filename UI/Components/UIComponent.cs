@@ -27,12 +27,14 @@ namespace OTK.LiteUI.UI.Components
 {
     public abstract class UIComponent : UIElement
     {
+        [UIProperty]
         public virtual AnchorType Anchor { get; set; } = AnchorType.BottomLeft;
 
         private IUIContainer? _parent = null;
 
-        public IUIContainer? Parent { get => _parent; set => _parent = value; }
+        public virtual IUIContainer? Parent { get => _parent; set => _parent = value; }
 
+        [UIProperty]
         public override bool IsVisible
         {
             get
@@ -50,7 +52,6 @@ namespace OTK.LiteUI.UI.Components
             get
             {
                 var current = Parent;
-
                 while (current is not null)
                 {
                     if (current is Page page)
@@ -95,6 +96,7 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector4 _bounds = Vector4.Zero;
 
+        [UIProperty]
         public virtual Vector4 Bounds
         {
             get
@@ -112,6 +114,7 @@ namespace OTK.LiteUI.UI.Components
 
         protected Vector4 _colour = Vector4.One;
 
+        [UIProperty]
         public virtual Vector4 Colour
         {
             get
