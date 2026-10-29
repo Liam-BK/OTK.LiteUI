@@ -67,7 +67,8 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector4 _rolloverColour = new Vector4(0.75f, 0.75f, 0.75f, 1);
 
-        private Vector4 RolloverColour
+        [UIProperty]
+        public Vector4 RolloverColour
         {
             set
             {
