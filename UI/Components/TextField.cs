@@ -277,6 +277,8 @@ namespace OTK.LiteUI.UI.Components
             if (GetType() == typeof(TextField)) Identifier = Canvas.GetNextIdentifier(typeof(TextField));
         }
 
+        public TextField(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, inset, uvInset, colour) { }
+
         private void UpdateLabelOrigin()
         {
             label.Origin = LabelPosition;

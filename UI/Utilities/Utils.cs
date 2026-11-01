@@ -16,10 +16,10 @@ namespace OTK.LiteUI.UI.Utilities
             float width = right - left;
             float height = top - bottom;
 
-            if (width <= 0 || height <= 0)
-            {
-                return quad;
-            }
+            if (width <= 0 || height <= 0) return quad;
+            if (left >= clipBounds.X && right <= clipBounds.Z && bottom >= clipBounds.Y && top <= clipBounds.W) return quad;
+
+
 
             float nLeft = MathF.Max(left, clipBounds.X);
             float nRight = MathF.Min(right, clipBounds.Z);

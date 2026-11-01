@@ -128,13 +128,15 @@ namespace OTK.LiteUI.UI.Components
 
         public ScrollBar(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
-            this.Canvas = canvas;
+            Canvas = canvas;
             Orientation = Width >= Height ? ComponentOrientation.Horizontal : ComponentOrientation.Vertical;
-            _thumb = new NineSlice(canvas, bounds);
+            _thumb = new NineSlice(Canvas, bounds);
             _thumbColour = colour ?? Vector4.One;
-            canvas.Deregister(_thumb);
+            Canvas.Deregister(_thumb);
             if (GetType() == typeof(ScrollBar)) Identifier = Canvas.GetNextIdentifier(typeof(ScrollBar));
         }
+
+        public ScrollBar(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, inset, uvInset, colour) { }
 
         private void UpdateThumbFromValue()
         {

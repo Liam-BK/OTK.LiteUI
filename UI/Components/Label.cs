@@ -147,6 +147,8 @@ namespace OTK.LiteUI.UI.Components
             if (GetType() == typeof(Label)) Identifier = Canvas.GetNextIdentifier(typeof(Label));
         }
 
+        public Label(Vector2 origin, float size, string text = "", Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), origin, size, text, colour) { }
+
         public int FindInsertionOffset(int line)
         {
             int result = 0;

@@ -47,6 +47,8 @@ namespace OTK.LiteUI.UI.Components
             if (GetType() == typeof(NumericField)) Identifier = Canvas.GetNextIdentifier(typeof(NumericField));
         }
 
+        public NumericField(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, inset, uvInset, colour) { }
+
         private bool HasDecimalAtCaretGroup()
         {
             if (string.IsNullOrEmpty(Text))

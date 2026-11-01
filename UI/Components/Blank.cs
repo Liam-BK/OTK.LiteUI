@@ -11,5 +11,7 @@ namespace OTK.LiteUI.UI.Components
             canvas.Register(this);
             if (GetType() == typeof(Blank)) Identifier = Canvas.GetNextIdentifier(typeof(Blank));
         }
+
+        public Blank() : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default")) { }
     }
 }

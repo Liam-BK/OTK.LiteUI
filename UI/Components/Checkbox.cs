@@ -42,11 +42,13 @@ namespace OTK.LiteUI.UI.Components
 
         public Checkbox(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
-            this.Canvas = canvas;
+            Canvas = canvas;
             UncheckedColour = colour ?? Vector4.One;
             CheckedColour = colour ?? Vector4.One;
             if (GetType() == typeof(Checkbox)) Identifier = Canvas.GetNextIdentifier(typeof(Checkbox));
         }
+
+        public Checkbox(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, inset, uvInset, colour) { }
 
         public override bool OnClickDown(MouseState mouse)
         {

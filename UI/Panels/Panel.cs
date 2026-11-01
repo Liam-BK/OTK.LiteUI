@@ -110,10 +110,12 @@ namespace OTK.LiteUI.UI.Components
 
         public Panel(UICanvas canvas, Vector4 bounds, ILayout layout, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
-            this.Canvas = canvas;
+            Canvas = canvas;
             Layout = layout;
             if (GetType() == typeof(Panel)) Identifier = Canvas.GetNextIdentifier(typeof(Panel));
         }
+
+        public Panel(Vector4 bounds, ILayout layout, float inset = 10, float uvInset = 0.25f, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, layout, inset, uvInset, colour) { }
 
         private void ApplyLayout()
         {

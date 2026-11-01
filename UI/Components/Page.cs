@@ -30,6 +30,8 @@ public class Page : UIElement, IRenderable, IUIContainer
         if (GetType() == typeof(Page)) Identifier = Canvas.GetNextIdentifier(typeof(Page));
     }
 
+    public Page() : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default")) { }
+
     public void AddChild(UIComponent child)
     {
         Canvas.Deregister(child);
