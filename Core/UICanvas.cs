@@ -185,9 +185,9 @@ namespace OTK.LiteUI.Core
             window.KeyDown += OnKeyDown;
             window.KeyUp += OnKeyUp;
             window.MouseDown += _ => OnClickDown(window.MouseState);
-            window.MouseUp += _ => OnClickUp(window.MouseState);
-            window.MouseMove += _ => OnMouseMove(window.MouseState);
             window.MouseWheel += _ => OnMouseWheel(window.MouseState);
+            window.MouseMove += _ => OnMouseMove(window.MouseState);
+            window.MouseUp += _ => OnClickUp(window.MouseState);
             window.TextInput += OnTextInput;
             window.UpdateFrame += args => OnUpdate((float)args.Time, window.MouseState, window.KeyboardState);
             window.Resize += args => OnResize();
@@ -336,15 +336,6 @@ namespace OTK.LiteUI.Core
             throw new UIComponentNotFoundException($"{resolvedPath}{delimiter}{failPoint}");
         }
 
-        private void OnClickDown(MouseState mouse)
-        {
-            for (int i = elements.Count - 1; i >= 0; i--)
-            {
-                var c = elements[i];
-                if (c.OnClickDown(mouse)) break;
-            }
-        }
-
         public void SetFocus(UIComponent? component)
         {
             if (FocusedComponent == component)
@@ -353,6 +344,50 @@ namespace OTK.LiteUI.Core
             FocusedComponent?.OnFocusLost();
             FocusedComponent = component;
             FocusedComponent?.OnFocusGained();
+        }
+
+        private void OnClickDown(MouseState mouse)
+        {
+            for (int i = elements.Count - 1; i >= 0; i--)
+            {
+                var c = elements[i];
+                if (c.OnClickDown(mouse)) break;
+            }
+
+            foreach (var element in elements)
+            {
+                element.OnClickDownNoConsume(mouse);
+            }
+        }
+
+        private void OnMouseWheel(MouseState mouse)
+        {
+            for (int i = elements.Count - 1; i >= 0; i--)
+            {
+                var c = elements[i];
+                if (c.OnMouseWheel(mouse)) break;
+            }
+
+            foreach (var element in elements)
+            {
+                element.OnMouseWheelNoConsume(mouse);
+            }
+        }
+
+        private void OnMouseMove(MouseState mouse)
+        {
+            for (int i = elements.Count - 1; i >= 0; i--)
+            {
+                var c = elements[i];
+                if (c.OnMouseMove(mouse)) break;
+            }
+            if (!cursorUpdated) window.Cursor = MouseCursor.Default;
+            cursorUpdated = false;
+
+            foreach (var element in elements)
+            {
+                element.OnMouseMoveNoConsume(mouse);
+            }
         }
 
         private void OnClickUp(MouseState mouse)
@@ -364,6 +399,11 @@ namespace OTK.LiteUI.Core
                 {
                     break;
                 }
+            }
+
+            foreach (var element in elements)
+            {
+                element.OnClickUpNoConsume(mouse);
             }
         }
 
@@ -386,26 +426,6 @@ namespace OTK.LiteUI.Core
         private void OnTextInput(TextInputEventArgs args)
         {
             FocusedComponent?.OnTextInput(args);
-        }
-
-        private void OnMouseMove(MouseState mouse)
-        {
-            for (int i = elements.Count - 1; i >= 0; i--)
-            {
-                var c = elements[i];
-                if (c.OnMouseMove(mouse)) break;
-            }
-            if (!cursorUpdated) window.Cursor = MouseCursor.Default;
-            cursorUpdated = false;
-        }
-
-        private void OnMouseWheel(MouseState mouse)
-        {
-            for (int i = elements.Count - 1; i >= 0; i--)
-            {
-                var c = elements[i];
-                if (c.OnMouseWheel(mouse)) break;
-            }
         }
 
         private void OnUpdate(float delta, MouseState mouse, KeyboardState keys)

@@ -1,6 +1,7 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using OTK.LiteUI.Core;
+using OTK.LiteUI.UI.Interfaces;
 using OTK.LiteUI.UI.Rendering;
 
 namespace OTK.LiteUI.UI.Components
@@ -126,6 +127,21 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        private static bool HorizontalScroll = false;
+
+        private IScrollable? _scrollingComponent;
+
+        public IScrollable? ScrollingComponent
+        {
+            get => _scrollingComponent;
+            set
+            {
+                _scrollingComponent = value;
+                if (_scrollingComponent is null) return;
+                SyncFromScrollable();
+            }
+        }
+
         public ScrollBar(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
             Canvas = canvas;
@@ -137,6 +153,36 @@ namespace OTK.LiteUI.UI.Components
         }
 
         public ScrollBar(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, inset, uvInset, colour) { }
+
+        private void SyncFromScrollable()
+        {
+            if (ScrollingComponent is null)
+                return;
+
+            Vector4 viewport = ScrollingComponent.ViewPort;
+            ViewSize = new Vector2(viewport.Z - viewport.X, viewport.W - viewport.Y);
+            Vector2 maxScroll = ScrollingComponent.MaxScroll;
+            ContentSize = ViewSize + maxScroll;
+            float maxOffset = Orientation == ComponentOrientation.Horizontal ? maxScroll.X : maxScroll.Y;
+            float currentOffset = Orientation == ComponentOrientation.Horizontal ? ScrollingComponent.ScrollOffset.X : ScrollingComponent.ScrollOffset.Y;
+            Value = maxOffset > 0 ? currentOffset / maxOffset : 0;
+        }
+
+        private void SyncToScrollable()
+        {
+            if (ScrollingComponent is null)
+                return;
+
+            Vector2 maxScroll = ScrollingComponent.MaxScroll;
+            Vector2 offset = ScrollingComponent.ScrollOffset;
+
+            if (Orientation == ComponentOrientation.Horizontal)
+                offset.X = Value * maxScroll.X;
+            else
+                offset.Y = Value * maxScroll.Y;
+
+            ScrollingComponent.ScrollOffset = offset;
+        }
 
         private void UpdateThumbFromValue()
         {
@@ -164,6 +210,8 @@ namespace OTK.LiteUI.UI.Components
                 var denominator = Math.Max(Height - _thumb.Height, 0.0f);
                 _value = Math.Abs(denominator) < 0.0005f ? 0 : (Bounds.W - _thumb.Bounds.W) / denominator;
             }
+            _value = Math.Clamp(_value, 0.0f, 1.0f);
+            SyncToScrollable();
         }
 
         private void SetThumbPos(float x, float y)
@@ -225,11 +273,38 @@ namespace OTK.LiteUI.UI.Components
             return base.OnMouseMove(mouse);
         }
 
+        public override void OnMouseMoveNoConsume(MouseState mouse)
+        {
+            if (_isPressed)
+            {
+                var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
+                var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+                convertedMouse -= visualOffset;
+                if (Orientation == ComponentOrientation.Horizontal)
+                {
+                    SetThumbPos(Math.Clamp(convertedMouse.X - _clickOffset.X, Bounds.X + _thumb.Width * 0.5f, Bounds.Z - _thumb.Width * 0.5f), Center.Y);
+                }
+                if (Orientation == ComponentOrientation.Vertical)
+                {
+                    SetThumbPos(Center.X, Math.Clamp(convertedMouse.Y - _clickOffset.Y, Bounds.Y + _thumb.Height * 0.5f, Bounds.W - _thumb.Height * 0.5f));
+                }
+                UpdateValueFromThumb();
+                return;
+            }
+        }
+
         public override bool OnClickUp(MouseState mouse)
         {
             _isPressed = false;
             _clickOffset = Vector2.Zero;
             return base.OnClickUp(mouse);
+        }
+
+        public override void OnClickUpNoConsume(MouseState mouse)
+        {
+            _isPressed = false;
+            _clickOffset = Vector2.Zero;
+            base.OnClickUpNoConsume(mouse);
         }
 
         public override bool OnMouseWheel(MouseState mouse)
@@ -242,22 +317,37 @@ namespace OTK.LiteUI.UI.Components
                     float velocity = mouse.ScrollDelta.X * scrollSensitivity;
                     SetThumbPos(Math.Clamp(_thumb.Center.X - velocity, Bounds.X + _thumb.Width * 0.5f, Bounds.Z - _thumb.Width * 0.5f), Center.Y);
                     UpdateValueFromThumb();
-                    return true;
                 }
                 else
                 {
                     float velocity = mouse.ScrollDelta.Y * scrollSensitivity;
                     SetThumbPos(Center.X, Math.Clamp(_thumb.Center.Y + velocity, Bounds.Y + _thumb.Height * 0.5f, Bounds.W - _thumb.Height * 0.5f));
                     UpdateValueFromThumb();
-                    return true;
                 }
+                return true;
             }
             return false;
+        }
+
+        public override void OnMouseWheelNoConsume(MouseState mouse)
+        {
+            if (!IsVisible) return;
+            if (ScrollingComponent is not null && ScrollingComponent is UIComponent component && component.WithinBounds(mouse))
+            {
+                SyncFromScrollable();
+            }
+            base.OnMouseWheelNoConsume(mouse);
         }
 
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
         {
             _thumb.Colour = _thumbColour * (_isPressed ? 0.5f : 1.0f);
+            HorizontalScroll = keyboard.IsKeyDown(Keys.LeftShift) || keyboard.IsKeyDown(Keys.RightShift);
+            if (mouse.IsButtonReleased(MouseButton.Left))
+            {
+                _isPressed = false;
+                _clickOffset = Vector2.Zero;
+            }
         }
 
         public override void SubmitData(Renderer renderer)

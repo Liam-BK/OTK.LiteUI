@@ -171,6 +171,16 @@ namespace OTK.LiteUI.UI.Components
             return base.OnClickDown(mouse);
         }
 
+        public override void OnClickDownNoConsume(MouseState mouse)
+        {
+            if (!IsVisible) return;
+            foreach (var element in Children)
+            {
+                element.OnClickDownNoConsume(mouse);
+            }
+            base.OnClickDownNoConsume(mouse);
+        }
+
         public override bool OnClickUp(MouseState mouse)
         {
             if (!IsVisible || !WithinBounds(mouse)) return false;
@@ -182,6 +192,16 @@ namespace OTK.LiteUI.UI.Components
             return base.OnClickUp(mouse);
         }
 
+        public override void OnClickUpNoConsume(MouseState mouse)
+        {
+            if (!IsVisible) return;
+            foreach (var element in Children)
+            {
+                element.OnClickUpNoConsume(mouse);
+            }
+            base.OnClickUpNoConsume(mouse);
+        }
+
         public override bool OnMouseMove(MouseState mouse)
         {
             if (!IsVisible || !WithinBounds(mouse)) return false;
@@ -191,6 +211,16 @@ namespace OTK.LiteUI.UI.Components
                 if (result) return true;
             }
             return base.OnMouseMove(mouse);
+        }
+
+        public override void OnMouseMoveNoConsume(MouseState mouse)
+        {
+            if (!IsVisible) return;
+            foreach (var element in Children)
+            {
+                element.OnMouseMoveNoConsume(mouse);
+            }
+            base.OnMouseMoveNoConsume(mouse);
         }
 
         public override bool OnMouseWheel(MouseState mouse)
@@ -208,6 +238,16 @@ namespace OTK.LiteUI.UI.Components
             ScrollOffset = new Vector2(ScrollOffset.X - mouse.ScrollDelta.X * ScrollMultiplier, ScrollOffset.Y - mouse.ScrollDelta.Y * ScrollMultiplier);
             ApplyLayout();
             return base.OnMouseWheel(mouse);
+        }
+
+        public override void OnMouseWheelNoConsume(MouseState mouse)
+        {
+            if (!IsVisible) return;
+            foreach (var element in Children)
+            {
+                element.OnMouseWheelNoConsume(mouse);
+            }
+            base.OnMouseWheelNoConsume(mouse);
         }
 
         public override void OnKeyDown(KeyboardKeyEventArgs e)

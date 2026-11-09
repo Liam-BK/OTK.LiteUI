@@ -23,9 +23,19 @@ namespace OTK.LiteUI.UI.Components
             return false;
         }
 
+        public virtual void OnClickDownNoConsume(MouseState mouse)
+        {
+
+        }
+
         public virtual bool OnClickUp(MouseState mouse)
         {
             return false;
+        }
+
+        public virtual void OnClickUpNoConsume(MouseState mouse)
+        {
+
         }
 
         public virtual bool OnMouseMove(MouseState mouse)
@@ -33,9 +43,19 @@ namespace OTK.LiteUI.UI.Components
             return false;
         }
 
+        public virtual void OnMouseMoveNoConsume(MouseState mouse)
+        {
+
+        }
+
         public virtual bool OnMouseWheel(MouseState mouse)
         {
             return false;
+        }
+
+        public virtual void OnMouseWheelNoConsume(MouseState mouse)
+        {
+
         }
 
         public virtual void OnTextInput(TextInputEventArgs e)

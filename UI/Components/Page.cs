@@ -72,6 +72,16 @@ public class Page : UIElement, IRenderable, IUIContainer
         return base.OnClickDown(mouse);
     }
 
+    public override void OnClickDownNoConsume(MouseState mouse)
+    {
+        if (!IsVisible) return;
+        foreach (var element in Children)
+        {
+            element.OnClickDownNoConsume(mouse);
+        }
+        base.OnClickDownNoConsume(mouse);
+    }
+
     public override bool OnClickUp(MouseState mouse)
     {
         if (!IsVisible) return false;
@@ -81,6 +91,16 @@ public class Page : UIElement, IRenderable, IUIContainer
             if (result) return true;
         }
         return base.OnClickUp(mouse);
+    }
+
+    public override void OnClickUpNoConsume(MouseState mouse)
+    {
+        if (!IsVisible) return;
+        foreach (var element in Children)
+        {
+            element.OnClickUpNoConsume(mouse);
+        }
+        base.OnClickUpNoConsume(mouse);
     }
 
     public override void OnKeyDown(KeyboardKeyEventArgs e)
@@ -121,6 +141,16 @@ public class Page : UIElement, IRenderable, IUIContainer
         return base.OnMouseMove(mouse);
     }
 
+    public override void OnMouseMoveNoConsume(MouseState mouse)
+    {
+        if (!IsVisible) return;
+        foreach (var element in Children)
+        {
+            element.OnMouseMoveNoConsume(mouse);
+        }
+        base.OnMouseMoveNoConsume(mouse);
+    }
+
     public override bool OnMouseWheel(MouseState mouse)
     {
         if (!IsVisible) return false;
@@ -133,6 +163,16 @@ public class Page : UIElement, IRenderable, IUIContainer
             }
         }
         return base.OnMouseWheel(mouse);
+    }
+
+    public override void OnMouseWheelNoConsume(MouseState mouse)
+    {
+        if (!IsVisible) return;
+        foreach (var element in Children)
+        {
+            element.OnMouseWheelNoConsume(mouse);
+        }
+        base.OnMouseWheelNoConsume(mouse);
     }
 
     public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
