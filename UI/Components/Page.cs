@@ -64,10 +64,15 @@ public class Page : UIElement, IRenderable, IUIContainer
     public override bool OnClickDown(MouseState mouse)
     {
         if (!IsVisible) return false;
-        foreach (var element in Children)
+        for (int i = Children.Count - 1; i >= 0; i--)
         {
-            bool result = element.OnClickDown(mouse);
-            if (result) return true;
+            var element = Children[i];
+            if (element.OnClickDown(mouse))
+            {
+                Children[i] = Children[^1];
+                Children[^1] = element;
+                return true;
+            }
         }
         return base.OnClickDown(mouse);
     }

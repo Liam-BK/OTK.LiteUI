@@ -26,6 +26,7 @@ namespace OTK.LiteUI.Layouts
             float elementWidth = viewport.Z - viewport.X;
             foreach (var element in elements)
             {
+                if (!element.IsVisible) continue;
                 float childHeight = Splits[splitIndex % Splits.Length];
                 element.Bounds = new Vector4(left, top - childHeight, left + elementWidth, top);
                 top -= childHeight + Padding;

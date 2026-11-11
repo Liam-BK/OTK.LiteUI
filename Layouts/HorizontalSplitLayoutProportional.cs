@@ -29,6 +29,7 @@ namespace OTK.LiteUI.Layouts
 
             for (int i = 0; i < elements.Count; i++)
             {
+                if (!elements[i].IsVisible) continue;
                 float split = Splits[i % Splits.Length];
                 float childWidth = availableWidth * split;
 

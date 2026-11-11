@@ -30,6 +30,7 @@ namespace OTK.LiteUI.Layouts
             float top = viewport.W;
             foreach (var element in elements)
             {
+                if (!element.IsVisible) continue;
                 element.Bounds = new Vector4(left, top - ElementSize.Y, left + ElementSize.X, top);
                 left += ElementSize.X + Padding;
             }

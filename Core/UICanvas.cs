@@ -350,8 +350,13 @@ namespace OTK.LiteUI.Core
         {
             for (int i = elements.Count - 1; i >= 0; i--)
             {
-                var c = elements[i];
-                if (c.OnClickDown(mouse)) break;
+                var component = elements[i];
+                if (component.OnClickDown(mouse))
+                {
+                    elements[i] = elements[^1];
+                    elements[^1] = component;
+                    break;
+                }
             }
 
             foreach (var element in elements)

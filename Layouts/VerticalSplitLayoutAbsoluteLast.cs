@@ -32,6 +32,7 @@ namespace OTK.LiteUI.Layouts
 
             for (int i = 0; i < elements.Count; i++)
             {
+                if (!elements[i].IsVisible) continue;
                 float childHeight;
 
                 if (i == elements.Count - 1)

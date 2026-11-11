@@ -37,6 +37,7 @@ namespace OTK.LiteUI.Layouts
 
             for (int i = 0; i < elements.Count; i++)
             {
+                if (!elements[i].IsVisible) continue;
                 int column = i % _columns;
                 int row = i / _columns;
 

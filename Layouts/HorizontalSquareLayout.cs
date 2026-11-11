@@ -29,6 +29,7 @@ namespace OTK.LiteUI.Layouts
 
             for (int i = 0; i < elements.Count; i++)
             {
+                if (!elements[i].IsVisible) continue;
                 int column = i / _rows;
                 int row = i % _rows;
                 float left = startLeft + column * (elementWidth + Padding);

@@ -48,6 +48,7 @@ public class VerticalSplitLayoutSandwich : ILayout
         // Middle
         for (int i = 1; i < elements.Count - 1; i++)
         {
+            if (!elements[i].IsVisible) continue;
             float height = availableHeight * Splits[(i - 1) % Splits.Length];
 
             elements[i].Bounds = new Vector4(

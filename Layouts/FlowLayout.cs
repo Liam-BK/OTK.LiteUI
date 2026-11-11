@@ -33,6 +33,7 @@ namespace OTK.LiteUI.Layouts
             float elementHeight = ElementSize.Y;
             foreach (var element in elements)
             {
+                if (!element.IsVisible) continue;
                 if (left + elementWidth > viewport.Z - Padding && left != viewport.X)
                 {
                     left = viewport.X;
