@@ -168,15 +168,13 @@ namespace OTK.LiteUI.UI.Components
             Value = maxOffset > 0 ? currentOffset / maxOffset : 0;
         }
 
-        private void SyncThumbSizeFromScrollable()
+        public void Refresh()
         {
-            if (ScrollingComponent is null)
-                return;
+            if (ScrollingComponent is null) return;
 
-            Vector4 viewport = ScrollingComponent.ViewPort;
-            ViewSize = new Vector2(viewport.Z - viewport.X, viewport.W - viewport.Y);
-            Vector2 maxScroll = ScrollingComponent.MaxScroll;
-            ContentSize = ViewSize + maxScroll;
+            SyncFromScrollable();
+            UpdateThumbFromValue();
+            SyncToScrollable();
         }
 
         private void SyncToScrollable()
@@ -354,7 +352,7 @@ namespace OTK.LiteUI.UI.Components
         {
             _thumb.Colour = _thumbColour * (_isPressed ? 0.5f : 1.0f);
             HorizontalScroll = keyboard.IsKeyDown(Keys.LeftShift) || keyboard.IsKeyDown(Keys.RightShift);
-            SyncThumbSizeFromScrollable();
+            Refresh();
             if (mouse.IsButtonReleased(MouseButton.Left))
             {
                 _isPressed = false;
