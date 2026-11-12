@@ -4,6 +4,8 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 using OTK.LiteUI.UI.Interfaces;
 using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Rendering;
+using OpenTK.Windowing.Common.Input;
+using System.Reflection.Metadata.Ecma335;
 
 namespace OTK.LiteUI.UI.Components
 {
@@ -95,6 +97,34 @@ namespace OTK.LiteUI.UI.Components
 
         public Vector4 ViewPort => new(Bounds.X + Inset, Bounds.Y + Inset, Bounds.Z - Inset, Bounds.W - Inset);
 
+        private bool _isResizable = false;
+
+        public bool IsResizable
+        {
+            get
+            {
+                return _isResizable;
+            }
+            set
+            {
+                _isResizable = value;
+            }
+        }
+
+        [Flags]
+        protected enum ResizingFlags
+        {
+            None = 0,
+            Left = 1,
+            Bottom = 1 << 1,
+            Right = 1 << 2,
+            Top = 1 << 3
+        }
+
+        public int ActiveResizeFlags = (int)ResizingFlags.None;
+
+        public bool isResizing = false;
+
         public override bool IsVisible
         {
             get => base.IsVisible;
@@ -160,9 +190,109 @@ namespace OTK.LiteUI.UI.Components
             Children.Clear();
         }
 
+        private bool SetFlags(MouseState mouse)
+        {
+            if (Parent is null || Parent is not UIComponent && _isResizable && !isResizing)
+            {
+                var anchorOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+                var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position) - anchorOffset;
+                var maxEdgeOffset = 3;
+
+                ActiveResizeFlags = (int)ResizingFlags.None;
+
+                if (convertedMouse.X >= Bounds.X - maxEdgeOffset && convertedMouse.X <= Bounds.X + maxEdgeOffset && convertedMouse.Y >= Bounds.Y - maxEdgeOffset && convertedMouse.Y <= Bounds.W + maxEdgeOffset)
+                {
+                    ActiveResizeFlags = ActiveResizeFlags | (int)ResizingFlags.Left;
+                }
+                if (convertedMouse.Y >= Bounds.Y - maxEdgeOffset && convertedMouse.Y <= Bounds.Y + maxEdgeOffset && convertedMouse.X >= Bounds.X - maxEdgeOffset && convertedMouse.X <= Bounds.Z + maxEdgeOffset)
+                {
+                    ActiveResizeFlags = ActiveResizeFlags | (int)ResizingFlags.Bottom;
+                }
+                if (convertedMouse.X >= Bounds.Z - maxEdgeOffset && convertedMouse.X <= Bounds.Z + maxEdgeOffset && convertedMouse.Y >= Bounds.Y - maxEdgeOffset && convertedMouse.Y <= Bounds.W + maxEdgeOffset)
+                {
+                    ActiveResizeFlags = ActiveResizeFlags | (int)ResizingFlags.Right;
+                }
+                if (convertedMouse.Y >= Bounds.W - maxEdgeOffset && convertedMouse.Y <= Bounds.W + maxEdgeOffset && convertedMouse.X >= Bounds.X - maxEdgeOffset && convertedMouse.X <= Bounds.Z + maxEdgeOffset)
+                {
+                    ActiveResizeFlags = ActiveResizeFlags | (int)ResizingFlags.Top;
+                }
+                if (ActiveResizeFlags != (int)ResizingFlags.None)
+                {
+                    if (ActiveResizeFlags == (int)ResizingFlags.Left || ActiveResizeFlags == (int)ResizingFlags.Right)
+                    {
+                        Canvas.SetCursor(MouseCursor.ResizeEW);
+                    }
+                    else if (ActiveResizeFlags == (int)ResizingFlags.Bottom || ActiveResizeFlags == (int)ResizingFlags.Top)
+                    {
+                        Canvas.SetCursor(MouseCursor.ResizeNS);
+                    }
+                    else if (ActiveResizeFlags == ((int)ResizingFlags.Left | (int)ResizingFlags.Bottom) || ActiveResizeFlags == ((int)ResizingFlags.Right | (int)ResizingFlags.Top))
+                    {
+                        Canvas.SetCursor(MouseCursor.ResizeNESW);
+                    }
+                    else
+                    {
+                        Canvas.SetCursor(MouseCursor.ResizeNWSE);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool UpdateBoundsForResize(MouseState mouse)
+        {
+            if (isResizing)
+            {
+                var anchorOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+                var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position) - anchorOffset;
+                if (ActiveResizeFlags == (int)ResizingFlags.Left)
+                {
+                    Bounds = new Vector4(convertedMouse.X, Bounds.Y, Bounds.Z, Bounds.W);
+                }
+                else if (ActiveResizeFlags == (int)ResizingFlags.Bottom)
+                {
+                    Bounds = new Vector4(Bounds.X, convertedMouse.Y, Bounds.Z, Bounds.W);
+                }
+                else if (ActiveResizeFlags == (int)ResizingFlags.Right)
+                {
+                    Bounds = new Vector4(Bounds.X, Bounds.Y, convertedMouse.X, Bounds.W);
+                }
+                else if (ActiveResizeFlags == (int)ResizingFlags.Top)
+                {
+                    Bounds = new Vector4(Bounds.X, Bounds.Y, Bounds.Z, convertedMouse.Y);
+                }
+                else if (ActiveResizeFlags == ((int)ResizingFlags.Left | (int)ResizingFlags.Bottom))
+                {
+                    Bounds = new Vector4(convertedMouse.X, convertedMouse.Y, Bounds.Z, Bounds.W);
+                }
+                else if (ActiveResizeFlags == ((int)ResizingFlags.Left | (int)ResizingFlags.Top))
+                {
+                    Bounds = new Vector4(convertedMouse.X, Bounds.Y, Bounds.Z, convertedMouse.Y);
+                }
+                else if (ActiveResizeFlags == ((int)ResizingFlags.Right | (int)ResizingFlags.Bottom))
+                {
+                    Bounds = new Vector4(Bounds.X, convertedMouse.Y, convertedMouse.X, Bounds.W);
+                }
+                else
+                {
+                    Bounds = new Vector4(Bounds.X, Bounds.Y, convertedMouse.X, convertedMouse.Y);
+                }
+                return true;
+            }
+            return false;
+        }
+
         public override bool OnClickDown(MouseState mouse)
         {
-            if (!IsVisible || !WithinBounds(mouse)) return false;
+            if (!IsVisible) return false;
+            if (ActiveResizeFlags != (int)ResizingFlags.None)
+            {
+                isResizing = true;
+                Canvas.LockCursorAppearance = true;
+                return true;
+            }
+            if (!WithinBounds(mouse)) return false;
             foreach (var element in Children)
             {
                 bool result = element.OnClickDown(mouse);
@@ -199,12 +329,20 @@ namespace OTK.LiteUI.UI.Components
             {
                 element.OnClickUpNoConsume(mouse);
             }
+            isResizing = false;
+            Canvas.LockCursorAppearance = false;
             base.OnClickUpNoConsume(mouse);
         }
 
         public override bool OnMouseMove(MouseState mouse)
         {
-            if (!IsVisible || !WithinBounds(mouse)) return false;
+            if (!IsVisible) return false;
+
+            UpdateBoundsForResize(mouse);
+            if (SetFlags(mouse)) return true;
+
+            if (!WithinBounds(mouse)) return false;
+
             foreach (var element in Children)
             {
                 bool result = element.OnMouseMove(mouse);

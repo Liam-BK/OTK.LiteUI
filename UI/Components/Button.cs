@@ -160,6 +160,12 @@ namespace OTK.LiteUI.UI.Components
         {
             if (!IsVisible) return false;
             isPressed = WithinBounds(mouse);
+            if (ClipBounds is Vector4 clipBounds)
+            {
+                var anchorOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+                var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position) - anchorOffset;
+                isPressed &= convertedMouse.X >= clipBounds.X && convertedMouse.X <= clipBounds.Z && convertedMouse.Y >= clipBounds.Y && convertedMouse.Y <= clipBounds.W;
+            }
 
             if (isPressed)
             {
@@ -173,6 +179,12 @@ namespace OTK.LiteUI.UI.Components
         {
             if (!IsVisible) return false;
             var nextHoverState = WithinBounds(mouse);
+            if (ClipBounds is Vector4 clipBounds)
+            {
+                var anchorOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+                var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position) - anchorOffset;
+                nextHoverState &= convertedMouse.X >= clipBounds.X && convertedMouse.X <= clipBounds.Z && convertedMouse.Y >= clipBounds.Y && convertedMouse.Y <= clipBounds.W;
+            }
             if (nextHoverState != _isHovered)
             {
                 if (nextHoverState == false)
@@ -228,9 +240,17 @@ namespace OTK.LiteUI.UI.Components
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
         {
             if (!IsVisible) return;
+            var isHovered = WithinBounds(mouse);
+
+            if (ClipBounds is Vector4 clipBounds)
+            {
+                var anchorOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
+                var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position) - anchorOffset;
+                isHovered &= convertedMouse.X >= clipBounds.X && convertedMouse.X <= clipBounds.Z && convertedMouse.Y >= clipBounds.Y && convertedMouse.Y <= clipBounds.W;
+            }
             var multiplier = new Vector4(isPressed ? 0.5f : 1.0f, isPressed ? 0.5f : 1.0f, isPressed ? 0.5f : 1.0f, 1);
-            if (TimeToRollover == 0) RolloverValue = WithinBounds(mouse) ? 1 : 0;
-            else RolloverValue = Math.Clamp(RolloverValue + deltaTime * (WithinBounds(mouse) ? 1 : -1) / TimeToRollover, 0, 1);
+            if (TimeToRollover == 0) RolloverValue = isHovered ? 1 : 0;
+            else RolloverValue = Math.Clamp(RolloverValue + deltaTime * (isHovered ? 1 : -1) / TimeToRollover, 0, 1);
             var lerpColour = Vector4.Lerp(_baseColour, _rolloverColour, Math.Clamp(RolloverValue, 0, 1));
             ForceUpdateQuadrantColours(lerpColour * multiplier);
         }

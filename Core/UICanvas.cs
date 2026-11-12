@@ -97,6 +97,8 @@ namespace OTK.LiteUI.Core
             }
         }
 
+        public bool LockCursorAppearance { get; set; }
+
         public Vector2 InvDPIScaleVec2
         {
             get => new Vector2(InvDPIScaleX, InvDPIScaleY);
@@ -386,8 +388,11 @@ namespace OTK.LiteUI.Core
                 var c = elements[i];
                 if (c.OnMouseMove(mouse)) break;
             }
-            if (!cursorUpdated) window.Cursor = MouseCursor.Default;
-            cursorUpdated = false;
+            if (!LockCursorAppearance)
+            {
+                if (!cursorUpdated) window.Cursor = MouseCursor.Default;
+                cursorUpdated = false;
+            }
 
             foreach (var element in elements)
             {
