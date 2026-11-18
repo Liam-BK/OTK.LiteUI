@@ -1,4 +1,5 @@
 using OpenTK.Mathematics;
+using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Components;
 using OTK.LiteUI.UI.Interfaces;
 
@@ -6,17 +7,23 @@ namespace OTK.LiteUI.Layouts
 {
     public class VerticalSquareLayout : ILayout
     {
+        [UIProperty]
         public float Padding
         {
             get;
             set;
         }
 
-        private int _columns;
+        [UIProperty]
+        public int Columns
+        {
+            get;
+            set;
+        }
 
         public VerticalSquareLayout(int columns, float padding)
         {
-            _columns = Math.Max(columns, 1);
+            Columns = Math.Max(columns, 1);
             Padding = padding;
         }
 
@@ -24,14 +31,14 @@ namespace OTK.LiteUI.Layouts
         {
             float startLeft = viewport.X;
             float startTop = viewport.W;
-            float elementWidth = (viewport.Z - viewport.X - Padding * Math.Max(_columns - 1, 0)) / _columns;
+            float elementWidth = (viewport.Z - viewport.X - Padding * Math.Max(Columns - 1, 0)) / Columns;
             float elementHeight = elementWidth;
 
             for (int i = 0; i < elements.Count; i++)
             {
                 if (!elements[i].IsVisible) continue;
-                int column = i % _columns;
-                int row = i / _columns;
+                int column = i % Columns;
+                int row = i / Columns;
                 float left = startLeft + column * (elementWidth + Padding);
                 float right = left + elementWidth;
                 float top = startTop - row * (elementHeight + Padding);

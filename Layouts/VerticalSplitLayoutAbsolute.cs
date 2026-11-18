@@ -1,4 +1,5 @@
 using OpenTK.Mathematics;
+using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Components;
 using OTK.LiteUI.UI.Interfaces;
 
@@ -6,9 +7,11 @@ namespace OTK.LiteUI.Layouts
 {
     public class VerticalSplitLayoutAbsolute : ILayout
     {
+        [UIProperty]
         public float Padding { get; set; }
 
-        private float[] Splits { get; }
+        [UIProperty]
+        public float[] Splits { get; set; }
 
         public VerticalSplitLayoutAbsolute(float padding, params float[] splits)
         {

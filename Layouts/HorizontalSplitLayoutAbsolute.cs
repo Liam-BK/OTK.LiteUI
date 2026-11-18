@@ -1,4 +1,5 @@
 using OpenTK.Mathematics;
+using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Components;
 using OTK.LiteUI.UI.Interfaces;
 
@@ -6,8 +7,11 @@ namespace OTK.LiteUI.Layouts
 {
     public class HorizontalSplitLayoutAbsolute : ILayout
     {
+        [UIProperty]
         public float Padding { get; set; }
-        private float[] Splits { get; }
+
+        [UIProperty]
+        public float[] Splits { get; }
 
         public HorizontalSplitLayoutAbsolute(float padding, params float[] splits)
         {

@@ -1,4 +1,5 @@
 using OpenTK.Mathematics;
+using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Components;
 using OTK.LiteUI.UI.Interfaces;
 
@@ -6,16 +7,19 @@ namespace OTK.LiteUI.Layouts
 {
     public class GridLayout : ILayout
     {
+        [UIProperty]
         public float Padding { get; set; }
 
-        private int _rows;
+        [UIProperty]
+        public int Rows { get; set; }
 
-        private int _columns;
+        [UIProperty]
+        public int Columns { get; set; }
 
         public GridLayout(int rows, int columns, float padding)
         {
-            _rows = rows;
-            _columns = columns;
+            Rows = rows;
+            Columns = columns;
             Padding = padding;
         }
 
@@ -30,16 +34,16 @@ namespace OTK.LiteUI.Layouts
             float totalHeight = top - bottom;
 
             float cellWidth =
-                (totalWidth - Padding * (_columns - 1)) / _columns;
+                (totalWidth - Padding * (Columns - 1)) / Columns;
 
             float cellHeight =
-                (totalHeight - Padding * (_rows - 1)) / _rows;
+                (totalHeight - Padding * (Rows - 1)) / Rows;
 
             for (int i = 0; i < elements.Count; i++)
             {
                 if (!elements[i].IsVisible) continue;
-                int column = i % _columns;
-                int row = i / _columns;
+                int column = i % Columns;
+                int row = i / Columns;
 
                 float x = left + column * (cellWidth + Padding);
                 float y = top - row * (cellHeight + Padding);

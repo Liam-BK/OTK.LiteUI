@@ -1,16 +1,21 @@
 using OpenTK.Mathematics;
+using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Components;
 using OTK.LiteUI.UI.Interfaces;
 
 public class HorizontalSplitLayoutSandwich : ILayout
 {
+    [UIProperty]
     public float Padding { get; set; }
 
-    private float[] Splits { get; }
+    [UIProperty]
+    public float[] Splits { get; set; }
 
-    private float AbsoluteLeft { get; }
+    [UIProperty]
+    public float AbsoluteLeft { get; set; }
 
-    private float AbsoluteRight { get; }
+    [UIProperty]
+    public float AbsoluteRight { get; set; }
 
     public HorizontalSplitLayoutSandwich(float padding, float absoluteWidthLeft, float absoluteWidthRight, params float[] splits)
     {

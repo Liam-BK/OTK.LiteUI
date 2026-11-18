@@ -1,17 +1,20 @@
 using OpenTK.Mathematics;
 using OTK.LiteUI.UI.Interfaces;
 using OTK.LiteUI.UI.Components;
+using OTK.LiteUI.Core;
 
 namespace OTK.LiteUI.Layouts
 {
     public class VerticalLayout : ILayout
     {
+        [UIProperty]
         public float Padding
         {
             get;
             set;
         }
 
+        [UIProperty]
         public Vector2 ElementSize
         {
             get;

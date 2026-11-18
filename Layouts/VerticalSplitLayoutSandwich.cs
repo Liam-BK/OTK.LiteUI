@@ -1,16 +1,21 @@
 using OpenTK.Mathematics;
+using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Components;
 using OTK.LiteUI.UI.Interfaces;
 
 public class VerticalSplitLayoutSandwich : ILayout
 {
+    [UIProperty]
     public float Padding { get; set; }
 
-    private float[] Splits { get; }
+    [UIProperty]
+    public float[] Splits { get; set; }
 
-    private float AbsoluteTop { get; }
+    [UIProperty]
+    public float AbsoluteTop { get; set; }
 
-    private float AbsoluteBottom { get; }
+    [UIProperty]
+    public float AbsoluteBottom { get; set; }
 
     public VerticalSplitLayoutSandwich(float padding, float absoluteHeightTop, float absoluteHeightBottom, params float[] splits)
     {

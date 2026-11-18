@@ -133,6 +133,7 @@ namespace OTK.LiteUI.UI.Components
             var defaultBounds = new Vector4(0, 0, 20, 20);
             float padding = 10;
             panel = new Panel(canvas, bounds, new VerticalSplitLayoutSandwich(padding, 25, 25, 1));
+            // panel.IsResizable = true;
             var topPanelLayer1 = new Panel(canvas, defaultBounds, new HorizontalSplitLayoutAbsoluteFirst(padding, 50, 1), 0, 0);
             topPanelLayer1.Colour = Vector4.Zero;
             panel.AddChild(topPanelLayer1);
@@ -182,7 +183,6 @@ namespace OTK.LiteUI.UI.Components
             Confirm.Identifier = "Confirm";
             QuickAccess.Identifier = "QuickAccess";
             CurrentDirectory.Identifier = "CurrentFolder";
-            canvas.Deregister(panel);
             if (GetType() == typeof(FileNavigator)) Identifier = Canvas.GetNextIdentifier(typeof(FileNavigator));
             var desktop = FileReference.SetUpFileRef(canvas, FileReference.Directories.Desktop);
             var documents = FileReference.SetUpFileRef(canvas, FileReference.Directories.Documents);

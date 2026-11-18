@@ -1,17 +1,23 @@
 using OpenTK.Mathematics;
 using OTK.LiteUI.UI.Interfaces;
 using OTK.LiteUI.UI.Components;
+using OTK.LiteUI.Core;
 
 namespace OTK.LiteUI.Layouts
 {
     public class HorizontalGridLayout : ILayout
     {
-        private int _rows;
+        [UIProperty]
+        public int Rows { get; set; }
+
+        [UIProperty]
         public float Padding
         {
             get;
             set;
         }
+
+        [UIProperty]
         public Vector2 ElementSize
         {
             get;
@@ -20,7 +26,7 @@ namespace OTK.LiteUI.Layouts
 
         public HorizontalGridLayout(int rows, Vector2 elementSize, float padding)
         {
-            _rows = Math.Max(rows, 1);
+            Rows = Math.Max(rows, 1);
             ElementSize = elementSize;
             Padding = padding;
         }
@@ -29,14 +35,14 @@ namespace OTK.LiteUI.Layouts
         {
             float startLeft = viewport.X;
             float startTop = viewport.W;
-            float elementHeight = ((viewport.W - viewport.Y) - Padding * Math.Max(_rows - 1, 0)) / _rows;
+            float elementHeight = ((viewport.W - viewport.Y) - Padding * Math.Max(Rows - 1, 0)) / Rows;
             float elementWidth = ElementSize.X;
 
             for (int i = 0; i < elements.Count; i++)
             {
                 if (!elements[i].IsVisible) continue;
-                int column = i / _rows;
-                int row = i % _rows;
+                int column = i / Rows;
+                int row = i % Rows;
                 float left = startLeft + column * (elementWidth + Padding);
                 float right = left + elementWidth;
                 float top = startTop - row * (elementHeight + Padding);

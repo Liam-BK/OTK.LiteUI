@@ -99,6 +99,7 @@ namespace OTK.LiteUI.UI.Components
 
         private bool _isResizable = false;
 
+        [UIProperty]
         public bool IsResizable
         {
             get

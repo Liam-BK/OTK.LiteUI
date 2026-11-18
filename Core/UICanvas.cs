@@ -1,3 +1,4 @@
+using System.Text.Json;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -198,6 +199,7 @@ namespace OTK.LiteUI.Core
             _windowDPIY = window.CurrentMonitor.VerticalDpi;
             _windowDPIX = window.CurrentMonitor.HorizontalDpi;
             Default ??= this;
+            AutoRegistry.Initialize();
         }
 
         public bool ContainsTexture(string textureName)
@@ -255,14 +257,14 @@ namespace OTK.LiteUI.Core
             projection = Matrix4.CreateOrthographicOffCenter(0, window.Size.X * InvDPIScaleX, 0, window.Size.Y * InvDPIScaleY, 0.01f, 1.0f);
         }
 
-        public void Register(UIElement component)
+        public void Register(UIElement element)
         {
-            elements.Add(component);
+            elements.Add(element);
         }
 
-        public void Deregister(UIElement component)
+        public void Deregister(UIElement element)
         {
-            pendingRemovals.Add(component);
+            pendingRemovals.Add(element);
         }
 
         public string GetNextIdentifier(Type type)
@@ -336,6 +338,12 @@ namespace OTK.LiteUI.Core
                 throw new UIComponentNotFoundException($"{resolvedPath}{delimiter}{failPoint}");
             }
             throw new UIComponentNotFoundException($"{resolvedPath}{delimiter}{failPoint}");
+        }
+
+        public void LoadJsonUI(Stream inputStream)
+        {
+            var loader = new UIJsonLoader(this);
+            loader.Load(inputStream);
         }
 
         public void SetFocus(UIComponent? component)
