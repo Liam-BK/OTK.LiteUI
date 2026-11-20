@@ -73,14 +73,12 @@ public class TextureManager
         textures = new TextureArray(capacity, resolution);
     }
 
-    public bool TryLoadTexture(string path, string name, out TextureResolution finalResolution, TextureResolution? forceResolution = null, EmptyPixelType type = EmptyPixelType.Transparent, bool greyScale = false)
+    public bool TryLoadTexture(string path, string name, TextureResolution? forceResolution = null, EmptyPixelType type = EmptyPixelType.Transparent, bool greyScale = false)
     {
         try
         {
             var data = ImageLoader.LoadImage(path, ImageLoader.Flip.Vertical, greyScale);
-            if (forceResolution is null) finalResolution = InferResolution(data);
-            else finalResolution = (TextureResolution)forceResolution;
-            data.ConvertToResolution(finalResolution);
+            data.ConvertToResolution(forceResolution is null ? InferResolution(data) : forceResolution.Value);
             if (textures is null) throw new InvalidOperationException("TextureArray must be created before loading textures.");
             textures.AddTexture(data, name);
             return true;
@@ -89,7 +87,6 @@ public class TextureManager
         {
             Console.WriteLine($"[TextureManager] Failed to load texture at path: {path}");
             Console.WriteLine(ex);
-            finalResolution = TextureResolution.INVALID;
             return false;
         }
     }
@@ -105,7 +102,7 @@ public class TextureManager
                 continue;
 
             string name = Path.GetFileNameWithoutExtension(file);
-            TryLoadTexture(file, name, out var result, forceResolution, type, greyScale);
+            TryLoadTexture(file, name, forceResolution, type, greyScale);
         }
 
         return true;

@@ -15,6 +15,9 @@ namespace OTK.LiteUI.Layouts
             set;
         }
 
+        /// <summary>
+        /// The width and height assigned to each element.
+        /// </summary>
         [UIProperty]
         public Vector2 ElementSize
         {
@@ -22,6 +25,11 @@ namespace OTK.LiteUI.Layouts
             set;
         }
 
+        /// <summary>
+        /// Creates a flow layout with the specified element size and spacing.
+        /// </summary>
+        /// <param name="elementSize">The width and height of each element.</param>
+        /// <param name="padding">The spacing between elements and rows.</param>
         public FlowLayout(Vector2 elementSize, float padding)
         {
             ElementSize = elementSize;

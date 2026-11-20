@@ -66,7 +66,7 @@ namespace OTK.LiteUI.UI.Rendering
                     if (flipY) flags |= 1 << 1;
                     if (flipX) flags |= 1 << 2;
 
-                    manager.TryLoadTexture(pathAttr, name, out var result, null, EmptyPixelType.Transparent, grayscale);
+                    manager.TryLoadTexture(pathAttr, name, null, EmptyPixelType.Transparent, grayscale);
                 }
             }
             return material;
