@@ -143,9 +143,9 @@ namespace OTK.LiteUI.UI.Components
             var bottomPanelLayer1 = new Panel(canvas, defaultBounds, new HorizontalSplitLayoutAbsoluteLast(padding, 130, 1), 0, 0);
             bottomPanelLayer1.Colour = Vector4.Zero;
             panel.AddChild(bottomPanelLayer1);
-            QuickAccess = new Panel(canvas, defaultBounds, new VerticalLayout(new Vector2(0, 25), 0), 0, 0);
+            QuickAccess = new Panel(canvas, defaultBounds, new VerticalLayout(25, 0), 0, 0);
             QuickAccess.Colour = Vector4.One;
-            CurrentDirectory = new Panel(canvas, defaultBounds, new VerticalLayout(new Vector2(0, 25), 0), 0, 0);
+            CurrentDirectory = new Panel(canvas, defaultBounds, new VerticalLayout(25, 0), 0, 0);
             CurrentDirectory.Colour = Vector4.One;
             middlePanelLayer1.AddChild(QuickAccess);
             middlePanelLayer1.AddChild(CurrentDirectory);

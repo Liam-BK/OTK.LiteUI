@@ -89,6 +89,7 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        [UIProperty]
         public ILayout Layout
         {
             private get;

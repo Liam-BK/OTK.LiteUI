@@ -36,7 +36,6 @@ public class Page : UIElement, IRenderable, IUIContainer
     {
         Canvas.Deregister(child);
         child.Parent = this;
-        child.IsVisible = IsVisible;
         Children.Add(child);
     }
 

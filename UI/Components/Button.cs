@@ -9,6 +9,7 @@ namespace OTK.LiteUI.UI.Components
     public class Button : NineSlice, ILinkable
     {
         protected Label label;
+
         [UIProperty]
         public string Text
         {

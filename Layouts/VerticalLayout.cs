@@ -15,13 +15,13 @@ namespace OTK.LiteUI.Layouts
         }
 
         [UIProperty]
-        public Vector2 ElementSize
+        public float ElementSize
         {
             get;
             set;
         }
 
-        public VerticalLayout(Vector2 elementSize, float padding)
+        public VerticalLayout(float elementSize, float padding)
         {
             ElementSize = elementSize;
             Padding = padding;
@@ -35,8 +35,8 @@ namespace OTK.LiteUI.Layouts
             foreach (var element in elements)
             {
                 if (!element.IsVisible) continue;
-                element.Bounds = new Vector4(left, top - ElementSize.Y, left + elementWidth, top);
-                top -= ElementSize.Y + Padding;
+                element.Bounds = new Vector4(left, top - ElementSize, left + elementWidth, top);
+                top -= ElementSize + Padding;
             }
         }
     }

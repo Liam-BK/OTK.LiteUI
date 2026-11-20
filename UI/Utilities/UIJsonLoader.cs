@@ -58,7 +58,9 @@ internal class UIJsonLoader
 
             try
             {
-                var value = ConvertJsonValue(jsonValue, property.PropertyType);
+                object? value;
+                if (typeof(ILayout).IsAssignableFrom(property.PropertyType)) value = CreateLayout(jsonValue);
+                else value = ConvertJsonValue(jsonValue, property.PropertyType);
                 property.SetValue(component, value);
             }
             catch (Exception ex)
@@ -214,7 +216,8 @@ internal class UIJsonLoader
 
             if (TryGetProperty(properties, parameter.Name!, out var jsonValue))
             {
-                arguments[i] = ConvertJsonValue(jsonValue, parameter.ParameterType);
+                if (parameter.ParameterType == typeof(ILayout)) arguments[i] = CreateLayout(jsonValue);
+                else arguments[i] = ConvertJsonValue(jsonValue, parameter.ParameterType);
 
                 continue;
             }
@@ -272,6 +275,16 @@ internal class UIJsonLoader
             if (TryGetProperty(json, "Properties", out var properties))
                 ApplyProperties(component, properties);
 
+            if (component is IUIContainer container && TryGetProperty(properties, "Children", out var children))
+            {
+                if (children.ValueKind != JsonValueKind.Array)
+                    throw new JsonException("'Children' must be an array.");
+                foreach (var child in children.EnumerateArray())
+                {
+                    var childElement = CreateComponent(child);
+                    if (childElement is UIComponent childComponent) container.AddChild(childComponent);
+                }
+            }
             return component;
         }
         catch (TargetInvocationException ex)
