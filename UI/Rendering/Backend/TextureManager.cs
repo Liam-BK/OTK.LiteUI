@@ -24,6 +24,8 @@ public class TextureManager
 
     public int TextureCapacity => textures?.Capacity ?? throw new MissingMemberException("TextureArray must be initialized before accessing it.");
 
+    public int TextureCount => textures?.LastLayer ?? throw new MissingMemberException("TextureArray must be initialized before accessing it.");
+
     public TextureResolution GetTextureResolution => textures is not null ? textures.Resolution : TextureResolution.INVALID;
 
     public static int FindResolution(TextureResolution resolution)

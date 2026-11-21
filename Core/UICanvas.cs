@@ -87,6 +87,16 @@ namespace OTK.LiteUI.Core
         private bool firstFrame = true;
 
         /// <summary>
+        /// The total number of occupied layers in the TextureArray.
+        /// </summary>
+        public int TextureCount => textureManager.TextureCount;
+
+        /// <summary>
+        /// The total number of occupied and free layers in the TextureArray.
+        /// </summary>
+        public int TextureCapacity => textureManager.TextureCapacity;
+
+        /// <summary>
         /// Only returns all elements directly stored on the Canvas. Does not count nested elements.
         /// </summary>
         public int RegisteredElements => elements.Count;
