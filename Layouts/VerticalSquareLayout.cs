@@ -5,6 +5,9 @@ using OTK.LiteUI.UI.Interfaces;
 
 namespace OTK.LiteUI.Layouts
 {
+    /// <summary>
+    /// Arranges elements in a vertical grid of square cells, filling each row from left to right before moving to the next.
+    /// </summary>
     public class VerticalSquareLayout : ILayout
     {
         [UIProperty]
@@ -14,6 +17,9 @@ namespace OTK.LiteUI.Layouts
             set;
         }
 
+        /// <summary>
+        /// The number of columns in the layout. Values are clamped to a minimum of one.
+        /// </summary>
         [UIProperty]
         public int Columns
         {
@@ -21,6 +27,11 @@ namespace OTK.LiteUI.Layouts
             set;
         }
 
+        /// <summary>
+        /// Creates a vertical square layout with the specified number of columns and spacing.
+        /// </summary>
+        /// <param name="columns">The number of columns in the layout. Values below one are clamped to one.</param>
+        /// <param name="padding">The spacing between elements.</param>
         public VerticalSquareLayout(int columns, float padding)
         {
             Columns = Math.Max(columns, 1);

@@ -5,17 +5,32 @@ using OTK.LiteUI.UI.Interfaces;
 
 namespace OTK.LiteUI.Layouts
 {
+    /// <summary>
+    /// Arranges elements in a uniform grid, filling each row from left to right before moving to the next.
+    /// </summary>
     public class GridLayout : ILayout
     {
         [UIProperty]
         public float Padding { get; set; }
 
+        /// <summary>
+        /// The number of rows that fit exactly within the provided viewport vertically
+        /// </summary>
         [UIProperty]
         public int Rows { get; set; }
 
+        /// <summary>
+        /// The number of columns that fit exactly within the provided viewport horizontally
+        /// </summary>
         [UIProperty]
         public int Columns { get; set; }
 
+        /// <summary>
+        /// Creates a grid layout with the specified number of rows and columns.
+        /// </summary>
+        /// <param name="rows">The number of rows that fit exactly within the provided viewport vertically.</param>
+        /// <param name="columns">The number of columns that fit exactly within the provided viewport horizontally.</param>
+        /// <param name="padding">The spacing between elements and rows.</param>
         public GridLayout(int rows, int columns, float padding)
         {
             Rows = rows;
@@ -33,17 +48,20 @@ namespace OTK.LiteUI.Layouts
             float totalWidth = right - left;
             float totalHeight = top - bottom;
 
-            float cellWidth =
-                (totalWidth - Padding * (Columns - 1)) / Columns;
+            float cellWidth = (totalWidth - Padding * (Columns - 1)) / Columns;
+            float cellHeight = (totalHeight - Padding * (Rows - 1)) / Rows;
 
-            float cellHeight =
-                (totalHeight - Padding * (Rows - 1)) / Rows;
+            int skipCount = 0;
 
             for (int i = 0; i < elements.Count; i++)
             {
-                if (!elements[i].IsVisible) continue;
-                int column = i % Columns;
-                int row = i / Columns;
+                if (!elements[i].IsVisible)
+                {
+                    skipCount++;
+                    continue;
+                }
+                int column = (i - skipCount) % Columns;
+                int row = (i - skipCount) / Columns;
 
                 float x = left + column * (cellWidth + Padding);
                 float y = top - row * (cellHeight + Padding);

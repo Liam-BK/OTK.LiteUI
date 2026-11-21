@@ -5,18 +5,33 @@ using OTK.LiteUI.UI.Interfaces;
 
 namespace OTK.LiteUI.Layouts
 {
+    /// <summary>
+    /// Arranges elements vertically, assigning the first element a fixed height and distributing the remaining height proportionally.
+    /// </summary>
     public class VerticalSplitLayoutAbsoluteFirst : ILayout
     {
         [UIProperty]
         public float Padding { get; set; }
 
+        /// <summary>
+        /// The fixed height assigned to the first element.
+        /// </summary>
         [UIProperty]
         public float AbsoluteHeight { get; set; }
 
+        /// <summary>
+        /// The proportions used to distribute the remaining height, cycled through as necessary.
+        /// </summary>
         [UIProperty]
         public float[] Splits { get; set; }
 
-
+        /// <summary>
+        /// Creates a vertical split layout with a fixed-height first element and proportionally sized remaining elements.
+        /// </summary>
+        /// <param name="padding">The spacing between elements.</param>
+        /// <param name="absoluteHeight">The fixed height of the first element.</param>
+        /// <param name="splits">The proportions used to distribute the remaining height, cycled through as necessary.</param>
+        /// <exception cref="ArgumentException">Thrown when no split values are provided.</exception>
         public VerticalSplitLayoutAbsoluteFirst(float padding, float absoluteHeight, params float[] splits)
         {
             Padding = padding;

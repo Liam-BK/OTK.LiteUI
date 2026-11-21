@@ -5,6 +5,9 @@ using OTK.LiteUI.UI.Interfaces;
 
 namespace OTK.LiteUI.Layouts
 {
+    /// <summary>
+    /// Arranges elements horizontally, assigning the first element a fixed width and distributing the remaining width proportionally.
+    /// </summary>
     public class HorizontalSplitLayoutAbsoluteFirst : ILayout
     {
         [UIProperty]
@@ -13,9 +16,19 @@ namespace OTK.LiteUI.Layouts
         [UIProperty]
         public float[] Splits { get; set; }
 
+        /// <summary>
+        /// The fixed width assigned to the first element.
+        /// </summary>
         [UIProperty]
         public float AbsoluteWidth { get; set; }
 
+        /// <summary>
+        /// Creates a horizontal split layout with a fixed-width first element and proportional remaining elements.
+        /// </summary>
+        /// <param name="padding">The spacing between elements.</param>
+        /// <param name="absoluteWidth">The fixed width of the first element.</param>
+        /// <param name="splits">The proportions used to distribute the remaining width, cycled through as necessary.</param>
+        /// <exception cref="ArgumentException">Thrown when no split values are provided.</exception>
         public HorizontalSplitLayoutAbsoluteFirst(float padding, float absoluteWidth, params float[] splits)
         {
             Padding = padding;

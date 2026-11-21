@@ -5,14 +5,26 @@ using OTK.LiteUI.UI.Interfaces;
 
 namespace OTK.LiteUI.Layouts
 {
+    /// <summary>
+    /// Arranges elements vertically, distributing the available height proportionally between them.
+    /// </summary>
     public class VerticalSplitLayoutProportional : ILayout
     {
         [UIProperty]
         public float Padding { get; set; }
 
+        /// <summary>
+        /// The proportions used to determine element heights, cycled through as necessary.
+        /// </summary>
         [UIProperty]
         public float[] Splits { get; set; }
 
+        /// <summary>
+        /// Creates a proportional vertical split layout.
+        /// </summary>
+        /// <param name="padding">The spacing between elements.</param>
+        /// <param name="splits">The proportions used to determine element heights, cycled through as necessary.</param>
+        /// <exception cref="ArgumentException">Thrown when no split values are provided.</exception>
         public VerticalSplitLayoutProportional(float padding, params float[] splits)
         {
             Padding = padding;

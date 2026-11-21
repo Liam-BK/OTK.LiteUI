@@ -5,6 +5,9 @@ using OTK.LiteUI.Core;
 
 namespace OTK.LiteUI.Layouts
 {
+    /// <summary>
+    /// Arranges elements horizontally from left to right, maintaining a consistent element size.
+    /// </summary>
     public class HorizontalLayout : ILayout
     {
         [UIProperty]
@@ -14,6 +17,9 @@ namespace OTK.LiteUI.Layouts
             set;
         }
 
+        /// <summary>
+        /// The size of each element in the viewport.
+        /// </summary>
         [UIProperty]
         public Vector2 ElementSize
         {
@@ -21,6 +27,11 @@ namespace OTK.LiteUI.Layouts
             set;
         }
 
+        /// <summary>
+        /// Creates a horizontal layout with the specified element size and spacing.
+        /// </summary>
+        /// <param name="elementSize">The width and height assigned to each element.</param>
+        /// <param name="padding">The spacing between elements.</param>
         public HorizontalLayout(Vector2 elementSize, float padding)
         {
             ElementSize = elementSize;

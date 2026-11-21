@@ -5,11 +5,11 @@ using OTK.LiteUI.Core;
 
 namespace OTK.LiteUI.Layouts
 {
+    /// <summary>
+    /// Arranges elements in a vertical grid, filling each row from left to right before moving to the next.
+    /// </summary>
     public class VerticalGridLayout : ILayout
     {
-        [UIProperty]
-        public int Columns { get; set; }
-
         [UIProperty]
         public float Padding
         {
@@ -17,14 +17,29 @@ namespace OTK.LiteUI.Layouts
             set;
         }
 
+        /// <summary>
+        /// The size used for each element's height. The width is calculated from the available viewport width.
+        /// </summary>
         [UIProperty]
-        public Vector2 ElementSize
+        public float ElementSize
         {
             get;
             set;
         }
 
-        public VerticalGridLayout(int columns, Vector2 elementSize, float padding)
+        /// <summary>
+        /// The number of columns in the layout. Values are clamped to a minimum of one.
+        /// </summary>
+        [UIProperty]
+        public int Columns { get; set; }
+
+        /// <summary>
+        /// Creates a vertical grid layout with the specified number of columns, element size, and spacing.
+        /// </summary>
+        /// <param name="columns">The number of columns in the layout. Values below one are clamped to one.</param>
+        /// <param name="elementSize">The size used for each element's height.</param>
+        /// <param name="padding">The spacing between elements.</param>
+        public VerticalGridLayout(int columns, float elementSize, float padding)
         {
             Columns = Math.Max(columns, 1);
             ElementSize = elementSize;
@@ -36,18 +51,22 @@ namespace OTK.LiteUI.Layouts
             float startLeft = viewport.X;
             float startTop = viewport.W;
             float elementWidth = ((viewport.Z - viewport.X) - Padding * Math.Max(Columns - 1, 0)) / Columns;
-            float elementHeight = ElementSize.Y;
+            int skipCount = 0;
 
             for (int i = 0; i < elements.Count; i++)
             {
-                if (!elements[i].IsVisible) continue;
-                int column = i % Columns;
-                int row = i / Columns;
+                if (!elements[i].IsVisible)
+                {
+                    skipCount++;
+                    continue;
+                }
+                int column = (i - skipCount) % Columns;
+                int row = (i - skipCount) / Columns;
                 float left = startLeft + column * (elementWidth + Padding);
                 float right = left + elementWidth;
-                float top = startTop - row * (elementHeight + Padding);
+                float top = startTop - row * (ElementSize + Padding);
 
-                elements[i].Bounds = new Vector4(left, top - elementHeight, right, top);
+                elements[i].Bounds = new Vector4(left, top - ElementSize, right, top);
             }
         }
     }

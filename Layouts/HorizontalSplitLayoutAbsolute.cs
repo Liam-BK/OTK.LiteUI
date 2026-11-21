@@ -5,6 +5,9 @@ using OTK.LiteUI.UI.Interfaces;
 
 namespace OTK.LiteUI.Layouts
 {
+    /// <summary>
+    /// Arranges elements horizontally using explicitly specified widths for each element.
+    /// </summary>
     public class HorizontalSplitLayoutAbsolute : ILayout
     {
         [UIProperty]
@@ -13,6 +16,12 @@ namespace OTK.LiteUI.Layouts
         [UIProperty]
         public float[] Splits { get; }
 
+        /// <summary>
+        /// Creates a horizontal split layout using the specified element widths.
+        /// </summary>
+        /// <param name="padding">The spacing between elements.</param>
+        /// <param name="splits">The widths assigned to elements, cycled through as necessary.</param>
+        /// <exception cref="ArgumentException">Thrown when no split values are provided.</exception>
         public HorizontalSplitLayoutAbsolute(float padding, params float[] splits)
         {
             Padding = padding;

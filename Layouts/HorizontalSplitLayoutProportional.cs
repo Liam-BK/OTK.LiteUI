@@ -5,6 +5,9 @@ using OTK.LiteUI.UI.Interfaces;
 
 namespace OTK.LiteUI.Layouts
 {
+    /// <summary>
+    /// Arranges elements horizontally, distributing the available width proportionally between them.
+    /// </summary>
     public class HorizontalSplitLayoutProportional : ILayout
     {
         [UIProperty]
@@ -13,6 +16,12 @@ namespace OTK.LiteUI.Layouts
         [UIProperty]
         public float[] Splits { get; set; }
 
+        /// <summary>
+        /// Creates a proportional horizontal split layout.
+        /// </summary>
+        /// <param name="padding">The spacing between elements.</param>
+        /// <param name="splits">The proportions used to determine element widths, cycled through as necessary.</param>
+        /// <exception cref="ArgumentException">Thrown when no split values are provided.</exception>
         public HorizontalSplitLayoutProportional(float padding, params float[] splits)
         {
             Padding = padding;
@@ -29,10 +38,15 @@ namespace OTK.LiteUI.Layouts
             float viewportHeight = viewport.W - viewport.Y;
             float totalPadding = MathF.Max(0, elements.Count - 1) * Padding;
             float availableWidth = viewportWidth - totalPadding;
+            int skipCount = 0;
 
             for (int i = 0; i < elements.Count; i++)
             {
-                if (!elements[i].IsVisible) continue;
+                if (!elements[i].IsVisible)
+                {
+                    skipCount++;
+                    continue;
+                }
                 float split = Splits[i % Splits.Length];
                 float childWidth = availableWidth * split;
 

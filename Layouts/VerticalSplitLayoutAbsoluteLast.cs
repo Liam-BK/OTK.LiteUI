@@ -5,18 +5,33 @@ using OTK.LiteUI.UI.Interfaces;
 
 namespace OTK.LiteUI.Layouts
 {
+    /// <summary>
+    /// Arranges elements vertically, distributing the available height proportionally and assigning the last element a fixed height.
+    /// </summary>
     public class VerticalSplitLayoutAbsoluteLast : ILayout
     {
         [UIProperty]
         public float Padding { get; set; }
 
+        /// <summary>
+        /// The fixed height assigned to the last element.
+        /// </summary>
         [UIProperty]
         public float AbsoluteHeight { get; set; }
 
+        /// <summary>
+        /// The proportions used to distribute the remaining height, cycled through as necessary.
+        /// </summary>
         [UIProperty]
         public float[] Splits { get; set; }
 
-
+        /// <summary>
+        /// Creates a vertical split layout with proportionally sized elements and a fixed-height last element.
+        /// </summary>
+        /// <param name="padding">The spacing between elements.</param>
+        /// <param name="absoluteHeight">The fixed height of the last element.</param>
+        /// <param name="splits">The proportions used to distribute the remaining height, cycled through as necessary.</param>
+        /// <exception cref="ArgumentException">Thrown when no split values are provided.</exception>
         public VerticalSplitLayoutAbsoluteLast(float padding, float absoluteHeight, params float[] splits)
         {
             Padding = padding;
