@@ -3,29 +3,55 @@ using System.Text;
 using OpenTK.Mathematics;
 using Typography.OpenFont;
 using static StbTrueTypeSharp.StbTrueType;
-using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Utilities;
 
 namespace OTK.LiteUI.UI.Rendering.Backend
 {
+    /// <summary>
+    /// Stores a font atlas and the glyph metrics required to render text.
+    /// </summary>
     public class FontData
     {
+        /// <summary>
+        /// The texture atlas containing the font's glyphs.
+        /// </summary>
         public ImageData Bitmap { get; set; } = new();
 
+        /// <summary>
+        /// Maps each character to its normalized texture coordinates in the atlas,
+        /// represented as left, bottom, right, and top.
+        /// </summary>
         public Dictionary<char, Vector4> GlyphUVs = new();
 
+        /// <summary>
+        /// Maps each character to its pixel bounds within the font atlas,
+        /// represented as left, bottom, right, and top.
+        /// </summary>
         public Dictionary<char, Vector4> GlyphBounds = new();
 
+        /// <summary>
+        /// Maps each character to its rendering offset from the glyph's origin.
+        /// </summary>
         public Dictionary<char, Vector2> Offsets = new();
 
+        /// <summary>
+        /// Maps character pairs to their kerning adjustment.
+        /// </summary>
         public Dictionary<(char, char), float> Kerning = new();
 
+        /// <summary>
+        /// The pixel height of the reference glyph used to normalize font measurements.
+        /// </summary>
         public float ScaleFactor = 1;
     }
 }
 
 namespace OTK.LiteUI.UI.Rendering.Backend
 {
+    /// <summary>
+    /// Loads font files, generates font atlases and glyph metrics, and manages
+    /// font data for use by text-rendering components.
+    /// </summary>
     public class FontManager
     {
         private const float INF = 1e20f;
@@ -136,7 +162,7 @@ namespace OTK.LiteUI.UI.Rendering.Backend
             };
         }
 
-        public static ImageData ConvertToSDF(ImageData data)
+        private static ImageData ConvertToSDF(ImageData data)
         {
             int w = data.Width;
             int h = data.Height;
