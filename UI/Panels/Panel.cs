@@ -5,16 +5,28 @@ using OTK.LiteUI.UI.Interfaces;
 using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Rendering;
 using OpenTK.Windowing.Common.Input;
-using System.Reflection.Metadata.Ecma335;
 
 namespace OTK.LiteUI.UI.Components
 {
+    /// <summary>
+    /// A container component that arranges child components using a layout.
+    /// Supports scrolling, clipping, and optional resizing.
+    /// </summary>
     public class Panel : NineSlice, IUIContainer, IScrollable
     {
+        /// <summary>
+        /// Gets the child components managed by this panel.
+        /// </summary>
         private List<UIComponent> _children = new List<UIComponent>();
 
+        /// <summary>
+        /// Gets or sets the multiplier applied to mouse wheel scrolling.
+        /// </summary>
         public static float ScrollMultiplier = 5.0f;
 
+        /// <summary>
+        /// Gets or sets the anchor used by the panel and its children.
+        /// </summary>
         public override AnchorType Anchor
         {
             get => base.Anchor; set
@@ -29,6 +41,10 @@ namespace OTK.LiteUI.UI.Components
 
         public List<UIComponent> Children => _children;
 
+        /// <summary>
+        /// Gets the maximum horizontal and vertical scroll offsets required
+        /// to reveal the panel's entire content.
+        /// </summary>
         public Vector2 MaxScroll
         {
             get
@@ -43,6 +59,10 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector2 _scrollOffset = Vector2.Zero;
 
+        /// <summary>
+        /// Gets or sets the current horizontal and vertical scroll offsets.
+        /// Values are clamped to the available scroll range.
+        /// </summary>
         public Vector2 ScrollOffset
         {
             get
@@ -75,6 +95,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the bounds of the panel and updates the clipping bounds
+        /// of its children.
+        /// </summary>
         public override Vector4 Bounds
         {
             get => base.Bounds;
@@ -89,6 +113,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the layout used to arrange the panel's children.
+        /// </summary>
         [UIProperty]
         public ILayout Layout
         {
@@ -96,10 +123,16 @@ namespace OTK.LiteUI.UI.Components
             set;
         }
 
+        /// <summary>
+        /// Gets the visible content area inside the panel's inset.
+        /// </summary>
         public Vector4 ViewPort => new(Bounds.X + Inset, Bounds.Y + Inset, Bounds.Z - Inset, Bounds.W - Inset);
 
         private bool _isResizable = false;
 
+        /// <summary>
+        /// Gets or sets whether the panel can be resized by dragging its edges.
+        /// </summary>
         [UIProperty]
         public bool IsResizable
         {
@@ -123,10 +156,19 @@ namespace OTK.LiteUI.UI.Components
             Top = 1 << 3
         }
 
+        /// <summary>
+        /// Gets or sets the resize edges currently being interacted with.
+        /// </summary>
         public int ActiveResizeFlags = (int)ResizingFlags.None;
 
+        /// <summary>
+        /// Gets whether the panel is currently being resized.
+        /// </summary>
         public bool isResizing = false;
 
+        /// <summary>
+        /// Gets or sets whether the panel and its children are visible.
+        /// </summary>
         public override bool IsVisible
         {
             get => base.IsVisible;
@@ -140,6 +182,15 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Initializes a panel on the specified canvas using the supplied layout.
+        /// </summary>
+        /// <param name="canvas">The canvas to register the panel with.</param>
+        /// <param name="bounds">The bounds of the panel.</param>
+        /// <param name="layout">The layout used to arrange child components.</param>
+        /// <param name="inset">The inset applied to the panel's background.</param>
+        /// <param name="uvInset">The texture coordinate inset of the background.</param>
+        /// <param name="colour">The background colour of the panel.</param>
         public Panel(UICanvas canvas, Vector4 bounds, ILayout layout, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
             Canvas = canvas;
@@ -147,6 +198,17 @@ namespace OTK.LiteUI.UI.Components
             if (GetType() == typeof(Panel)) Identifier = Canvas.GetNextIdentifier(typeof(Panel));
         }
 
+        /// <summary>
+        /// Initializes a panel on the default canvas using the supplied layout.
+        /// </summary>
+        /// <param name="bounds">The bounds of the panel.</param>
+        /// <param name="layout">The layout used to arrange child components.</param>
+        /// <param name="inset">The inset applied to the panel's background.</param>
+        /// <param name="uvInset">The texture coordinate inset of the background.</param>
+        /// <param name="colour">The background colour of the panel.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when no default canvas is assigned.
+        /// </exception>
         public Panel(Vector4 bounds, ILayout layout, float inset = 10, float uvInset = 0.25f, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, layout, inset, uvInset, colour) { }
 
         private void ApplyLayout()
@@ -161,6 +223,11 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Adds a component to the panel, assigning it as a child and arranging
+        /// the panel's contents. If null is supplied, a blank component is added instead.
+        /// </summary>
+        /// <param name="child">The component to add, or null to add a blank component.</param>
         public void AddChild(UIComponent? child)
         {
             if (child is null)
@@ -176,17 +243,28 @@ namespace OTK.LiteUI.UI.Components
             ApplyLayout();
         }
 
+        /// <summary>
+        /// Replaces the layout used to arrange the panel's children.
+        /// </summary>
+        /// <param name="layout">The layout to apply.</param>
         public void SetLayout(ILayout layout)
         {
             Layout = layout;
         }
 
+        /// <summary>
+        /// Removes a component from the panel and rearranges the remaining children.
+        /// </summary>
+        /// <param name="child">The component to remove.</param>
         public void RemoveChild(UIComponent child)
         {
             Children.Remove(child);
             ApplyLayout();
         }
 
+        /// <summary>
+        /// Removes all child components from the panel.
+        /// </summary>
         public void Clear()
         {
             Children.Clear();
@@ -285,6 +363,15 @@ namespace OTK.LiteUI.UI.Components
             return false;
         }
 
+        /// <summary>
+        /// Handles mouse button presses, forwarding input to child components
+        /// and initiating panel resizing when applicable.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>
+        /// <see langword="true"/> if the input was handled; otherwise,
+        /// <see langword="false"/>.
+        /// </returns>
         public override bool OnClickDown(MouseState mouse)
         {
             if (!IsVisible) return false;
@@ -303,6 +390,10 @@ namespace OTK.LiteUI.UI.Components
             return base.OnClickDown(mouse);
         }
 
+        /// <summary>
+        /// Forwards mouse button presses to child components without consuming the input.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
         public override void OnClickDownNoConsume(MouseState mouse)
         {
             if (!IsVisible) return;
@@ -313,6 +404,14 @@ namespace OTK.LiteUI.UI.Components
             base.OnClickDownNoConsume(mouse);
         }
 
+        /// <summary>
+        /// Handles mouse button releases and forwards them to child components.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>
+        /// <see langword="true"/> if the input was handled; otherwise,
+        /// <see langword="false"/>.
+        /// </returns>
         public override bool OnClickUp(MouseState mouse)
         {
             if (!IsVisible || !WithinBounds(mouse)) return false;
@@ -324,6 +423,11 @@ namespace OTK.LiteUI.UI.Components
             return base.OnClickUp(mouse);
         }
 
+        /// <summary>
+        /// Forwards mouse button releases to child components without consuming the input.
+        /// Also ends any active panel resizing operation.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
         public override void OnClickUpNoConsume(MouseState mouse)
         {
             if (!IsVisible) return;
@@ -336,6 +440,14 @@ namespace OTK.LiteUI.UI.Components
             base.OnClickUpNoConsume(mouse);
         }
 
+        /// <summary>
+        /// Handles mouse movement, child input, and panel resizing.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>
+        /// <see langword="true"/> if the input was consumed, otherwise,
+        /// <see langword="false"/>.
+        /// </returns>
         public override bool OnMouseMove(MouseState mouse)
         {
             if (!IsVisible) return false;
@@ -353,6 +465,10 @@ namespace OTK.LiteUI.UI.Components
             return base.OnMouseMove(mouse);
         }
 
+        /// <summary>
+        /// Forwards mouse movement to child components without consuming the input.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
         public override void OnMouseMoveNoConsume(MouseState mouse)
         {
             if (!IsVisible) return;
@@ -363,6 +479,13 @@ namespace OTK.LiteUI.UI.Components
             base.OnMouseMoveNoConsume(mouse);
         }
 
+        /// <summary>
+        /// Handles mouse wheel input, forwarding it to children before scrolling the panel.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>
+        /// The result of the base implementation.
+        /// </returns>
         public override bool OnMouseWheel(MouseState mouse)
         {
             if (!IsVisible || !WithinBounds(mouse)) return false;
@@ -380,6 +503,10 @@ namespace OTK.LiteUI.UI.Components
             return base.OnMouseWheel(mouse);
         }
 
+        /// <summary>
+        /// Forwards mouse wheel input to child components without consuming the input.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
         public override void OnMouseWheelNoConsume(MouseState mouse)
         {
             if (!IsVisible) return;
@@ -390,6 +517,10 @@ namespace OTK.LiteUI.UI.Components
             base.OnMouseWheelNoConsume(mouse);
         }
 
+        /// <summary>
+        /// Forwards keyboard key presses to child components.
+        /// </summary>
+        /// <param name="e">The keyboard event.</param>
         public override void OnKeyDown(KeyboardKeyEventArgs e)
         {
             if (!IsVisible) return;
@@ -399,6 +530,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Forwards keyboard key releases to child components.
+        /// </summary>
+        /// <param name="e">The keyboard event.</param>
         public override void OnKeyUp(KeyboardKeyEventArgs e)
         {
             if (!IsVisible) return;
@@ -408,6 +543,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Forwards text input to child components.
+        /// </summary>
+        /// <param name="e">The text input event.</param>
         public override void OnTextInput(TextInputEventArgs e)
         {
             if (!IsVisible) return;
@@ -417,6 +556,12 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Applies the panel layout and updates visible child components.
+        /// </summary>
+        /// <param name="deltaTime">The elapsed time since the previous update.</param>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <param name="keyboard">The current keyboard state.</param>
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
         {
             if (!IsVisible) return;
@@ -428,6 +573,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Submits the panel background and visible renderable children to the renderer.
+        /// </summary>
+        /// <param name="renderer">The renderer receiving the panel data.</param>
         public override void SubmitData(Renderer renderer)
         {
             if (!IsVisible) return;
