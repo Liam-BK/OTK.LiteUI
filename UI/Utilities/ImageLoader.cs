@@ -112,6 +112,15 @@ namespace OTK.LiteUI.UI.Utilities
             }
         }
 
+        /// <summary>
+        /// Splits the image into a two-dimensional array of equally sized tiles.
+        /// </summary>
+        /// <param name="tileWidth">The width of each tile in pixels.</param>
+        /// <param name="tileHeight">The height of each tile in pixels.</param>
+        /// <returns>A two-dimensional array of extracted image tiles.</returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown if the image dimensions are not evenly divisible by the tile dimensions.
+        /// </exception>
         public ImageData[,] Split(int tileWidth, int tileHeight)
         {
             if (Width % tileWidth != 0 || Height % tileHeight != 0)
@@ -134,6 +143,14 @@ namespace OTK.LiteUI.UI.Utilities
             return result;
         }
 
+        /// <summary>
+        /// Extracts a rectangular region of the image into a new image.
+        /// </summary>
+        /// <param name="x">The horizontal coordinate of the region's top-left corner.</param>
+        /// <param name="y">The vertical coordinate of the region's top-left corner.</param>
+        /// <param name="subWidth">The width of the extracted region.</param>
+        /// <param name="subHeight">The height of the extracted region.</param>
+        /// <returns>A new image containing the extracted pixel data.</returns>
         public ImageData Extract(int x, int y, int subWidth, int subHeight)
         {
             byte[] pixels = new byte[subWidth * subHeight * Channels];
@@ -164,6 +181,11 @@ namespace OTK.LiteUI.UI.Utilities
             };
         }
 
+        /// <summary>
+        /// Converts the image to the specified square resolution, resizing it when
+        /// necessary and padding it when its dimensions are smaller than the target.
+        /// </summary>
+        /// <param name="resolution">The target texture resolution.</param>
         public void ConvertToResolution(TextureResolution resolution)
         {
             int target = TextureManager.FindResolution(resolution);
