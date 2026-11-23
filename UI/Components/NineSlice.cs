@@ -6,13 +6,24 @@ using OTK.LiteUI.UI.Utilities;
 
 namespace OTK.LiteUI.UI.Components
 {
+    /// <summary>
+    /// A UI component that renders a texture divided into nine sections,
+    /// allowing its corners and edges to retain their proportions when resized.
+    /// </summary>
     public class NineSlice : UIComponent, IRenderable
     {
+        /// <summary>
+        /// The texture used to set the appearance of the nine-slice component.
+        /// </summary>
         [UIProperty]
         public string Texture { get; set; } = "";
 
         private float _inset;
 
+        /// <summary>
+        /// The thickness of the corner and edge sections in UI coordinates.
+        /// Clamped to half the smaller component dimension.
+        /// </summary>
         [UIProperty]
         public float Inset
         {
@@ -33,6 +44,10 @@ namespace OTK.LiteUI.UI.Components
 
         private float _uvInset;
 
+        /// <summary>
+        /// The size of the corner and edge sections in normalized texture coordinates.
+        /// Clamped between 0 and 0.5.
+        /// </summary>
         [UIProperty]
         public float UVInset
         {
@@ -55,6 +70,9 @@ namespace OTK.LiteUI.UI.Components
         private UIQuad bottomCenter = new UIQuad();
         private UIQuad bottomRight = new UIQuad();
 
+        /// <summary>
+        /// Gets or sets the component colour, applied uniformly to all nine sections.
+        /// </summary>
         [UIProperty]
         public override Vector4 Colour
         {
@@ -66,6 +84,14 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Initializes a nine-slice component on the specified canvas.
+        /// </summary>
+        /// <param name="canvas">The canvas to register the component with.</param>
+        /// <param name="bounds">The bounds of the component.</param>
+        /// <param name="inset">The thickness of the corner and edge sections.</param>
+        /// <param name="uvInset">The texture coordinate inset of the corner and edge sections.</param>
+        /// <param name="colour">The colour applied to the component.</param>
         public NineSlice(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25f, Vector4? colour = null)
         {
             this.Canvas = canvas;
@@ -78,6 +104,16 @@ namespace OTK.LiteUI.UI.Components
             if (GetType() == typeof(NineSlice)) Identifier = Canvas.GetNextIdentifier(typeof(NineSlice));
         }
 
+        /// <summary>
+        /// Initializes a nine-slice component on the default canvas.
+        /// </summary>
+        /// <param name="bounds">The bounds of the component.</param>
+        /// <param name="inset">The thickness of the corner and edge sections.</param>
+        /// <param name="uvInset">The texture coordinate inset of the corner and edge sections.</param>
+        /// <param name="colour">The colour applied to the component.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when no default canvas is assigned.
+        /// </exception>
         public NineSlice(Vector4 bounds, float inset = 10, float uvInset = 0.25f, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, inset, uvInset, colour) { }
 
         protected void ForceUpdateQuadrantColours(Vector4 colour)
@@ -177,6 +213,10 @@ namespace OTK.LiteUI.UI.Components
             bottomRight.textureLayer = textureLayer;
         }
 
+        /// <summary>
+        /// Submits the nine sections of the component to the renderer.
+        /// </summary>
+        /// <param name="renderer">The renderer receiving the section data.</param>
         public virtual void SubmitData(Renderer renderer)
         {
             if (!IsVisible || Colour.W <= 0) return;

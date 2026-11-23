@@ -6,6 +6,10 @@ using OTK.LiteUI.Core;
 
 namespace OTK.LiteUI.UI.Components
 {
+    /// <summary>
+    /// A single-line text field that accepts numeric input and mathematical expressions.
+    /// Expressions are evaluated when Enter is pressed or the field loses focus.
+    /// </summary>
     public class NumericField : TextField
     {
         private enum TokenType
@@ -18,12 +22,20 @@ namespace OTK.LiteUI.UI.Components
             Invalid
         }
 
+        /// <summary>
+        /// Whether the most recently evaluated expression was valid.
+        /// </summary>
         public bool ExpressionValid
         {
             get;
             private set;
         } = false;
 
+        /// <summary>
+        /// Gets or sets the numeric value represented by the field's text.
+        /// Returns zero if the text cannot be parsed directly as a double.
+        /// Setting this property replaces the field's text with the specified value.
+        /// </summary>
         [UIProperty]
         public double Value
         {
@@ -39,6 +51,14 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Initializes a numeric field on the specified canvas.
+        /// </summary>
+        /// <param name="canvas">The canvas to register the field with.</param>
+        /// <param name="bounds">The bounds of the field.</param>
+        /// <param name="inset">The thickness of the nine-slice sections.</param>
+        /// <param name="uvInset">The texture coordinate inset of the nine-slice sections.</param>
+        /// <param name="colour">The colour applied to the field.</param>
         public NumericField(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
             this.Canvas = canvas;
@@ -47,6 +67,16 @@ namespace OTK.LiteUI.UI.Components
             if (GetType() == typeof(NumericField)) Identifier = Canvas.GetNextIdentifier(typeof(NumericField));
         }
 
+        /// <summary>
+        /// Initializes a numeric field on the default canvas.
+        /// </summary>
+        /// <param name="bounds">The bounds of the field.</param>
+        /// <param name="inset">The thickness of the nine-slice sections.</param>
+        /// <param name="uvInset">The texture coordinate inset of the nine-slice sections.</param>
+        /// <param name="colour">The colour applied to the field.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when no default canvas is assigned.
+        /// </exception>
         public NumericField(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, inset, uvInset, colour) { }
 
         private bool HasDecimalAtCaretGroup()
@@ -72,6 +102,11 @@ namespace OTK.LiteUI.UI.Components
             return false;
         }
 
+        /// <summary>
+        /// Handles text input, rejecting characters that are not valid numeric expression characters
+        /// and preventing multiple decimal points within the current number.
+        /// </summary>
+        /// <param name="e">The text input event arguments.</param>
         public override void OnTextInput(TextInputEventArgs e)
         {
             if (!IsVisible || !IsFocused) return;
@@ -80,6 +115,10 @@ namespace OTK.LiteUI.UI.Components
             base.OnTextInput(e);
         }
 
+        /// <summary>
+        /// Handles keyboard input and evaluates the expression when Enter is pressed.
+        /// </summary>
+        /// <param name="e">The keyboard event arguments.</param>
         public override void OnKeyDown(KeyboardKeyEventArgs e)
         {
             if (!IsVisible || !IsFocused) return;
@@ -90,6 +129,11 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Handles mouse presses and evaluates the expression when the field loses focus.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>Whether the base text field handled the mouse press.</returns>
         public override bool OnClickDown(MouseState mouse)
         {
             if (!IsVisible) return false;
@@ -97,6 +141,12 @@ namespace OTK.LiteUI.UI.Components
             return base.OnClickDown(mouse);
         }
 
+        /// <summary>
+        /// Updates the numeric field while it is visible.
+        /// </summary>
+        /// <param name="deltaTime">The elapsed time since the previous update.</param>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <param name="keyboard">The current keyboard state.</param>
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
         {
             if (!IsVisible) return;

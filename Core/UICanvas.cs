@@ -641,7 +641,7 @@ namespace OTK.LiteUI.Core
         /// <returns>The converted position in canvas coordinates.</returns>
         public Vector2 ConvertMouseScreenCoords(Vector2 position)
         {
-            return new Vector2(position.X, window.Size.Y - position.Y) * InvDPIScaleVec2;
+            return new Vector2(position.X, window.ClientSize.Y - position.Y) * InvDPIScaleVec2;
         }
 
         /// <summary>

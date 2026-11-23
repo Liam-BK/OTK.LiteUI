@@ -5,8 +5,16 @@ using OTK.LiteUI.UI.Rendering;
 
 namespace OTK.LiteUI.UI.Components
 {
+    /// <summary>
+    /// A slider that allows a normalized value to be adjusted by dragging its thumb
+    /// or clicking along its track.
+    /// Supports horizontal and vertical orientations.
+    /// </summary>
     public class Slider : NineSlice
     {
+        /// <summary>
+        /// Gets or sets whether the slider and its thumb are visible.
+        /// </summary>
         [UIProperty]
         public override bool IsVisible
         {
@@ -18,6 +26,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the anchor position used by the slider and its thumb.
+        /// </summary>
         [UIProperty]
         public override AnchorType Anchor
         {
@@ -28,12 +39,22 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the orientation of the slider.
+        /// Automatically determined from the bounds when they are assigned.
+        /// </summary>
         [UIProperty]
         public ComponentOrientation Orientation { get; set; }
+
         private NineSlice _thumb;
+
         private Vector2 _clickOffset = Vector2.Zero;
+
         private Vector4 _thumbColour;
 
+        /// <summary>
+        /// Gets or sets the colour applied to the slider thumb.
+        /// </summary>
         [UIProperty]
         public Vector4 ThumbColour
         {
@@ -49,6 +70,9 @@ namespace OTK.LiteUI.UI.Components
 
         private bool _thumbPressed = false;
 
+        /// <summary>
+        /// Sets the texture used by the slider thumb.
+        /// </summary>
         [UIProperty]
         public string ThumbTexture
         {
@@ -57,22 +81,34 @@ namespace OTK.LiteUI.UI.Components
                 _thumb.Texture = value;
             }
         }
+
         private float _value = 0.0f;
 
         private float HalfThumbSize => Orientation == ComponentOrientation.Horizontal ? Height * 0.5f : Width * 0.5f;
 
+        /// <summary>
+        /// Gets or sets the normalized slider value, clamped between 0 and 1.
+        /// Changing this value updates the thumb position and raises
+        /// <see cref="OnValueChanged"/>.
+        /// </summary>
         [UIProperty]
         public float Value
         {
             get => _value;
             set
             {
+                bool valueChanged = _value != value;
                 _value = Math.Clamp(value, 0, 1);
                 SetThumbPositionFromValue();
-                OnValueChanged?.Invoke(_value);
+                if (valueChanged) OnValueChanged?.Invoke(_value);
             }
         }
 
+        /// <summary>
+        /// Gets or sets the slider bounds.
+        /// The orientation is determined by whether the bounds are wider or taller.
+        /// Updating the bounds also repositions the thumb.
+        /// </summary>
         [UIProperty]
         public override Vector4 Bounds
         {
@@ -83,12 +119,25 @@ namespace OTK.LiteUI.UI.Components
             set
             {
                 base.Bounds = value;
+                Orientation = Width >= Height ? ComponentOrientation.Horizontal : ComponentOrientation.Vertical;
                 if (_thumb is not null) SetThumbPositionFromValue();
             }
         }
 
+        /// <summary>
+        /// Occurs when the slider value changes, either through direct assignment
+        /// or user interaction.
+        /// </summary>
         public event Action<float>? OnValueChanged;
 
+        /// <summary>
+        /// Initializes a slider on the specified canvas.
+        /// </summary>
+        /// <param name="canvas">The canvas to register the slider with.</param>
+        /// <param name="bounds">The bounds of the slider.</param>
+        /// <param name="inset">The corner inset of the slider background.</param>
+        /// <param name="uvInset">The texture coordinate inset of the slider background.</param>
+        /// <param name="colour">The initial colour of the slider background and thumb.</param>
         public Slider(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
             this.Canvas = canvas;
@@ -102,6 +151,16 @@ namespace OTK.LiteUI.UI.Components
             if (GetType() == typeof(Slider)) Identifier = Canvas.GetNextIdentifier(typeof(Slider));
         }
 
+        /// <summary>
+        /// Initializes a slider on the default canvas.
+        /// </summary>
+        /// <param name="bounds">The bounds of the slider.</param>
+        /// <param name="inset">The corner inset of the slider background.</param>
+        /// <param name="uvInset">The texture coordinate inset of the slider background.</param>
+        /// <param name="colour">The initial colour of the slider background and thumb.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when no default canvas is assigned.
+        /// </exception>
         public Slider(Vector4 bounds, float inset = 10, float uvInset = 0.25f, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, inset, uvInset, colour) { }
 
         private void SetValueFromThumbPosition()
@@ -133,11 +192,23 @@ namespace OTK.LiteUI.UI.Components
             _thumb.Bounds = new Vector4(x - halfThumbSize, y - halfThumbSize, x + halfThumbSize, y + halfThumbSize);
         }
 
+        /// <summary>
+        /// Determines whether the specified mouse position intersects the slider track
+        /// or its thumb.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>Whether the mouse position is within the slider or its thumb.</returns>
         public override bool WithinBounds(MouseState mouse)
         {
             return base.WithinBounds(mouse) || _thumb.WithinBounds(mouse);
         }
 
+        /// <summary>
+        /// Handles mouse presses on the slider, allowing the thumb to be dragged
+        /// or repositioned by clicking the track.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>Whether the slider handled the press.</returns>
         public override bool OnClickDown(MouseState mouse)
         {
             if (!IsVisible) return false;
@@ -174,6 +245,11 @@ namespace OTK.LiteUI.UI.Components
             return base.OnClickDown(mouse);
         }
 
+        /// <summary>
+        /// Updates the thumb position and value while it is being dragged.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>Whether the slider handled the mouse movement.</returns>
         public override bool OnMouseMove(MouseState mouse)
         {
             if (!IsVisible) return false;
@@ -202,6 +278,11 @@ namespace OTK.LiteUI.UI.Components
             return base.OnMouseMove(mouse);
         }
 
+        /// <summary>
+        /// Ends thumb dragging and resets the drag offset.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>The result of the base click-release handler.</returns>
         public override bool OnClickUp(MouseState mouse)
         {
             if (!IsVisible) return false;
@@ -210,6 +291,12 @@ namespace OTK.LiteUI.UI.Components
             return base.OnClickUp(mouse);
         }
 
+        /// <summary>
+        /// Updates the background and thumb appearance while the slider is visible.
+        /// </summary>
+        /// <param name="deltaTime">The elapsed time since the previous update.</param>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <param name="keyboard">The current keyboard state.</param>
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
         {
             if (!IsVisible) return;
@@ -217,6 +304,10 @@ namespace OTK.LiteUI.UI.Components
             _thumb.Colour = _thumbPressed ? _thumbColour * new Vector4(0.5f, 0.5f, 0.5f, 1.0f) : _thumbColour;
         }
 
+        /// <summary>
+        /// Submits the slider background and thumb to the renderer.
+        /// </summary>
+        /// <param name="renderer">The renderer receiving the slider data.</param>
         public override void SubmitData(Renderer renderer)
         {
             if (!IsVisible || Colour.W <= 0) return;

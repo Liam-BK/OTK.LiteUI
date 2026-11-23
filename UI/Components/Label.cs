@@ -7,17 +7,36 @@ using OTK.LiteUI.UI.Utilities;
 
 namespace OTK.LiteUI.UI.Components
 {
+    /// <summary>
+    /// Specifies the horizontal alignment of text.
+    /// </summary>
     public enum TextAlignment
     {
+        /// <summary>
+        /// Aligns text to the left.
+        /// </summary>
         Left,
+        /// <summary>
+        /// Centers text horizontally.
+        /// </summary>
         Center,
+        /// <summary>
+        /// Aligns text to the right.
+        /// </summary>
         Right
     }
 
+    /// <summary>
+    /// Displays text using a font registered with the canvas.
+    /// Supports multiline text, alignment, clipping, and page navigation.
+    /// </summary>
     public class Label : UIComponent, IRenderable, ILinkable
     {
         private Vector2 _origin = Vector2.Zero;
 
+        /// <summary>
+        /// The starting position used when laying out the text.
+        /// </summary>
         [UIProperty]
         public Vector2 Origin
         {
@@ -31,6 +50,9 @@ namespace OTK.LiteUI.UI.Components
 
         private float _size = 0;
 
+        /// <summary>
+        /// The size used when generating text glyphs.
+        /// </summary>
         [UIProperty]
         public float Size
         {
@@ -42,9 +64,15 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// The horizontal alignment applied to each line of text.
+        /// </summary>
         [UIProperty]
         public TextAlignment Alignment { get; set; } = TextAlignment.Left;
 
+        /// <summary>
+        /// The number of glyphs generated for the current text.
+        /// </summary>
         public int GlyphCount
         {
             get
@@ -55,6 +83,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// The number of lines in the current text layout.
+        /// </summary>
         public int TotalLines
         {
             get => _lines.Count;
@@ -62,8 +93,14 @@ namespace OTK.LiteUI.UI.Components
 
         private readonly List<List<UIQuad>> _lines = [];
 
+        /// <summary>
+        /// The vertical spacing between lines, in addition to the text size.
+        /// </summary>
         public const float LineSpacing = 12.0f;
 
+        /// <summary>
+        /// The key identifying the font used to render the text. Is automatically set to default if not specified.
+        /// </summary>
         public string FontKey
         {
             private get;
@@ -72,6 +109,9 @@ namespace OTK.LiteUI.UI.Components
 
         private string _text = "";
 
+        /// <summary>
+        /// The text displayed by the label.
+        /// </summary>
         [UIProperty]
         public string Text
         {
@@ -90,6 +130,10 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector4 _bounds;
 
+        /// <summary>
+        /// Gets or sets the bounds used to position and size the text.
+        /// Setting the bounds also updates <see cref="Origin"/> and <see cref="Size"/>.
+        /// </summary>
         [UIProperty]
         public override Vector4 Bounds
         {
@@ -113,6 +157,9 @@ namespace OTK.LiteUI.UI.Components
 
         private string _pageLink = "";
 
+        /// <summary>
+        /// The identifier of the page to navigate to when the label is clicked.
+        /// </summary>
         [UIProperty]
         public string PageLink
         {
@@ -126,11 +173,22 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Whether the parent page should be hidden when the link is activated.
+        /// </summary>
         [UIProperty]
         public bool HideParentPageOnClick { get; set; } = true;
 
         private bool isClicked = false;
 
+        /// <summary>
+        /// Initializes a label on the specified canvas.
+        /// </summary>
+        /// <param name="canvas">The canvas to register the label with.</param>
+        /// <param name="origin">The starting position of the text.</param>
+        /// <param name="size">The size of the text.</param>
+        /// <param name="text">The initial text to display.</param>
+        /// <param name="colour">The colour of the text.</param>
         public Label(UICanvas canvas, Vector2 origin, float size, string text = "", Vector4? colour = null)
         {
             this.Canvas = canvas;
@@ -147,8 +205,23 @@ namespace OTK.LiteUI.UI.Components
             if (GetType() == typeof(Label)) Identifier = Canvas.GetNextIdentifier(typeof(Label));
         }
 
+        /// <summary>
+        /// Initializes a label on the default canvas.
+        /// </summary>
+        /// <param name="origin">The starting position of the text.</param>
+        /// <param name="size">The size of the text.</param>
+        /// <param name="text">The initial text to display.</param>
+        /// <param name="colour">The colour of the text.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when no default canvas is assigned.
+        /// </exception>
         public Label(Vector2 origin, float size, string text = "", Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), origin, size, text, colour) { }
 
+        /// <summary>
+        /// Gets the insertion offset corresponding to the start of the specified line.
+        /// </summary>
+        /// <param name="line">The zero-based line index.</param>
+        /// <returns>The insertion offset within the text.</returns>
         public int FindInsertionOffset(int line)
         {
             int result = 0;
@@ -159,6 +232,12 @@ namespace OTK.LiteUI.UI.Components
             return result + line;
         }
 
+        /// <summary>
+        /// Gets the position of a caret at the specified glyph index within a line.
+        /// </summary>
+        /// <param name="caretIndex">The zero-based glyph index within the line.</param>
+        /// <param name="line">The zero-based line index.</param>
+        /// <returns>The position of the caret.</returns>
         public Vector2 FindCaretPosFromIndex(int caretIndex, int line)
         {
             float y = Origin.Y - line * (Size + LineSpacing) + Size * 0.5f;
@@ -193,12 +272,22 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets the line index corresponding to a mouse position.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>The zero-based line index.</returns>
         public int FindLineFromPos(MouseState mouse)
         {
             var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
             return FindLineFromPos(convertedMouse);
         }
 
+        /// <summary>
+        /// Gets the line index corresponding to a position in canvas coordinates.
+        /// </summary>
+        /// <param name="pos">The position to test.</param>
+        /// <returns>The zero-based line index.</returns>
         public int FindLineFromPos(Vector2 pos)
         {
             var visualOffset = Canvas.AnchorTypeOffsets[(int)Anchor](Canvas.CanvasSize, this);
@@ -209,12 +298,22 @@ namespace OTK.LiteUI.UI.Components
             return Math.Clamp(line, 0, _lines.Count - 1);
         }
 
+        /// <summary>
+        /// Gets the caret index corresponding to a mouse position.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>The zero-based glyph index, or -1 if the position is outside the label's bounds.</returns>
         public int FindCaretIndexFromPos(MouseState mouse)
         {
             var convertedMouse = Canvas.ConvertMouseScreenCoords(mouse.Position);
             return FindCaretIndexFromPos(convertedMouse);
         }
 
+        /// <summary>
+        /// Gets the caret index corresponding to a position in canvas coordinates.
+        /// </summary>
+        /// <param name="pos">The position to test.</param>
+        /// <returns>The zero-based glyph index, or -1 if the position is outside the label's bounds.</returns>
         public int FindCaretIndexFromPos(Vector2 pos)
         {
             if (!WithinBounds(pos)) return -1;
@@ -228,11 +327,19 @@ namespace OTK.LiteUI.UI.Components
             return _lines[line].Count;
         }
 
+        /// <summary>
+        /// Gets the number of glyphs in the specified line.
+        /// </summary>
+        /// <param name="line">The zero-based line index.</param>
+        /// <returns>The number of glyphs in the line.</returns>
         public int FindLineEndIndex(int line)
         {
             return _lines[line].Count;
         }
 
+        /// <summary>
+        /// Regenerates the glyph data using the current text, font, size, and alignment.
+        /// </summary>
         public void ForceUpdateGlyphs()
         {
             if (Canvas.DefaultFontKey == "") return;
@@ -340,6 +447,11 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Handles a mouse button press within the label.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>True if the press was handled.</returns>
         public override bool OnClickDown(MouseState mouse)
         {
             if (!IsVisible || !WithinBounds(mouse)) return false;
@@ -347,6 +459,11 @@ namespace OTK.LiteUI.UI.Components
             return true;
         }
 
+        /// <summary>
+        /// Handles a mouse button release within the label and performs page navigation if configured.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>True if the release was handled.</returns>
         public override bool OnClickUp(MouseState mouse)
         {
             if (!IsVisible || !WithinBounds(mouse))
@@ -371,6 +488,10 @@ namespace OTK.LiteUI.UI.Components
             return false;
         }
 
+        /// <summary>
+        /// Submits the label's visible glyphs to the renderer.
+        /// </summary>
+        /// <param name="renderer">The renderer receiving the glyph data.</param>
         public void SubmitData(Renderer renderer)
         {
             if (!IsVisible || string.IsNullOrEmpty(Text) || Colour.W <= 0) return;

@@ -9,10 +9,16 @@ using OTK.LiteUI.UI.Rendering;
 
 namespace OTK.LiteUI.UI.Components
 {
+    /// <summary>
+    /// Provides a file navigation interface for browsing directories and selecting files.
+    /// </summary>
     public class FileNavigator : UIComponent, IRenderable
     {
         Panel panel;
 
+        /// <summary>
+        /// Gets or sets the anchor used by the file navigator and its internal panel.
+        /// </summary>
         public override AnchorType Anchor
         {
             get => base.Anchor;
@@ -23,6 +29,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the colour applied to the file navigator and its internal panel.
+        /// </summary>
         public override Vector4 Colour
         {
             get => base.Colour;
@@ -33,6 +42,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// The directory separator used when displaying and navigating paths.
+        /// Defaults to the platform-specific directory separator.
+        /// </summary>
         public char Delimiter = OperatingSystem.IsWindows() ? '\\' : '/';
 
         private Button Confirm, Cancel, Back;
@@ -68,12 +81,19 @@ namespace OTK.LiteUI.UI.Components
 
         private readonly Vector4 fileColour = new Vector4(0.55f, 0.85f, 1.0f, 1.0f);
 
+        /// <summary>
+        /// Gets or sets the currently displayed directory path.
+        /// Defaults to the user's profile directory.
+        /// </summary>
         public string CurrentPath
         {
             get;
             set;
         } = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
+        /// <summary>
+        /// Sets the texture used by the search and filename input fields.
+        /// </summary>
         public string TextFieldTexture
         {
             set
@@ -83,6 +103,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Sets the texture used by the quick access and current directory panels.
+        /// </summary>
         public string SubPanelTexture
         {
             set
@@ -92,6 +115,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Sets the texture used by the confirmation and cancellation buttons.
+        /// </summary>
         public string ButtonTexture
         {
             set
@@ -101,6 +127,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the bounds of the file navigator and its internal panel.
+        /// </summary>
         public override Vector4 Bounds
         {
             get => panel.Bounds;
@@ -115,8 +144,11 @@ namespace OTK.LiteUI.UI.Components
 
         private bool _refreshPending = false;
 
-        public static bool multiSelect = false;
+        private static bool multiSelect = false;
 
+        /// <summary>
+        /// Gets or sets whether the file navigator and its internal panel are visible.
+        /// </summary>
         public override bool IsVisible
         {
             get => base.IsVisible;
@@ -127,6 +159,11 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Initializes a file navigator on the specified canvas.
+        /// </summary>
+        /// <param name="canvas">The canvas to register the file navigator with.</param>
+        /// <param name="bounds">The bounds of the file navigator.</param>
         public FileNavigator(UICanvas canvas, Vector4 bounds)
         {
             Canvas = canvas;
@@ -202,6 +239,13 @@ namespace OTK.LiteUI.UI.Components
             RefreshCurrentFolder();
         }
 
+        /// <summary>
+        /// Initializes a file navigator on the default canvas.
+        /// </summary>
+        /// <param name="bounds">The bounds of the file navigator.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when no default canvas is assigned.
+        /// </exception>
         public FileNavigator(Vector4 bounds) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds) { }
 
         private void BindQuickAccess(FileReference reference)
@@ -215,6 +259,10 @@ namespace OTK.LiteUI.UI.Components
             };
         }
 
+        /// <summary>
+        /// Navigates to the parent directory of the current directory.
+        /// Does nothing if the current path is empty or has no parent directory.
+        /// </summary>
         public void NavigateUp()
         {
             if (string.IsNullOrEmpty(CurrentPath))
@@ -369,11 +417,23 @@ namespace OTK.LiteUI.UI.Components
             return tcs.Task;
         }
 
+        /// <summary>
+        /// Opens the file picker and asynchronously waits for the user's selection.
+        /// </summary>
+        /// <returns>
+        /// The paths of the selected files, or null if the selection is cancelled.
+        /// </returns>
         public async Task<string[]?> SelectFile()
         {
             return await GetPathFromPicker();
         }
 
+        /// <summary>
+        /// Handles mouse button presses within the file navigator.
+        /// Clears the current selection and focus when the pointer is outside its bounds.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>True if the input was handled by the internal panel.</returns>
         public override bool OnClickDown(MouseState mouse)
         {
             if (!IsVisible || !WithinBounds(mouse))
@@ -385,6 +445,12 @@ namespace OTK.LiteUI.UI.Components
             return panel.OnClickDown(mouse);
         }
 
+        /// <summary>
+        /// Handles mouse button releases within the file navigator.
+        /// Supports selecting multiple files when multi-selection is enabled.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>True if the input was handled.</returns>
         public override bool OnClickUp(MouseState mouse)
         {
             if (!IsVisible || !WithinBounds(mouse)) return false;
@@ -402,6 +468,10 @@ namespace OTK.LiteUI.UI.Components
             return panel.OnClickUp(mouse);
         }
 
+        /// <summary>
+        /// Handles keyboard input, including the modifier key used to enable multi-selection.
+        /// </summary>
+        /// <param name="e">The keyboard event arguments.</param>
         public override void OnKeyDown(KeyboardKeyEventArgs e)
         {
             if (!IsVisible) return;
@@ -421,6 +491,10 @@ namespace OTK.LiteUI.UI.Components
             panel.OnKeyDown(e);
         }
 
+        /// <summary>
+        /// Handles keyboard key releases and disables modifier-based multi-selection when appropriate.
+        /// </summary>
+        /// <param name="e">The keyboard event arguments.</param>
         public override void OnKeyUp(KeyboardKeyEventArgs e)
         {
             if (!IsVisible) return;
@@ -437,25 +511,45 @@ namespace OTK.LiteUI.UI.Components
             panel.OnKeyUp(e);
         }
 
-
+        /// <summary>
+        /// Handles mouse movement within the file navigator.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>True if the input was handled by the internal panel.</returns>
         public override bool OnMouseMove(MouseState mouse)
         {
             if (!IsVisible || !WithinBounds(mouse)) return false;
             return panel.OnMouseMove(mouse);
         }
 
+        /// <summary>
+        /// Handles mouse wheel input within the file navigator.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>True if the input was handled by the internal panel.</returns>
         public override bool OnMouseWheel(MouseState mouse)
         {
             if (!IsVisible || !WithinBounds(mouse)) return false;
             return panel.OnMouseWheel(mouse);
         }
 
+        /// <summary>
+        /// Handles text input and forwards it to the internal panel.
+        /// </summary>
+        /// <param name="e">The text input event arguments.</param>
         public override void OnTextInput(TextInputEventArgs e)
         {
             if (!IsVisible) return;
             panel.OnTextInput(e);
         }
 
+        /// <summary>
+        /// Updates the file navigator and its internal components.
+        /// Processes pending directory refreshes before updating the panel.
+        /// </summary>
+        /// <param name="deltaTime">The elapsed time since the previous update, in seconds.</param>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <param name="keyboard">The current keyboard state.</param>
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
         {
             if (!IsVisible) return;
@@ -467,6 +561,10 @@ namespace OTK.LiteUI.UI.Components
             panel.OnUpdate(deltaTime, mouse, keyboard);
         }
 
+        /// <summary>
+        /// Submits the file navigator's internal panel to the renderer.
+        /// </summary>
+        /// <param name="renderer">The renderer receiving the component's data.</param>
         public void SubmitData(Renderer renderer)
         {
             if (!IsVisible) return;

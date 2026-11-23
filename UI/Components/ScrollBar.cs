@@ -6,8 +6,16 @@ using OTK.LiteUI.UI.Rendering;
 
 namespace OTK.LiteUI.UI.Components
 {
+    /// <summary>
+    /// A scrollbar that supports horizontal and vertical scrolling, with an adjustable thumb
+    /// whose size reflects the visible portion of the content.
+    /// Can be linked to an <see cref="IScrollable"/> component to synchronize its scroll offset.
+    /// </summary>
     public class ScrollBar : NineSlice
     {
+        /// <summary>
+        /// Gets or sets the anchor used by both the scrollbar and its thumb.
+        /// </summary>
         [UIProperty]
         public override AnchorType Anchor
         {
@@ -18,6 +26,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the scrollbar's orientation.
+        /// Automatically determined from the bounds when they are assigned.
+        /// </summary>
         [UIProperty]
         public ComponentOrientation Orientation { get; set; }
 
@@ -25,6 +37,10 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector2 _contentSize = Vector2.One;
 
+        /// <summary>
+        /// Gets or sets the total size of the scrollable content.
+        /// Used with <see cref="ViewSize"/> to determine the thumb size.
+        /// </summary>
         [UIProperty]
         public Vector2 ContentSize
         {
@@ -41,6 +57,10 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector2 _viewSize = Vector2.One;
 
+        /// <summary>
+        /// Gets or sets the size of the visible portion of the content.
+        /// Used with <see cref="ContentSize"/> to determine the thumb size.
+        /// </summary>
         [UIProperty]
         public Vector2 ViewSize
         {
@@ -57,6 +77,9 @@ namespace OTK.LiteUI.UI.Components
 
         private float _value = 0.0f;
 
+        /// <summary>
+        /// Gets or sets the normalized scroll position, clamped between 0 and 1.
+        /// </summary>
         [UIProperty]
         public float Value
         {
@@ -71,6 +94,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Sets the texture used by the scrollbar thumb.
+        /// </summary>
         [UIProperty]
         public string ThumbTexture
         {
@@ -82,6 +108,9 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector4 _thumbColour;
 
+        /// <summary>
+        /// Gets or sets the colour applied to the scrollbar thumb.
+        /// </summary>
         [UIProperty]
         public Vector4 ThumbColour
         {
@@ -95,6 +124,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the scrollbar bounds.
+        /// The orientation is determined by whether the bounds are wider or taller.
+        /// </summary>
         [UIProperty]
         public override Vector4 Bounds
         {
@@ -110,12 +143,18 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// The sensitivity multiplier applied to mouse wheel scrolling.
+        /// </summary>
         public const float scrollSensitivity = 0.4f;
 
         private bool _isPressed = false;
 
         private Vector2 _clickOffset = Vector2.Zero;
 
+        /// <summary>
+        /// Gets or sets whether the scrollbar and its thumb are visible.
+        /// </summary>
         [UIProperty]
         public override bool IsVisible
         {
@@ -131,6 +170,10 @@ namespace OTK.LiteUI.UI.Components
 
         private IScrollable? _scrollingComponent;
 
+        /// <summary>
+        /// Gets or sets the component whose scroll state is synchronized with this scrollbar.
+        /// Assigning a component immediately synchronizes the scrollbar with its current state.
+        /// </summary>
         public IScrollable? ScrollingComponent
         {
             get => _scrollingComponent;
@@ -142,6 +185,14 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Initializes a scrollbar on the specified canvas.
+        /// </summary>
+        /// <param name="canvas">The canvas to register the scrollbar with.</param>
+        /// <param name="bounds">The bounds of the scrollbar.</param>
+        /// <param name="inset">The corner inset of the scrollbar background.</param>
+        /// <param name="uvInset">The texture coordinate inset of the scrollbar background.</param>
+        /// <param name="colour">The base colour of the scrollbar background.</param>
         public ScrollBar(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
             Canvas = canvas;
@@ -152,6 +203,16 @@ namespace OTK.LiteUI.UI.Components
             if (GetType() == typeof(ScrollBar)) Identifier = Canvas.GetNextIdentifier(typeof(ScrollBar));
         }
 
+        /// <summary>
+        /// Initializes a scrollbar on the default canvas.
+        /// </summary>
+        /// <param name="bounds">The bounds of the scrollbar.</param>
+        /// <param name="inset">The corner inset of the scrollbar background.</param>
+        /// <param name="uvInset">The texture coordinate inset of the scrollbar background.</param>
+        /// <param name="colour">The base colour of the scrollbar background.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when no default canvas is assigned.
+        /// </exception>
         public ScrollBar(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, inset, uvInset, colour) { }
 
         private void SyncFromScrollable()
@@ -168,7 +229,7 @@ namespace OTK.LiteUI.UI.Components
             Value = maxOffset > 0 ? currentOffset / maxOffset : 0;
         }
 
-        public void Refresh()
+        private void Refresh()
         {
             if (ScrollingComponent is null) return;
 
@@ -229,6 +290,12 @@ namespace OTK.LiteUI.UI.Components
             _thumb.Bounds = new Vector4(x - halfThumbSize.X, y - halfThumbSize.Y, x + halfThumbSize.X, y + halfThumbSize.Y);
         }
 
+        /// <summary>
+        /// Handles mouse button presses, allowing the thumb to be dragged or the track
+        /// to be clicked to change the scroll position.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>Whether the scrollbar handled the press.</returns>
         public override bool OnClickDown(MouseState mouse)
         {
             if (!IsVisible) return false;
@@ -261,6 +328,11 @@ namespace OTK.LiteUI.UI.Components
             return _isPressed;
         }
 
+        /// <summary>
+        /// Updates the thumb position while it is being dragged.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>Whether the scrollbar is handling the mouse movement.</returns>
         public override bool OnMouseMove(MouseState mouse)
         {
             if (_isPressed)
@@ -282,6 +354,10 @@ namespace OTK.LiteUI.UI.Components
             return base.OnMouseMove(mouse);
         }
 
+        /// <summary>
+        /// Updates the thumb position while dragging without consuming the mouse movement, regardless of if it hits something.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
         public override void OnMouseMoveNoConsume(MouseState mouse)
         {
             if (_isPressed)
@@ -302,6 +378,11 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Ends thumb dragging and resets the drag offset.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>The result of the base click-release handler.</returns>
         public override bool OnClickUp(MouseState mouse)
         {
             _isPressed = false;
@@ -309,6 +390,10 @@ namespace OTK.LiteUI.UI.Components
             return base.OnClickUp(mouse);
         }
 
+        /// <summary>
+        /// Ends thumb dragging without consuming the click release, regardless of if it hits something.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
         public override void OnClickUpNoConsume(MouseState mouse)
         {
             _isPressed = false;
@@ -316,6 +401,11 @@ namespace OTK.LiteUI.UI.Components
             base.OnClickUpNoConsume(mouse);
         }
 
+        /// <summary>
+        /// Changes the scroll position using the mouse wheel when the pointer is over the scrollbar.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>Whether the scrollbar handled the wheel input.</returns>
         public override bool OnMouseWheel(MouseState mouse)
         {
             if (!IsVisible) return false;
@@ -338,6 +428,11 @@ namespace OTK.LiteUI.UI.Components
             return false;
         }
 
+        /// <summary>
+        /// Synchronizes the scrollbar with its associated component when the pointer is
+        /// over that component, without consuming the mouse wheel input.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
         public override void OnMouseWheelNoConsume(MouseState mouse)
         {
             if (!IsVisible) return;
@@ -348,6 +443,13 @@ namespace OTK.LiteUI.UI.Components
             base.OnMouseWheelNoConsume(mouse);
         }
 
+        /// <summary>
+        /// Updates the thumb appearance, synchronizes the scroll position, and handles
+        /// the release of the left mouse button.
+        /// </summary>
+        /// <param name="deltaTime">The elapsed time since the previous update.</param>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <param name="keyboard">The current keyboard state.</param>
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
         {
             _thumb.Colour = _thumbColour * (_isPressed ? 0.5f : 1.0f);
@@ -360,6 +462,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Submits the scrollbar background and thumb render data to the renderer.
+        /// </summary>
+        /// <param name="renderer">The renderer receiving the scrollbar data.</param>
         public override void SubmitData(Renderer renderer)
         {
             if (!IsVisible || Colour.W <= 0) return;

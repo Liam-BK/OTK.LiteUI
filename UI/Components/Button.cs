@@ -6,10 +6,19 @@ using OTK.LiteUI.UI.Rendering;
 
 namespace OTK.LiteUI.UI.Components
 {
+    /// <summary>
+    /// A clickable UI component with a nine-slice background, text label, hover effects, and optional page navigation.
+    /// </summary>
     public class Button : NineSlice, ILinkable
     {
+        /// <summary>
+        /// The label displayed within the button.
+        /// </summary>
         protected Label label;
 
+        /// <summary>
+        /// The text displayed on the button.
+        /// </summary>
         [UIProperty]
         public string Text
         {
@@ -23,6 +32,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// The bounds of the button's text label.
+        /// </summary>
         public Vector4 TextBounds
         {
             get
@@ -31,18 +43,28 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// The duration, in seconds, of the button's hover colour transition.
+        /// </summary>
         public float TimeToRollover = 0.2f;
 
         private float _rolloverValue = 0;
 
         private bool _isHovered = false;
 
+        /// <summary>
+        /// The current progress of the hover colour transition, ranging from 0 to 1.
+        /// </summary>
         protected float RolloverValue
         {
             get => _rolloverValue;
             set => _rolloverValue = value;
         }
 
+        /// <summary>
+        /// Gets or sets whether the button is visible.
+        /// Also updates the visibility of its text label.
+        /// </summary>
         [UIProperty]
         public override bool IsVisible
         {
@@ -55,6 +77,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the button's anchor.
+        /// The text label's anchor is updated to match.
+        /// </summary>
         [UIProperty]
         public override AnchorType Anchor
         {
@@ -68,6 +94,9 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector4 _rolloverColour = new Vector4(0.75f, 0.75f, 0.75f, 1);
 
+        /// <summary>
+        /// Sets the colour used when the button is hovered.
+        /// </summary>
         [UIProperty]
         public Vector4 RolloverColour
         {
@@ -77,6 +106,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Sets the colour of the button's text.
+        /// </summary>
         [UIProperty]
         public Vector4 TextColour
         {
@@ -86,10 +118,16 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Whether the button is currently pressed.
+        /// </summary>
         public bool isPressed = false;
 
         private Vector4 _baseColour;
 
+        /// <summary>
+        /// Gets or sets the button's base colour.
+        /// </summary>
         [UIProperty]
         public override Vector4 Colour
         {
@@ -100,6 +138,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the button's bounds.
+        /// Updating the bounds also repositions and resizes its text label.
+        /// </summary>
         [UIProperty]
         public override Vector4 Bounds
         {
@@ -121,6 +163,9 @@ namespace OTK.LiteUI.UI.Components
 
         private string _pageLink = "";
 
+        /// <summary>
+        /// Gets or sets the identifier of the page to set visible when clicked.
+        /// </summary>
         [UIProperty]
         public string PageLink
         {
@@ -134,17 +179,42 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Whether the parent page should be hidden when the button navigates to another page.
+        /// Defaults to true.
+        /// </summary>
         [UIProperty]
         public bool HideParentPageOnClick { get; set; } = true;
 
+        /// <summary>
+        /// Occurs when a mouse button is pressed while the pointer is over the button.
+        /// </summary>
         public event Action<MouseButton>? OnPointerDown;
 
+        /// <summary>
+        /// Occurs when a mouse button is released while the button is pressed.
+        /// </summary>
         public event Action<MouseButton>? OnClick;
 
+        /// <summary>
+        /// Occurs when the pointer enters the button's bounds.
+        /// </summary>
         public event Action? OnHoverEnter;
 
+        /// <summary>
+        /// Occurs when the pointer leaves the button's bounds.
+        /// </summary>
         public event Action? OnHoverExit;
 
+        /// <summary>
+        /// Initializes a button on the specified canvas.
+        /// </summary>
+        /// <param name="canvas">The canvas to register the button with.</param>
+        /// <param name="bounds">The bounds of the button.</param>
+        /// <param name="text">The text displayed on the button.</param>
+        /// <param name="inset">The nine-slice inset.</param>
+        /// <param name="uvInset">The texture coordinate inset.</param>
+        /// <param name="colour">The button's initial colour. Defaults to white.</param>
         public Button(UICanvas canvas, Vector4 bounds, string text = "", float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
             _baseColour = colour ?? Vector4.One;
@@ -155,8 +225,24 @@ namespace OTK.LiteUI.UI.Components
             if (GetType() == typeof(Button)) Identifier = Canvas.GetNextIdentifier(typeof(Button));
         }
 
+        /// <summary>
+        /// Initializes a button on the default canvas.
+        /// </summary>
+        /// <param name="bounds">The bounds of the button.</param>
+        /// <param name="text">The text displayed on the button.</param>
+        /// <param name="inset">The nine-slice inset.</param>
+        /// <param name="uvInset">The texture coordinate inset.</param>
+        /// <param name="colour">The button's initial colour. Defaults to white.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when no default canvas is assigned.
+        /// </exception>
         public Button(Vector4 bounds, string text = "", float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, text, inset, uvInset, colour) { }
 
+        /// <summary>
+        /// Handles mouse button presses, raising <see cref="OnPointerDown"/> when the pointer is within the button.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>True if the button was pressed.</returns>
         public override bool OnClickDown(MouseState mouse)
         {
             if (!IsVisible) return false;
@@ -176,6 +262,11 @@ namespace OTK.LiteUI.UI.Components
             return isPressed;
         }
 
+        /// <summary>
+        /// Updates the button's hover state and raises the appropriate hover event when it changes.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>Whether the button remains pressed.</returns>
         public override bool OnMouseMove(MouseState mouse)
         {
             if (!IsVisible) return false;
@@ -205,6 +296,11 @@ namespace OTK.LiteUI.UI.Components
             return isPressed;
         }
 
+        /// <summary>
+        /// Handles mouse button releases, raising <see cref="OnClick"/> and performing page navigation when applicable.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>True if a click was handled.</returns>
         public override bool OnClickUp(MouseState mouse)
         {
             if (!IsVisible) return false;
@@ -238,6 +334,12 @@ namespace OTK.LiteUI.UI.Components
             return false;
         }
 
+        /// <summary>
+        /// Updates the button's hover transition and pressed-state appearance.
+        /// </summary>
+        /// <param name="deltaTime">The elapsed time since the previous update, in seconds.</param>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <param name="keyboard">The current keyboard state.</param>
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
         {
             if (!IsVisible) return;
@@ -256,6 +358,10 @@ namespace OTK.LiteUI.UI.Components
             ForceUpdateQuadrantColours(lerpColour * multiplier);
         }
 
+        /// <summary>
+        /// Submits the button's background and text label to the renderer.
+        /// </summary>
+        /// <param name="renderer">The renderer receiving the button's data.</param>
         public override void SubmitData(Renderer renderer)
         {
             if (!IsVisible || Colour.W <= 0) return;

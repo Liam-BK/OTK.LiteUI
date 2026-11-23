@@ -9,18 +9,34 @@ using OTK.LiteUI.Core;
 using OTK.LiteUI.UI.Rendering;
 using OTK.LiteUI.UI.Utilities;
 
+/// <summary>
+/// Specifies whether a text field accepts single-line or multiline text.
+/// </summary>
 public enum TextFieldMode
 {
+    /// <summary>
+    /// Restricts text input to a single line.
+    /// </summary>
     SingleLine,
+    /// <summary>
+    /// Allows text input across multiple lines.
+    /// </summary>
     MultiLine
 }
 
 namespace OTK.LiteUI.UI.Components
 {
+    /// <summary>
+    /// An editable text field supporting text input, caret movement, text selection,
+    /// and scrolling. Supports both single-line and multiline editing.
+    /// </summary>
     public class TextField : NineSlice, IScrollable
     {
         protected readonly Label label;
 
+        /// <summary>
+        /// Gets or sets the anchor used by the text field and its text label.
+        /// </summary>
         [UIProperty]
         public override AnchorType Anchor
         {
@@ -31,6 +47,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the text displayed and edited by the text field.
+        /// Raises <see cref="OnTextChanged"/> when the text changes.
+        /// </summary>
         [UIProperty]
         public string Text
         {
@@ -46,6 +66,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets the bounds of the text label.
+        /// </summary>
         public Vector4 TextBounds
         {
             get
@@ -54,6 +77,10 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets the clipping bounds applied to the text label.
+        /// Returns <see cref="Vector4.Zero"/> when no clipping bounds are assigned.
+        /// </summary>
         public Vector4 LabelClipBounds
         {
             get
@@ -68,6 +95,12 @@ namespace OTK.LiteUI.UI.Components
 
         private TextFieldMode _mode = TextFieldMode.MultiLine;
 
+        /// <summary>
+        /// Gets or sets the editing mode of the text field.
+        /// </summary>
+        /// <remarks>
+        /// The mode cannot be changed when <c>LockMode</c> is enabled by a derived component.
+        /// </remarks>
         [UIProperty]
         public TextFieldMode Mode
         {
@@ -81,6 +114,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets the dimensions of the caret.
+        /// </summary>
         public Vector2 CaretSize
         {
             get
@@ -89,6 +125,9 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the colour of the caret.
+        /// </summary>
         [UIProperty]
         public Vector4 CaretColour
         {
@@ -125,6 +164,9 @@ namespace OTK.LiteUI.UI.Components
             get => GlobalCaretIndex <= GlobalAnchorIndex ? GlobalCaretIndex : GlobalAnchorIndex;
         }
 
+        /// <summary>
+        /// Gets the visible text viewport, excluding the field's inset.
+        /// </summary>
         public Vector4 ViewPort
         {
             get
@@ -133,6 +175,11 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets or sets the bounds of the text field.
+        /// Updating the bounds also updates the text clipping area, text sizing,
+        /// and caret dimensions and position.
+        /// </summary>
         [UIProperty]
         public override Vector4 Bounds
         {
@@ -160,6 +207,9 @@ namespace OTK.LiteUI.UI.Components
 
         private const float defaultTextSize = 25.0f;
 
+        /// <summary>
+        /// Gets or sets the size of the displayed text.
+        /// </summary>
         [UIProperty]
         public float TextSize
         {
@@ -177,8 +227,14 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Gets whether the text field can receive keyboard focus.
+        /// </summary>
         public override bool CanFocus => true;
 
+        /// <summary>
+        /// Gets the maximum horizontal and vertical scroll offsets.
+        /// </summary>
         public Vector2 MaxScroll
         {
             get
@@ -191,6 +247,12 @@ namespace OTK.LiteUI.UI.Components
 
         private Vector2 _scrollOffset = Vector2.Zero;
 
+
+        /// <summary>
+        /// Gets or sets the current horizontal and vertical scroll offsets.
+        /// The offsets are clamped to the available scroll range.
+        /// Vertical scrolling is disabled in single-line mode.
+        /// </summary>
         public Vector2 ScrollOffset
         {
             get
@@ -207,6 +269,9 @@ namespace OTK.LiteUI.UI.Components
 
         private bool _caretVisible = false;
 
+        /// <summary>
+        /// Gets whether the caret is currently visible within the text field's viewport.
+        /// </summary>
         public bool CaretVisible
         {
             get
@@ -220,11 +285,23 @@ namespace OTK.LiteUI.UI.Components
 
         private float _caretBlinkAccumulation = 0;
 
+        /// <summary>
+        /// Gets or sets the caret's horizontal character index within the current line.
+        /// </summary>
         public int caretIndex = 0;
+
+        /// <summary>
+        /// Gets or sets the zero-based index of the line containing the caret.
+        /// </summary>
         public int caretLine = 0;
+
+        /// <summary>
+        /// Gets the preferred horizontal caret position used when navigating between lines.
+        /// </summary>
         public int desiredColumn = 0;
 
         protected int selectionAnchorIndex = 0;
+
         protected int selectionAnchorLine = 0;
 
         private bool IsSelecting
@@ -239,8 +316,14 @@ namespace OTK.LiteUI.UI.Components
             get => Math.Abs(GlobalAnchorIndex - GlobalCaretIndex);
         }
 
+        /// <summary>
+        /// Gets the text label's origin position.
+        /// </summary>
         public Vector2 GetTextPos { get => label.Origin; }
 
+        /// <summary>
+        /// Gets or sets whether the text field and its label are visible.
+        /// </summary>
         [UIProperty]
         public override bool IsVisible
         {
@@ -252,12 +335,30 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
+        /// <summary>
+        /// Occurs when Enter is pressed while editing the text field.
+        /// </summary>
         public event Action? OnEnterPressed;
+
+        /// <summary>
+        /// Occurs when the text field's text changes.
+        /// </summary>
         public event Action? OnTextChanged;
 
+        /// <summary>
+        /// Gets or sets whether the text size automatically adjusts to the field's bounds.
+        /// </summary>
         [UIProperty]
         public bool AutoScaleTextByBounds { get; set; } = false;
 
+        /// <summary>
+        /// Initializes a text field on the specified canvas.
+        /// </summary>
+        /// <param name="canvas">The canvas to register the text field with.</param>
+        /// <param name="bounds">The bounds of the text field.</param>
+        /// <param name="inset">The inset between the text and the field's edges.</param>
+        /// <param name="uvInset">The texture coordinate inset of the background.</param>
+        /// <param name="colour">The background colour of the text field.</param>
         public TextField(UICanvas canvas, Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : base(canvas, bounds, inset, uvInset, colour)
         {
             this.Canvas = canvas;
@@ -277,6 +378,16 @@ namespace OTK.LiteUI.UI.Components
             if (GetType() == typeof(TextField)) Identifier = Canvas.GetNextIdentifier(typeof(TextField));
         }
 
+        /// <summary>
+        /// Initializes a text field on the default canvas.
+        /// </summary>
+        /// <param name="bounds">The bounds of the text field.</param>
+        /// <param name="inset">The inset between the text and the field's edges.</param>
+        /// <param name="uvInset">The texture coordinate inset of the background.</param>
+        /// <param name="colour">The background colour of the text field.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when no default canvas is assigned.
+        /// </exception>
         public TextField(Vector4 bounds, float inset = 10, float uvInset = 0.25F, Vector4? colour = null) : this(UICanvas.Default ?? throw new InvalidOperationException("Default Canvas must not be null for this Constructor. Try Creating a new UICanvas or assigning a UICanvas instance to UICanvas.Default"), bounds, inset, uvInset, colour) { }
 
         private void UpdateLabelOrigin()
@@ -577,6 +688,10 @@ namespace OTK.LiteUI.UI.Components
             return temp;
         }
 
+        /// <summary>
+        /// Inserts the entered character at the caret position, replacing any selected text.
+        /// </summary>
+        /// <param name="e">The text input event.</param>
         public override void OnTextInput(TextInputEventArgs e)
         {
             if (!IsVisible || !IsFocused) return;
@@ -599,6 +714,12 @@ namespace OTK.LiteUI.UI.Components
             SetCaretVisible();
         }
 
+        /// <summary>
+        /// Handles keyboard input for text editing, caret navigation, selection, and shortcuts.
+        /// In multiline mode, Enter inserts a newline; in single-line mode, it releases focus
+        /// and raises <see cref="OnEnterPressed"/>.
+        /// </summary>
+        /// <param name="e">The keyboard event.</param>
         public override void OnKeyDown(KeyboardKeyEventArgs e)
         {
             if (!IsVisible || !IsFocused) return;
@@ -670,6 +791,15 @@ namespace OTK.LiteUI.UI.Components
             SetCaretVisible();
         }
 
+        /// <summary>
+        /// Scrolls the text when the pointer is over the field and scrolling can continue
+        /// in the requested direction.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>
+        /// <see langword="true"/> if the text field consumes the scroll input; otherwise,
+        /// <see langword="false"/>.
+        /// </returns>
         public override bool OnMouseWheel(MouseState mouse)
         {
             if (!WithinBounds(mouse) || !IsVisible) return base.OnMouseWheel(mouse);
@@ -710,6 +840,13 @@ namespace OTK.LiteUI.UI.Components
             return false;
         }
 
+        /// <summary>
+        /// Sets keyboard focus and positions the caret at the pointer location.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>
+        /// <see langword="true"/> if the pointer is within the visible text field.
+        /// </returns>
         public override bool OnClickDown(MouseState mouse)
         {
             if (!WithinBounds(mouse) || !IsVisible)
@@ -731,6 +868,15 @@ namespace OTK.LiteUI.UI.Components
             return true;
         }
 
+        /// <summary>
+        /// Updates the caret position while the pointer is dragged across the text field.
+        /// Sets the mouse cursor to an I-beam when hovering over the field.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>
+        /// <see langword="true"/> if the pointer is being used to select text; otherwise,
+        /// the result of the base implementation.
+        /// </returns>
         public override bool OnMouseMove(MouseState mouse)
         {
             if (IsVisible && WithinBounds(mouse))
@@ -750,12 +896,26 @@ namespace OTK.LiteUI.UI.Components
             return base.OnMouseMove(mouse);
         }
 
+        /// <summary>
+        /// Ends the current pointer selection operation.
+        /// </summary>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <returns>
+        /// <see langword="true"/> if the pointer is within the visible text field.
+        /// </returns>
         public override bool OnClickUp(MouseState mouse)
         {
             IsClicked = false;
             return WithinBounds(mouse) && IsVisible;
         }
 
+        /// <summary>
+        /// Updates caret blinking and adjusts the caret position while selecting text
+        /// beyond the text field's viewport.
+        /// </summary>
+        /// <param name="deltaTime">The elapsed time since the previous update.</param>
+        /// <param name="mouse">The current mouse state.</param>
+        /// <param name="keyboard">The current keyboard state.</param>
         public override void OnUpdate(float deltaTime, MouseState mouse, KeyboardState keyboard)
         {
             base.OnUpdate(deltaTime, mouse, keyboard);
@@ -793,6 +953,11 @@ namespace OTK.LiteUI.UI.Components
             UpdateBlinkTime(deltaTime);
         }
 
+        /// <summary>
+        /// Submits the text field background, text, selection highlight, and visible caret
+        /// to the renderer.
+        /// </summary>
+        /// <param name="renderer">The renderer receiving the text field data.</param>
         public override void SubmitData(Renderer renderer)
         {
             if (!IsVisible) return;
