@@ -663,7 +663,7 @@ namespace OTK.LiteUI.Core
     }
 
     /// <summary>
-    /// Represents an error that occurs when a UI component cannot be found during a Get<t>() operation or does not match the expected type.
+    /// Represents an error that occurs when a UI component cannot be found during a Get&lt;T&gt;() operation or does not match the expected type.
     /// </summary>
     public class UIComponentNotFoundException : Exception
     {

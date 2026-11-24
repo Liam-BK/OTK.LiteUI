@@ -140,8 +140,6 @@ namespace OTK.LiteUI.UI.Components
             }
         }
 
-        private bool _isInitialized = false;
-
         private bool _refreshPending = false;
 
         private static bool multiSelect = false;
@@ -235,7 +233,6 @@ namespace OTK.LiteUI.UI.Components
             BindQuickAccess(videos);
             QuickAccess.AddChild(null);
             QuickAccess.AddChild(totalItems);
-            _isInitialized = true;
             RefreshCurrentFolder();
         }
 
