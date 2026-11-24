@@ -4,34 +4,77 @@ using OTK.LiteUI.UI.Utilities;
 
 namespace OTK.LiteUI.UI.Rendering
 {
+    /// <summary>
+    /// Represents a GPU mesh containing vertex and index buffers, with a
+    /// vertex array object describing its vertex attribute layout.
+    /// Supports loading mesh data from 3D model files.
+    /// </summary>
     public class Mesh : IDisposable
     {
+        /// <summary>
+        /// Specifies the type and component count of a vertex attribute.
+        /// </summary>
         public enum VertexAttribType
         {
+            /// <summary>A two-component vertex position.</summary>
             Position2,
+            /// <summary>A three-component vertex position.</summary>
             Position3,
+            /// <summary>A two-component texture coordinate.</summary>
             TexCoords2,
+            /// <summary>A three-component vertex normal.</summary>
             Normal3,
+            /// <summary>A tangent attribute with three stored components.</summary>
             Tangent4,
+            /// <summary>Four bone indices.</summary>
             WeightIndices4,
+            /// <summary>Four bone weights.</summary>
             Weight4,
+            /// <summary>A three-component vertex colour.</summary>
             Color3,
+            /// <summary>A four-component vertex colour.</summary>
             Color4,
+            /// <summary>A single floating-point value.</summary>
             Single,
+            /// <summary>A two-component vector.</summary>
             Vec2,
+            /// <summary>A three-component vector.</summary>
             Vec3,
+            /// <summary>A four-component vector.</summary>
             Vec4,
+            /// <summary>A four-by-four matrix.</summary>
             Mat4
         }
 
+        /// <summary>The OpenGL vertex array object handle.</summary>
         public int VAO { get; private set; }
+
+        /// <summary>The OpenGL vertex buffer object handle.</summary>
         public int VBO { get; private set; }
+
+        /// <summary>The OpenGL element buffer object handle.</summary>
         public int EBO { get; private set; }
+
+        /// <summary>The number of vertices in the mesh.</summary>
         public int VertexCount { get; private set; }
+
+        /// <summary>The number of indices in the mesh.</summary>
         public int IndexCount { get; private set; }
+
+        /// <summary>The number of triangular faces in the mesh.</summary>
         public int FaceCount { get; private set; }
+
+        /// <summary>The number of vertex attributes in the layout.</summary>
         public int VertexAttributeCount { get; private set; }
 
+        /// <summary>
+        /// Creates a mesh from vertex and index data using the specified vertex layout.
+        /// Uploads the data to GPU buffers and configures the vertex array object.
+        /// </summary>
+        /// <param name="vertexData">The interleaved vertex attribute data.</param>
+        /// <param name="indices">The indices defining the mesh's triangular faces.</param>
+        /// <param name="vertexLayout">The ordered vertex attribute layout.</param>
+        /// <param name="hint">The expected usage pattern of the GPU buffers.</param>
         public Mesh(float[] vertexData, int[] indices, VertexAttribType[] vertexLayout, BufferUsageHint hint = BufferUsageHint.StaticDraw)
         {
             VertexAttributeCount = vertexLayout.Length;
@@ -69,6 +112,16 @@ namespace OTK.LiteUI.UI.Rendering
             GL.BindVertexArray(0);
         }
 
+        /// <summary>
+        /// Loads a mesh from a 3D model file and uploads its geometry to the GPU.
+        /// Imports the selected mesh with triangulation and vertex processing enabled.
+        /// </summary>
+        /// <param name="path">The path to the model file.</param>
+        /// <param name="sceneMeshIndex">The index of the mesh within the imported scene.</param>
+        /// <returns>The loaded mesh.</returns>
+        /// <exception cref="FileNotFoundException">
+        /// Thrown if the model file cannot be found.
+        /// </exception>
         public static Mesh Load(string path, int sceneMeshIndex = 0)
         {
             var stream = ResourceIO.GetLoadingStream(path);
@@ -159,6 +212,14 @@ namespace OTK.LiteUI.UI.Rendering
             return new Mesh(vertices.ToArray(), indices.ToArray(), vertexLayout.ToArray());
         }
 
+        /// <summary>
+        /// Gets the number of floating-point components used by the specified vertex attribute.
+        /// </summary>
+        /// <param name="type">The vertex attribute type.</param>
+        /// <returns>The number of components occupied by the attribute.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown if the attribute type is unsupported.
+        /// </exception>
         public static int GetVertexAttribSize(VertexAttribType type) => type switch
         {
             VertexAttribType.Position2 => 2,
@@ -178,9 +239,19 @@ namespace OTK.LiteUI.UI.Rendering
             _ => throw new ArgumentOutOfRangeException()
         };
 
+        /// <summary>
+        /// Binds this mesh's vertex array object.
+        /// </summary>
         public void Bind() => GL.BindVertexArray(VAO);
+
+        /// <summary>
+        /// Unbinds the currently bound vertex array object.
+        /// </summary>
         public void UnBind() => GL.BindVertexArray(0);
 
+        /// <summary>
+        /// Disposes of the mesh's OpenGL buffers and vertex array object.
+        /// </summary>
         public void Dispose()
         {
             GL.DeleteBuffer(VBO);

@@ -1,10 +1,15 @@
 using System.Xml.Linq;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
+using OTK.LiteUI.UI.Rendering.Backend;
 using OTK.LiteUI.UI.Utilities;
 
 namespace OTK.LiteUI.UI.Rendering
 {
+    /// <summary>
+    /// Represents a rendering material containing a shader program, configurable
+    /// uniform values, and OpenGL render state settings.
+    /// </summary>
     public class Material
     {
         private Shader? shader = null;
@@ -16,12 +21,33 @@ namespace OTK.LiteUI.UI.Rendering
         private Dictionary<string, Vector4> _vec4Uniforms = new Dictionary<string, Vector4>();
         private Dictionary<string, Matrix4> _matrix4Uniforms = new Dictionary<string, Matrix4>();
 
+        /// <summary>
+        /// Whether depth testing is enabled when the material is bound.
+        /// </summary>
         public bool DepthTest = true;
+
+        /// <summary>
+        /// Whether alpha blending is enabled when the material is bound.
+        /// </summary>
         public bool Blending = false;
+
+        /// <summary>
+        /// Whether face culling is enabled when the material is bound.
+        /// </summary>
         public bool CullFace = true;
 
         private readonly int MaxUnits = GL.GetInteger(GetPName.MaxTextureImageUnits);
 
+        /// <summary>
+        /// Loads a material definition from an XML file, including its shaders,
+        /// render state settings, and referenced textures.
+        /// </summary>
+        /// <param name="path">The path to the material definition file.</param>
+        /// <param name="manager">The texture manager used to load referenced textures.</param>
+        /// <returns>The loaded material.</returns>
+        /// <exception cref="FileNotFoundException">
+        /// Thrown if the material definition file cannot be found.
+        /// </exception>
         public static Material Load(string path, TextureManager manager)
         {
             XDocument doc = XDocument.Load(ResourceIO.GetLoadingStream(path) ?? throw new FileNotFoundException($"Path {path} not found. Make sure the name of the file is correct prior to loading."));
@@ -72,41 +98,83 @@ namespace OTK.LiteUI.UI.Rendering
             return material;
         }
 
+        /// <summary>
+        /// Sets a floating-point uniform value.
+        /// </summary>
+        /// <param name="name">The uniform name.</param>
+        /// <param name="value">The value to assign.</param>
         public void SetFloat(string name, float value)
         {
             _floatUniforms[name] = value;
         }
 
+        /// <summary>
+        /// Sets an integer uniform value.
+        /// </summary>
+        /// <param name="name">The uniform name.</param>
+        /// <param name="value">The value to assign.</param>
         public void SetInteger(string name, int value)
         {
             _intUniforms[name] = value;
         }
 
+        /// <summary>
+        /// Sets a Vector2 uniform value.
+        /// </summary>
+        /// <param name="name">The uniform name.</param>
+        /// <param name="value">The value to assign.</param>
         public void SetVector2(string name, Vector2 value)
         {
             _vec2Uniforms[name] = value;
         }
 
+        /// <summary>
+        /// Sets a Vector3 uniform value.
+        /// </summary>
+        /// <param name="name">The uniform name.</param>
+        /// <param name="value">The value to assign.</param>
         public void SetVector3(string name, Vector3 value)
         {
             _vec3Uniforms[name] = value;
         }
 
+        /// <summary>
+        /// Sets a Vector4 uniform value.
+        /// </summary>
+        /// <param name="name">The uniform name.</param>
+        /// <param name="value">The value to assign.</param>
         public void SetVector4(string name, Vector4 value)
         {
             _vec4Uniforms[name] = value;
         }
 
+        /// <summary>
+        /// Sets a Matrix4 uniform value.
+        /// </summary>
+        /// <param name="name">The uniform name.</param>
+        /// <param name="value">The value to assign.</param>
         public void SetMatrix4(string name, Matrix4 value)
         {
             _matrix4Uniforms[name] = value;
         }
 
+        /// <summary>
+        /// Determines whether a Matrix4 uniform with the specified name has been assigned.
+        /// </summary>
+        /// <param name="name">The uniform name to check.</param>
+        /// <returns><see langword="true"/> if a value has been assigned; otherwise, <see langword="false"/>.</returns>
         public bool Matrix4Exists(string name)
         {
             return _matrix4Uniforms.ContainsKey(name);
         }
 
+        /// <summary>
+        /// Uploads the stored uniform values to the material's shader program.
+        /// </summary>
+        /// <param name="transpose">Whether matrix values should be transposed when uploaded.</param>
+        /// <exception cref="MissingMemberException">
+        /// Thrown if the material has no initialized shader.
+        /// </exception>
         public void UpdateUniforms(bool transpose = false)
         {
             if (shader is null) throw new MissingMemberException("Shader has not been initialized");
@@ -129,6 +197,14 @@ namespace OTK.LiteUI.UI.Rendering
             }
         }
 
+        /// <summary>
+        /// Binds the material's shader, applies its render state settings,
+        /// and binds the texture array to texture unit zero.
+        /// </summary>
+        /// <param name="textureManager">The texture manager providing the texture array.</param>
+        /// <exception cref="MissingMemberException">
+        /// Thrown if the material has no initialized shader.
+        /// </exception>
         public void Bind(TextureManager textureManager)
         {
             if (shader is null) throw new MissingMemberException("Shader has not been initialized so it cannot be bound.");
