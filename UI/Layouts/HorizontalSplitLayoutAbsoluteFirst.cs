@@ -44,7 +44,12 @@ namespace OTK.LiteUI.Layouts
 
             float viewportWidth = viewport.Z - viewport.X;
             float viewportHeight = viewport.W - viewport.Y;
-            float totalPadding = MathF.Max(0, elements.Count - 1) * Padding;
+            float invisibleElements = 0;
+            foreach (var element in elements)
+            {
+                if (!element.IsVisible) invisibleElements++;
+            }
+            float totalPadding = MathF.Max(0, elements.Count - invisibleElements - 1) * Padding;
             float availableWidth = viewportWidth - AbsoluteWidth - totalPadding;
 
             for (int i = 0; i < elements.Count; i++)

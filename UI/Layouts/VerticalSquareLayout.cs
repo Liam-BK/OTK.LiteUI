@@ -44,12 +44,17 @@ namespace OTK.LiteUI.Layouts
             float startTop = viewport.W;
             float elementWidth = (viewport.Z - viewport.X - Padding * Math.Max(Columns - 1, 0)) / Columns;
             float elementHeight = elementWidth;
+            int skipCount = 0;
 
             for (int i = 0; i < elements.Count; i++)
             {
-                if (!elements[i].IsVisible) continue;
-                int column = i % Columns;
-                int row = i / Columns;
+                if (!elements[i].IsVisible)
+                {
+                    skipCount++;
+                    continue;
+                }
+                int column = (i - skipCount) % Columns;
+                int row = (i - skipCount) / Columns;
                 float left = startLeft + column * (elementWidth + Padding);
                 float right = left + elementWidth;
                 float top = startTop - row * (elementHeight + Padding);
