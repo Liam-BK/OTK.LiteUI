@@ -30,7 +30,7 @@ namespace OTK.LiteUI.Layouts
         /// <summary>
         /// Creates a vertical layout with the specified element height and spacing.
         /// </summary>
-        /// <param name="elementSize">The height assigned to each element.</param>
+        /// <param name="elementHeight">The height assigned to each element.</param>
         /// <param name="padding">The spacing between elements.</param>
         public VerticalLayout(float elementHeight, float padding)
         {

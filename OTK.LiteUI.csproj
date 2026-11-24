@@ -15,9 +15,11 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-
+    <PackageProjectUrl>https://github.com/Liam-BK/OTK.LiteUI</PackageProjectUrl>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,7 +28,7 @@
     <PackageReference Include="StbImageSharp" Version="2.30.15" />
     <PackageReference Include="StbTrueTypeSharp" Version="1.26.12" />
     <PackageReference Include="Syntellect.Typography.OpenFont.Net6" Version="1.0.0" />
-    <None Include="README.md" Pack="true" PackagePath=""/>
+    <None Include="Docs/README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

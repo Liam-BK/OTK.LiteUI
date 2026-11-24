@@ -16,9 +16,9 @@ namespace OTK.LiteUI.UI.Rendering
         /// </summary>
         public enum VertexAttribType
         {
-            /// <summary>A two-component vertex position.</summary>
+            /// <summary>An arbitrary two-component vertex position.</summary>
             Position2,
-            /// <summary>A three-component vertex position.</summary>
+            /// <summary>An arbitrary three-component vertex position.</summary>
             Position3,
             /// <summary>A two-component texture coordinate.</summary>
             TexCoords2,

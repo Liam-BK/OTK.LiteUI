@@ -65,10 +65,10 @@ namespace OTK.LiteUI.UI.Rendering.Backend
         /// <summary>
         /// Generates relevant FontData based on the provided parameters and stores it for access by Label.
         /// </summary>
+        /// <param name="manager">The TextureManager that handles the generated font atlas.</param>
         /// <param name="filePath">The path to the .ttf font file you want to load.</param>
         /// <param name="fontSize">The desired pixel height of each glyph when baked.</param>
-        /// <param name="atlasWidth">The total width in pixels of the generated font atlas texture.</param>
-        /// <param name="atlasHeight">The total height in pixels of the generated font atlas texture.</param>
+        /// <param name="resolution">The total width and height in pixels of the generated font atlas texture.</param>
         /// <param name="firstChar">The first Unicode character to include in the generated font atlas. 
         /// Only characters from firstChar to lastChar (inclusive) will be baked.</param>
         /// <param name="lastChar">The last Unicode character to include in the generated font atlas. 

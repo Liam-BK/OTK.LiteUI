@@ -38,15 +38,10 @@ namespace OTK.LiteUI.Layouts
             float viewportHeight = viewport.W - viewport.Y;
             float totalPadding = MathF.Max(0, elements.Count - 1) * Padding;
             float availableWidth = viewportWidth - totalPadding;
-            int skipCount = 0;
 
             for (int i = 0; i < elements.Count; i++)
             {
-                if (!elements[i].IsVisible)
-                {
-                    skipCount++;
-                    continue;
-                }
+                if (!elements[i].IsVisible) continue;
                 float split = Splits[i % Splits.Length];
                 float childWidth = availableWidth * split;
 
