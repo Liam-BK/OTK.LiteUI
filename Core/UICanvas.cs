@@ -104,7 +104,7 @@ namespace OTK.LiteUI.Core
         /// <summary>
         /// Returns the canvas' current dimensions in the current display units.
         /// </summary>
-        public Vector2 CanvasSize => window.Size.ToVector2() * InvDPIScaleVec2;
+        public Vector2 CanvasSize => window.FramebufferSize.ToVector2() * InvDPIScaleVec2;
 
         /// <summary>
         /// References the default dictionary key for a font. It is automatically assigned the first time a font is loaded.
@@ -359,7 +359,7 @@ namespace OTK.LiteUI.Core
 
         private void UpdateProjection()
         {
-            projection = Matrix4.CreateOrthographicOffCenter(0, window.Size.X * InvDPIScaleX, 0, window.Size.Y * InvDPIScaleY, 0.01f, 1.0f);
+            projection = Matrix4.CreateOrthographicOffCenter(0, window.FramebufferSize.X * InvDPIScaleX, 0, window.FramebufferSize.Y * InvDPIScaleY, 0.01f, 1.0f);
         }
 
         /// <summary>
@@ -641,7 +641,7 @@ namespace OTK.LiteUI.Core
         /// <returns>The converted position in canvas coordinates.</returns>
         public Vector2 ConvertMouseScreenCoords(Vector2 position)
         {
-            return new Vector2(position.X, window.ClientSize.Y - position.Y) * InvDPIScaleVec2;
+            return new Vector2(position.X, window.FramebufferSize.Y - position.Y) * InvDPIScaleVec2;
         }
 
         /// <summary>
