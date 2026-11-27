@@ -228,6 +228,17 @@ namespace OTK.LiteUI.UI.Components
         }
 
         /// <summary>
+        /// Sets the font style of the underlying Label.
+        /// </summary>
+        public string FontKey
+        {
+            set
+            {
+                if (label is not null) label.FontKey = value;
+            }
+        }
+
+        /// <summary>
         /// Gets whether the text field can receive keyboard focus.
         /// </summary>
         public override bool CanFocus => true;

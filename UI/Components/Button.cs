@@ -119,6 +119,17 @@ namespace OTK.LiteUI.UI.Components
         }
 
         /// <summary>
+        /// Sets the font style of the underlying Label.
+        /// </summary>
+        public string FontKey
+        {
+            set
+            {
+                if (label is not null) label.FontKey = value;
+            }
+        }
+
+        /// <summary>
         /// Whether the button is currently pressed.
         /// </summary>
         public bool isPressed = false;
